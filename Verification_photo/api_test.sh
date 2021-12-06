@@ -13,7 +13,7 @@ echo ;
 
 
 echo extract.200.JPG
-RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @photo.jpg --output Resources/bio_template http://${1}/pattern/extract)
+RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @Resources/photo.jpg --output Resources/bio_template http://${1}/pattern/extract)
 echo HTTP status: $RESULT
 PLM=`du -b Resources/bio_template`
 echo Size and name of template: $PLM 
@@ -30,7 +30,7 @@ echo ;
 
 
 echo extract.200.PNG
-RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/png" -H "Expect:" --data-binary @photo.png --output Resources/template/bio_template_a http://${1}/pattern/extract)
+RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/png" -H "Expect:" --data-binary @Resources/photo.png --output Resources/template/bio_template_a http://${1}/pattern/extract)
 echo HTTP status: $RESULT
 PLO=`du -b Resources/template/bio_template_a`
 echo Size and name of template: $PLO
@@ -47,7 +47,7 @@ echo ;
 
 
 echo extract.content-type.lowercase.image/png with JPG 
-RESULT=$(curl -s -w "%{http_code}" -H "content-type:image/png" -H "Expect:" --data-binary @photo.jpg --output Resources/template/bio_template_d http://${1}/pattern/extract)
+RESULT=$(curl -s -w "%{http_code}" -H "content-type:image/png" -H "Expect:" --data-binary @Resources/photo.jpg --output Resources/template/bio_template_d http://${1}/pattern/extract)
 echo HTTP status: $RESULT
 NHC=`du -b Resources/template/bio_template_d`
 echo Size and name of template: $NHC
@@ -64,7 +64,7 @@ echo ;
 
 
 echo extract.content-type.lowercase.image/jpeg with PNG
-RESULT=$(curl -s -w "%{http_code}" -H "content-type:image/jpeg" -H "Expect:" --data-binary @photo.png --output Resources/template/bio_template_e http://${1}/pattern/extract)
+RESULT=$(curl -s -w "%{http_code}" -H "content-type:image/jpeg" -H "Expect:" --data-binary @Resources/photo.png --output Resources/template/bio_template_e http://${1}/pattern/extract)
 echo HTTP status: $RESULT
 RQM=`du -b Resources/template/bio_template_e`
 echo Size and name of template: $RQM
@@ -81,7 +81,7 @@ echo ;
 
 
 echo extract.400.BPE-002003.empty_file
-RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @empty.jpg --output Resources/trash/bio_template_a http://${1}/pattern/extract)
+RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @Resources/empty.jpg --output Resources/trash/bio_template_a http://${1}/pattern/extract)
 echo HTTP status: $RESULT
 PP=`cat Resources/trash/bio_template_a`
 echo json status: $PP
@@ -101,7 +101,7 @@ echo ;
 
 
 echo extract.400.BPE-003002.no_face 
-RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @24.jpg --output Resources/trash/bio_template_b http://${1}/pattern/extract)
+RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @Resources/24.jpg --output Resources/trash/bio_template_b http://${1}/pattern/extract)
 echo HTTP status: $RESULT
 II=`cat Resources/trash/bio_template_b`
 echo json status: $II
@@ -121,7 +121,7 @@ echo ;
 
 
 echo extract.400.BPE-003003.more_than_one_face
-RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @two_face.jpg --output Resources/trash/bio_template_c http://${1}/pattern/extract)
+RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @Resources/two_face.jpg --output Resources/trash/bio_template_c http://${1}/pattern/extract)
 echo HTTP status: $RESULT
 YY=`cat Resources/trash/bio_template_c`
 echo json status: $YY
@@ -141,7 +141,7 @@ echo ;
 
 
 echo extract.400.BPE-002001.wrong_content-type
-RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" --data-binary @photo.jpg --output Resources/trash/bio_template_d http://${1}/pattern/extract)
+RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" --data-binary @Resources/photo.jpg --output Resources/trash/bio_template_d http://${1}/pattern/extract)
 echo HTTP status: $RESULT
 QQ=`cat Resources/trash/bio_template_d`
 echo json status: $QQ
@@ -161,7 +161,7 @@ echo ;
 
 
 echo extract.400.BPE-002002.invalid_http_method
-RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @photo.jpg --output Resources/trash/bio_template_e -X GET http://${1}/pattern/extract)
+RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @Resources/photo.jpg --output Resources/trash/bio_template_e -X GET http://${1}/pattern/extract)
 echo HTTP status: $RESULT
 WW=`cat Resources/trash/bio_template_e`
 echo json status: $WW
@@ -181,7 +181,7 @@ echo ;
 
 
 echo extract.400.BPE-002003.sound
-RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" --data-binary "@sound.wav" --output Resources/trash/bio_template_z http://${1}/pattern/extract)
+RESULT=$(curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" --data-binary @Resources/sound.wav --output Resources/trash/bio_template_z http://${1}/pattern/extract)
 echo HTTP status: $RESULT
 BV=`cat Resources/trash/bio_template_z`
 echo json status: $BV 
@@ -533,7 +533,7 @@ cat Resources/bio_template >> Resources/final_body2
 cat Resources/file2_3 >> Resources/final_body2
 cat Resources/photo.jpg >> Resources/final_body2
 cat Resources/file3_3 >> Resources/final_body2
-RESULT=$(curl --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @Resources/final_body2 --output Resources/trash/bio_template_good_2  http://${1}/pattern/verify)
+RESULT=$(curl --max-time 15000 -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @Resources/final_body2 --output Resources/trash/bio_template_good_2  http://${1}/pattern/verify)
 RTY=`cat Resources/trash/bio_template_good_2 | grep -a score`
 RUI=`cat Resources/trash/bio_template_good_2 | grep -a score | sed "s/[^.]*\.//"`
 TVZ=`cat Resources/trash/bio_template_good_2 | tail -n 2 Resources/trash/bio_template_good_2 > trash/ver_template2`
@@ -567,7 +567,7 @@ cat Resources/bio_template >> Resources/final_body3
 cat Resources/file2_4 >> Resources/final_body3
 cat Resources/photo.jpg >> Resources/final_body3
 cat Resources/file3_4 >> Resources/final_body3
-RESULT=$(curl --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @Resources/final_body3 --output Resources/trash/bio_template_good_3  http://${1}/pattern/verify)
+RESULT=$(curl --max-time 15000 -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @Resources/final_body3 --output Resources/trash/bio_template_good_3  http://${1}/pattern/verify)
 RTY=`cat Resources/trash/bio_template_good_3 | grep -a score`
 RUI=`cat Resources/trash/bio_template_good_3 | grep -a score | sed "s/[^.]*\.//"`
 TVZ=`cat Resources/trash/bio_template_good_3 | tail -n 2 Resources/trash/bio_template_good_3 > Resources/trash/ver_template3`
