@@ -303,7 +303,7 @@ echo ;
 echo compare.400.BPE-002002.invalid_http_method
 RESULT=$(curl -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_feature=@Resources/bio_template;type=application/octet-stream" -F "bio_template=@Resources/bio_template;type=application/octet-stream" --output Resources/trash/bio_template_x -X GET http://${1}/pattern/compare)
 echo HTTP status: $RESULT
-XP=`cat trash/bio_template_x`
+XP=`cat Resources/trash/bio_template_x`
 echo json status: $GG
 if [[ "$RESULT" =~ "400" ]];
 then
@@ -320,7 +320,7 @@ fi
 echo ;
 
 echo compare.400.BPE-002004.bio_template_0X00
-RESULT=$(curl -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_feature=@Resources/bio_template;type=application/octet-stream" -F "bio_template=@Resources/tem;type=application/octet-stream" --output Resources/trash/bio_template_UI http://${1}/pattern/compare)
+RESULT=$(curl -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data" -F "bio_feature=@Resources/bio_template;type=application/octet-stream" -F "bio_template=@Resources/tem;type=application/octet-stream" --output Resources/trash/bio_template_UI http://${1}/pattern/compare)
 echo HTTP status: $RESULT
 JJJ=`cat Resources/trash/bio_template_UI`
 echo json status: $JJJ
@@ -417,7 +417,7 @@ fi
 echo ;
 
 
-echo verify.400.BPE-002003.empty_photo 
+echo verify.400.BPE-002003.empty_photo
 RESULT=$(curl --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@Resources/bio_template_empty;type=application/octet-stream" -F "sample=@Resources/empty.jpg;type=image/jpeg" --output Resources/trash/bio_template_k http://${1}/pattern/verify)
 echo HTTP status: $RESULT
 NH=`cat Resources/trash/bio_template_k`
@@ -503,7 +503,7 @@ echo verify.200
 RESULT=$(curl --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@Resources/bio_template;type=application/octet-stream" -F "sample=@Resources/photo.jpg;type=image/jpeg" --output Resources/trash/bio_template_good_1  http://${1}/pattern/verify)
 RTY=`cat Resources/trash/bio_template_good_1 | grep -a score`
 RUI=`cat Resources/trash/bio_template_good_1 | grep -a score | sed "s/[^.]*\.//"`
-TVZ=`cat Resources/trash/bio_template_good_1 | tail -n 2 Resources/trash/bio_template_good_1 > Resources/trash/ver_template` 
+TVZ=`cat Resources/trash/bio_template_good_1 | tail -n 2 Resources/trash/bio_template_good_1 > Resources/trash/ver_template`
 XRT=`head -1 Resources/trash/ver_template > Resources/trash/ll`
 DDDD=`du -b Resources/trash/ll`
 echo HTTP status: $RESULT
@@ -536,7 +536,7 @@ cat Resources/file3_3 >> Resources/final_body2
 RESULT=$(curl --max-time 15000 -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @Resources/final_body2 --output Resources/trash/bio_template_good_2  http://${1}/pattern/verify)
 RTY=`cat Resources/trash/bio_template_good_2 | grep -a score`
 RUI=`cat Resources/trash/bio_template_good_2 | grep -a score | sed "s/[^.]*\.//"`
-TVZ=`cat Resources/trash/bio_template_good_2 | tail -n 2 Resources/trash/bio_template_good_2 > trash/ver_template2`
+TVZ=`cat Resources/trash/bio_template_good_2 | tail -n 2 Resources/trash/bio_template_good_2 > Resources/trash/ver_template2`
 XRT=`head -1 Resources/trash/ver_template2 > Resources/trash/ll2`
 DDDD=`du -b Resources/trash/ll2`
 echo HTTP status: $RESULT
