@@ -207,7 +207,7 @@ echo HTTP status: $RESULT_H12
 MWM=`cat trash/res_meta_without_mnemonic`
 echo Result: $MWM
 if [ "$RESULT_H12" == "400" ]; then
-	if [[ "MWM" =~ "LDE-002003" ]]; then
+	if [[ "$MWM" =~ "LDE-002003" ]]; then
 		echo "Result - Good"
 	else
 	echo "HTTP status good. Result bad"
@@ -224,7 +224,7 @@ echo HTTP status: $RESULT_H13
 MWA=`cat trash/res_meta_without_action`
 echo Result: $MWA
 if [ "$RESULT_H13" == "400" ]; then
-        if [[ "MWA" =~ "LDE-002003" ]]; then
+        if [[ "$MWA" =~ "LDE-002003" ]]; then
                 echo "Result - Good"
         else
         echo "HTTP status good. Result bad"
@@ -241,7 +241,7 @@ echo HTTP status: $RESULT_H14
 MWAT=`cat trash/res_meta_without_action_type`
 echo Result: $MWAT
 if [ "$RESULT_H14" == "400" ]; then
-        if [[ "MWAT" =~ "LDE-002003" ]]; then
+        if [[ "$MWAT" =~ "LDE-002003" ]]; then
                 echo "Result - Good"
         else
         echo "HTTP status good. Result bad"
@@ -258,7 +258,7 @@ echo HTTP status: $RESULT_H15
 MWAD=`cat trash/res_meta_without_action_duration`
 echo Result: $MWAD
 if [ "$RESULT_H15" == "400" ]; then
-        if [[ "MWAD" =~ "LDE-002003" ]]; then
+        if [[ "$MWAD" =~ "LDE-002003" ]]; then
                 echo "Result - Good"
         else
         echo "HTTP status good. Result bad"
@@ -275,7 +275,7 @@ echo HTTP status: $RESULT_H16
 MWAM=`cat trash/res_meta_without_action_duration`
 echo Result: $MWAM
 if [ "$RESULT_H16" == "400" ]; then
-        if [[ "MWAM" =~ "LDE-002003" ]]; then
+        if [[ "$MWAM" =~ "LDE-002003" ]]; then
                 echo "Result - Good"
         else
         echo "HTTP status good. Result bad"
