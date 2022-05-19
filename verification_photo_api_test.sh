@@ -4,8 +4,9 @@ f_print_usage() {
 echo "Usage: $0 [OPTIONS] URL
 
 OPTIONS:
-    -t  list        Set test method: all (default), extract, 
-    -v, -vv         Verbose
+    -t  list        Set test method: all (default), extract, compare, verify
+    -v              Verbose FAIL checks
+    -vv             Verbose All checks
 
 URL                 <ip>:<port>
 "
