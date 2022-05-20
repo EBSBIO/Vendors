@@ -183,7 +183,7 @@ f_test_extract () {
     f_check -r 400 -m "BPE-002003"
 
     TEST_NAME="extract.400.BPE-003002.no_face"
-    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @resources/24.jpg --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @resources/no_face.jpg --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-003002"
 
     TEST_NAME="extract.400.BPE-003003.more_than_one_face"
@@ -284,7 +284,7 @@ f_test_verify() {
     f_check -r 400 -m "BPE-002003|BPE-002004"
 
     TEST_NAME="verify.400.BPE-003002.no_face"
-    REQUEST='curl --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@resources/24.jpg;type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    REQUEST='curl --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@resources/no_face.jpg;type=image/jpeg" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-003002"
 
     TEST_NAME="verify.400.BPE-003003.more_than_one_face"
