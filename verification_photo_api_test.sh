@@ -81,6 +81,7 @@ f_check() {
             -m) MESSAGE_CHECK=1
                 if [ -s $BODY ]; then
                     #MESSAGE=$(head -n 5 $BODY)
+                    #cat $BODY
                     MESSAGE=$(grep --binary-files=text -e '{.*}' $BODY)
                     if [[ $MESSAGE  =~ $2 ]]; then
                         MESSAGE_RESULT="OK"
@@ -318,7 +319,7 @@ f_test_liveness() {
     SAMPLE_JPG="resources/photo_velmozhin.jpg"
     SAMPLE_PNG="resources/photo.png"
     SAMPLE_WAV="resources/sound.wav"
-    SAMPLE_WEBM="resources/video.webm"
+    SAMPLE_WEBM="resources/video.mov"
     META="resources/meta.json"
     META_WM="resources/meta_without_mnemonic.json"
     META_WA="resources/meta_without_action.json"
