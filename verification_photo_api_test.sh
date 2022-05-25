@@ -1,4 +1,9 @@
 #!/bin/bash
+##########################
+# Author: kflirik        #
+#                        #
+##########################
+
 
 f_print_usage() {
 echo "Usage: $0 [OPTIONS] URL
@@ -55,11 +60,12 @@ f_check() {
     while [ -n "$1" ]; do
         case "$1" in
             # http responce check
-            -r)  HTTP_CHECK="1";
-                if [ "$RESPONCE_CODE" == "$2" ] ; then
+            -r) HTTP_CHECK="1";
+                REQUEST_CODE=$2
+                if [ "$RESPONCE_CODE" == "$REQUEST_CODE" ] ; then
                     HTTP_RESULT="OK"
                 else
-                    HTTP_RESULT="FAIL (HTTP $RESPONCE_CODE is expected)"
+                    HTTP_RESULT="FAIL (HTTP $REQUEST_CODE is expected)"
                 fi
                 shift
             ;;
@@ -95,9 +101,8 @@ f_check() {
     done
 
     
-    if  [ "$HTTP_CHECK" == 1 ] && [ "$HTTP_RESULT" != "OK" ] ||
-        [ "$BODY_CHECK" == 1 ] && [ "$BODY_RESULT" != "OK" ] ||
-        [ "$MESSAGE_CHECK" == 1 ] && [ "$MESSAGE_RESULT" != "OK" ]; then
+    #if  [ "$HTTP_CHECK" == 1 ] && [ "$HTTP_RESULT" != "OK" ] || [ "$BODY_CHECK" == 1 ] && [ "$BODY_RESULT" != "OK" ] || [ "$MESSAGE_CHECK" == 1 ] && [ "$MESSAGE_RESULT" != "OK" ]; then
+    if  [[ ( "$HTTP_CHECK" == 1 && "$HTTP_RESULT" != "OK" ) || ( "$BODY_CHECK" == 1 && "$BODY_RESULT" != "OK" ) || ( "$MESSAGE_CHECK" == 1 && "$MESSAGE_RESULT" != "OK" ) ]]; then
         FAIL=1
         ERROR=$(($ERROR+1))
         #echo "HTTP_CHECK = $HTTP_CHECK"
@@ -111,49 +116,41 @@ f_check() {
         SUCCES=$(($SUCCES+1))
     fi
 
-    if [ "$HTTP_CHECK" == 1 ] && [ "$HTTP_RESULT" != "OK" ] && [ -n "$FAIL_MESSAGE" ]; then
-        HTTP_RESULT="$HTTP_RESULT $FAIL_MESSAGE"
+    if [ "$MESSAGE_CHECK" == 1 ] && [ "$MESSAGE_RESULT" != "OK" ] && [ -n "$FAIL_MESSAGE" ]; then
+        MESSAGE_RESULT="$HTTP_RESULT $FAIL_MESSAGE"
     fi
    
-#    if [ "$FAIL" == 1 ] || [ "$V1" == 1 ]; then
-#        echo ""
-#        echo "Test: $TEST_NAME"
-#    fi
-   
-    if [ "$FAIL" == 1 ] && [ "$V1" == 1 ] || [ "$V2" == 1 ]; then
+    if [[ ( "$FAIL" == 1 && "$V1" == 1 ) || "$V2" == 1 ]]; then
         echo ""
         echo "Test: $TEST_NAME"
         echo "Cmd: $REQUEST"
         echo "Responce runtime: 0$(echo "$end - $start" | bc -l )s"
         echo "Responce http_code: $RESPONCE_CODE"
         echo "Responce body_msg: $MESSAGE"
+    elif [ "$FAIL" == 1 ]; then
+        echo ""
+        echo "Test: $TEST_NAME"
     fi
 
     if [ "$HTTP_CHECK" == 1 ]; then
-        if [ "$HTTP_RESULT" != "OK" ] && [ "$V1" == 1 ]; then
-            echo "Status http_code: $HTTP_RESULT"
-        elif [ "$HTTP_RESULT" != "OK" ] || [ "$V2" == 1 ]; then
+        if [ "$HTTP_RESULT" != "OK" ] || [ "$V1" == 1 ]; then
             echo "Status http_code: $HTTP_RESULT"
         fi
     fi
     
     if [ "$BODY_CHECK" == 1 ]; then
-        if [ "$BODY_RESULT" != "OK" ] && [ "$V1" == 1 ]; then
-            echo "Status body: $BODY_RESULT"
-        elif [ "$BODY_RESULT" != "OK" ] || [ "$V2" == 1 ]; then
+        if [ "$BODY_RESULT" != "OK" ] || [ "$V1" == 1 ]; then
             echo "Status body: $BODY_RESULT"
         fi
     fi
 
     if [ "$MESSAGE_CHECK" == 1 ]; then
-        if [ "$MESSAGE_RESULT" != "OK" ] && [ "$V1" == 1 ]; then
-            echo "Status message: $MESSAGE_RESULT"
-        elif [ "$MESSAGE_RESULT" != "OK" ] || [ "$V2" == 1 ]; then
+        if [ "$MESSAGE_RESULT" != "OK" ] || [ "$V1" == 1 ]; then
             echo "Status message: $MESSAGE_RESULT"
         fi
     fi
 
-#    rm -f $BODY
+    rm -f $BODY
 }
 
 
@@ -304,8 +301,89 @@ f_test_verify() {
     echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="sample"\r\nContent-Type: image/jpeg\r\n\r\n' >> tmp/request_body; cat $SAMPLE >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
-    RESULT='curl --max-time 15000 -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    REQUEST='curl --max-time 15000 -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+}
+
+
+f_test_liveness() {
+    VENDOR_URL="http://$URL/v1/liveness/detect"
+    BODY="tmp/responce_body"
+    SAMPLE_JPG="resources/photo_velmozhin.jpg"
+    SAMPLE_PNG="resources/photo.png"
+    SAMPLE_WAV="resources/sound.wav"
+    SAMPLE_WEBM="resources/video.webm"
+    META="resources/meta.json"
+    META_WM="resources/meta_without_mnemonic.json"
+    META_WA="resources/meta_without_action.json"
+    META_WT="resources/meta_without_type.json"
+    META_WD="resources/meta_without_duration.json"
+    META_WMSG="resources/meta_without_message.json"
+    EMPTY="resources/empty"
+
+    TEST_NAME="Positive test 1. detect photo.jpeg"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+
+    TEST_NAME="Positive test 2. detect photo.png"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_PNG';type=image/png" --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+
+    TEST_NAME="Negative test 1. Request with incorrect HTTP method"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpg" -X GET --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002002"
+
+    TEST_NAME="Negative test 2. Request with empty bio_sample"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$EMPTY';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002004"
+
+    TEST_NAME="Negative test 3. Incorrect Content-Type"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:application/json" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002001"
+
+    TEST_NAME="Negative test 4. Incorrect Content-Type part of multipart"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=image/jpeg" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002005"
+
+    TEST_NAME="Negative test 5. Incorrect Content-Type part of multipart"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=application/json" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002005"
+
+    TEST_NAME="Negative test 6. Request with sound"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002005"
+
+    TEST_NAME="Negative test 7. Request with sound"
+    REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002004"
+
+    TEST_NAME="Negative test 8. Request with video"
+    REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WEBM';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002004"
+
+    TEST_NAME="Negative test 9. Request with video"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WEBM';type=video/webm" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002005"
+
+    TEST_NAME="Negative test 10. Request with meta without mnemonic"
+    REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WM';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002003"
+
+    TEST_NAME="Negative test 11. Request with meta without action"
+    REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WA';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002003"
+
+    TEST_NAME="Negative test 12. Request with meta without action.type"
+    REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WT';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002003"
+
+    TEST_NAME="Negative test 13. Request with meta without action.duration"
+    REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WD';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002003"
+
+    TEST_NAME="Negative test 14. Request with meta without action.message"
+    REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WMSG';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002003"
 }
 
 
@@ -348,6 +426,9 @@ else
             ;;
             verify )
                 f_test_verify
+            ;;
+            liveness )
+                f_test_liveness
             ;;
             esac
             echo ""; echo ""; echo "SCORE: succes $SUCCES, error $ERROR"
