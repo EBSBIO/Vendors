@@ -133,19 +133,25 @@ f_check() {
     fi
 
     if [ "$HTTP_CHECK" == 1 ]; then
-        if [ "$HTTP_RESULT" != "OK" ] || [ "$V1" == 1 ]; then
+        if [ "$HTTP_RESULT" != "OK" ]; then
+            echo "Status http_code: $HTTP_RESULT"
+        elif [ "$V2" == 1 ]; then
             echo "Status http_code: $HTTP_RESULT"
         fi
     fi
     
     if [ "$BODY_CHECK" == 1 ]; then
-        if [ "$BODY_RESULT" != "OK" ] || [ "$V1" == 1 ]; then
+        if [ "$BODY_RESULT" != "OK" ]; then
+            echo "Status body: $BODY_RESULT"
+        elif [ "$V2" == 1 ]; then
             echo "Status body: $BODY_RESULT"
         fi
     fi
 
     if [ "$MESSAGE_CHECK" == 1 ]; then
-        if [ "$MESSAGE_RESULT" != "OK" ] || [ "$V1" == 1 ]; then
+        if [ "$MESSAGE_RESULT" != "OK" ]; then
+            echo "Status message: $MESSAGE_RESULT"
+        elif [ "$V2" == 1 ]; then
             echo "Status message: $MESSAGE_RESULT"
         fi
     fi
