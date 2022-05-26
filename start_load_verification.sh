@@ -1,34 +1,68 @@
 #!/bin/bash
 
-if [ "$#" -ne "4" ]
-then
-  echo Usage: "$0" TASK_NAME METHOD THREADS URL:PORT
-  exit 1
-fi
+##########################
+#                        #
+# Author: kflirik        #
+#                        #
+##########################
 
-JPATH=/opt/apache-jmeter/bin                # Путь к ПО Jmeter
-JMX_FILE=resources/jmx/verification.jmx    # Template jmeter
-
-JREPORT=reports/${1}/${2}_${3}thr_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv  # Лог
-JPERFLOG=reports/${1}/${2}_${3}thr_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
-JLOG=tmp/jmeter.log			    # Лог jmeter
-JOUT=tmp/jmeter_load.out                  # Output jmeter
-
-THREADS=$3                               # Количество потоков (пользователей)
-RAMP=0                                     # Период (в сек) между запуском новых тредов (пользователей)
-LOOP="-1"                                  # количество повторов (-1 безконечно)
-
-SAMPLE="$PWD/resources/photo.png"           # Используемый в тесте файл. Файл необходимо расположить в папке resources
-CTYPE="image/png"                           # content_type, указать image/jpeg для модальности photo или audio/pcm для модальности sound
-JTASK=$PWD/scripts/req-${2}.sh              # Скрипт проверки вендора
-
-VENDOR_URL=http://$4/v1                     # URL
+f_usage(){
+echo Usage: "$0 [OPTIONS] TASK_NAME THREADS RAMP URL PORT
+    
+    OPTIONS:
+    -b              Start in background (screen)
+    -r  num         Ramp-up period (sec, default 0)
+    
+    TASK_NAME       Vendor name
+    METHOD          extract, verify, compare
+    THREADS         Sum threads(users)
+    URL             IP
+    PORT            TCP порт БП"
+}
 
 
-# Запуск
-date "+%Y-%m-%d-%H:%M:%S" > $JOUT
-CMD='screen -dmS start.jmeter sh -c "'$JPATH'/jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -JRamp='$RAMP' -Jtask='$JTASK' -Jcontent_type='$CTYPE' -Jdata='$SAMPLE' -Jvendor='$VENDOR_URL' -Jperflog='$JPERFLOG' -j '$JLOG' -l '$JREPORT' >> '$JOUT'"'
+if [ -z $1 ]; then
+    f_usage
+else
+    while [ -n "$1" ]; do
+        case "$1" in
+            -b) BG=1
+                shift
+            ;;
+            -r) RAMP=$2
+                shift; shift
+            ;;
+            *) break
+            ;;
+        esac
+    done
+    if [ "$#" -ne "5" ]; then
+        f_usage
+    else
+        JMX_FILE=resources/jmx/verification.jmx    # Template jmeter
+        SUMINTERVAL=10                          # Интервал (в сек) обновления summariser (таблицы результатов в логе)
+        
+        REPORT=reports/${1}/${2}_${3}thr_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv  # Отчет по запросам
+        PERFLOG=reports/${1}/${2}_${3}thr_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
+        LOG=tmp/jmeter.log                       # Лог jmeter
+        
+        SAMPLE="$PWD/resources/photo.png"           # Используемый в тесте файл. Файл необходимо расположить в папке resources
+        CTYPE="image/png"                           # content_type, указать image/jpeg для модальности photo или audio/pcm для модальности sound
+        
+        THREADS=$3                               # Количество потоков (пользователей)
+        LOOP="-1"                                  # количество повторов (-1 безконечно)
+        [ -z $RAMP ] && RAMP=0                  # Длительность (в сек) для «наращивания» до полного числа выбранных потоков.
+        
+        JTASK=$PWD/scripts/req-${2}.sh              # Скрипт проверки вендора
+        
+        VENDOR_URL=http://$4:$5/v1                     # URL
+        
+        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -JRamp='$RAMP' -Jtask='$JTASK' -Jcontent_type='$CTYPE' -Jdata='$SAMPLE' -Jsummariser.interval='$SUMINTERVAL' -Jvendor='$VENDOR_URL' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
 
-echo "CMD: $CMD"
-echo ""
-eval $CMD
+        if [ "$BG" == 1 ]; then
+            CMD='screen -dmS start.jmeter sh -c "'$CMD'"'
+        fi
+        echo -e "\nCMD: $CMD\n"
+        eval $CMD
+    fi
+fi      

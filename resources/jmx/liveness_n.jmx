@@ -21,7 +21,7 @@
         <stringProp name="ThreadGroup.num_threads">${__P(threads, 7)}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${__P(ramp, 7)}</stringProp>
         <boolProp name="ThreadGroup.scheduler">false</boolProp>
-        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.duration">${__P(dur:)}</stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
       </ThreadGroup>
