@@ -39,23 +39,23 @@ else
     if [ "$#" -ne "5" ]; then
         f_usage
     else
-        JMX_FILE=resources/jmx/verification.jmx    # Template jmeter
-        SUMINTERVAL=10                          # Интервал (в сек) обновления summariser (таблицы результатов в логе)
+        JMX_FILE=resources/jmx/verification.jmx     # Template jmeter
+        SUMINTERVAL=10                              # Интервал (в сек) обновления summariser (таблицы результатов в логе)
         
         REPORT=reports/${1}/${2}_${3}thr_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv  # Отчет по запросам
         PERFLOG=reports/${1}/${2}_${3}thr_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
-        LOG=tmp/jmeter.log                       # Лог jmeter
+        LOG=tmp/jmeter.log                          # Лог jmeter
         
-        SAMPLE="$PWD/resources/photo.png"           # Используемый в тесте файл. Файл необходимо расположить в папке resources
+        SAMPLE="$PWD/resources/samples/photo.png"   # Используемый в тесте файл. Файл необходимо расположить в папке resources
         CTYPE="image/png"                           # content_type, указать image/jpeg для модальности photo или audio/pcm для модальности sound
         
-        THREADS=$3                               # Количество потоков (пользователей)
-        LOOP="-1"                                  # количество повторов (-1 безконечно)
-        [ -z $RAMP ] && RAMP=0                  # Длительность (в сек) для «наращивания» до полного числа выбранных потоков.
+        THREADS=$3                                  # Количество потоков (пользователей)
+        LOOP="-1"                                   # количество повторов (-1 безконечно)
+        [ -z $RAMP ] && RAMP=0                      # Длительность (в сек) для «наращивания» до полного числа выбранных потоков.
         
         JTASK=$PWD/scripts/req-${2}.sh              # Скрипт проверки вендора
         
-        VENDOR_URL=http://$4:$5/v1                     # URL
+        VENDOR_URL=http://$4:$5/v1                  # URL
         
         CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -JRamp='$RAMP' -Jtask='$JTASK' -Jcontent_type='$CTYPE' -Jdata='$SAMPLE' -Jsummariser.interval='$SUMINTERVAL' -Jvendor='$VENDOR_URL' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
 

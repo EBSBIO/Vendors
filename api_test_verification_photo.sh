@@ -9,13 +9,13 @@
 source include/f_checks.sh
 
 BODY="tmp/responce_body"
-SAMPLE_JPG="resources/photo.jpg"
-SAMPLE_PNG="resources/photo.png"
-SAMPLE_WAV="resources/sound.wav"
-SAMPLE_WEBM="resources/video.mov"
-SAMPLE_NF="resources/no_face.jpg"
-SAMPLE_TF="resources/two_face.jpg"
-EMPTY="resources/empty"
+SAMPLE_JPG="resources/samples/photo.jpg"
+SAMPLE_PNG="resources/samples/photo.png"
+SAMPLE_WAV="resources/samples/sound.wav"
+SAMPLE_WEBM="resources/samples/video.mov"
+SAMPLE_NF="resources/samples/no_face.jpg"
+SAMPLE_TF="resources/samples/two_face.jpg"
+EMPTY="resources/samples/empty"
 BIOTEMPLATE="tmp/biotemplate"
 BIOTEMPLATE_0X00="resources/biotemplate_0X00"
 
@@ -67,7 +67,6 @@ f_test_extract () {
 
 
 
-
 f_test_compare() {
     VENDOR_URL="http://$URL/v1/pattern/compare"
 
@@ -104,6 +103,7 @@ f_test_compare() {
     REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$BIOTEMPLATE_0X00';type=application/octet-stream" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002004"
 }
+
 
 
 f_test_verify() {
@@ -151,7 +151,7 @@ f_test_verify() {
     f_check -r 400 -m "BPE-002005"
     
     TEST_NAME="verify.200.boundary_no_hyphens"
-    cat resources/body_stream $BIOTEMPLATE resources/body_image $SAMPLE_JPG resources/body_end > tmp/request_body
+    cat resources/body/body_stream $BIOTEMPLATE resources/body/body_image $SAMPLE_JPG resources/body/body_end > tmp/request_body
     REQUEST='curl --max-time 15000 -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 

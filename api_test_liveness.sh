@@ -7,21 +7,21 @@
 
 # include functions
 source include/f_checks.sh
+BODY="tmp/responce_body"
+SAMPLE_JPG="resources/samples/photo_velmozhin.jpg"
+SAMPLE_PNG="resources/samples/photo.png"
+SAMPLE_WAV="resources/samples/sound.wav"
+SAMPLE_WEBM="resources/samples/video.mov"
+EMPTY="resources/samples/empty"
+META="resources/metadata/meta.json"
+META_WM="resources/metadata/meta_without_mnemonic.json"
+META_WA="resources/metadata/meta_without_action.json"
+META_WT="resources/metadata/meta_without_type.json"
+META_WD="resources/metadata/meta_without_duration.json"
+META_WMSG="resources/metadata/meta_without_message.json"
 
 f_test_liveness() {
     VENDOR_URL="http://$URL/v1/liveness/detect"
-    BODY="tmp/responce_body"
-    SAMPLE_JPG="resources/photo_velmozhin.jpg"
-    SAMPLE_PNG="resources/photo.png"
-    SAMPLE_WAV="resources/sound.wav"
-    SAMPLE_WEBM="resources/video.mov"
-    META="resources/meta.json"
-    META_WM="resources/meta_without_mnemonic.json"
-    META_WA="resources/meta_without_action.json"
-    META_WT="resources/meta_without_type.json"
-    META_WD="resources/meta_without_duration.json"
-    META_WMSG="resources/meta_without_message.json"
-    EMPTY="resources/empty"
 
     TEST_NAME="Positive test 1. detect photo.jpeg"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL

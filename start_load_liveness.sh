@@ -40,9 +40,9 @@ else
         JMX_FILE=resources/jmx/liveness_n.jmx   # Template jmeter
         SUMINTERVAL=10                          # Интервал (в сек) обновления summariser (таблицы результатов в логе)
         
-        SAMPLE="resources/photo_velmozhin.jpg"  # Используемый в тесте файл. Файл необходимо расположить в папке resources
+        SAMPLE="resources/samples/photo_velmozhin.jpg"  # Используемый в тесте файл. Файл необходимо расположить в папке resources
         CTYPE="image/jpeg"                      # content_type, указать image/jpeg для модальности photo или audio/pcm для модальности sound
-        META="resources/meta.json"              # Metadata, json файл для теста liveness
+        META="resources/metadata/meta.json"     # Metadata, json файл для теста liveness
 
         REPORT=reports/${1}/liveness_${2}thr_${3}r_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv    # Отчет по запросам
         PERFLOG=reports/${1}/liveness_${2}thr_${3}r_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
