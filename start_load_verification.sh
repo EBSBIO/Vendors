@@ -39,25 +39,26 @@ else
     if [ "$#" -ne "5" ]; then
         f_usage
     else
-        JMX_FILE=resources/jmx/verification.jmx     # Template jmeter
+        JMX_FILE=resources/jmx/verification_n.jmx     # Template jmeter
         SUMINTERVAL=10                              # Интервал (в сек) обновления summariser (таблицы результатов в логе)
         
-        REPORT=reports/${1}/${2}_${3}thr_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv  # Отчет по запросам
-        PERFLOG=reports/${1}/${2}_${3}thr_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
-        LOG=tmp/jmeter.log                          # Лог jmeter
-        
-        SAMPLE="$PWD/resources/samples/photo.png"   # Используемый в тесте файл. Файл необходимо расположить в папке resources
-        CTYPE="image/png"                           # content_type, указать image/jpeg для модальности photo или audio/pcm для модальности sound
-        
+        METHOD=$2
         THREADS=$3                                  # Количество потоков (пользователей)
         LOOP="-1"                                   # количество повторов (-1 безконечно)
         [ -z $RAMP ] && RAMP=0                      # Длительность (в сек) для «наращивания» до полного числа выбранных потоков.
+
+        REPORT=reports/${1}/$METHOD_${THREADS}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv  # Отчет по запросам
+        PERFLOG=reports/${1}/$METHOD_${THREADS}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
+        LOG=tmp/jmeter.log                          # Лог jmeter
         
-        JTASK=$PWD/scripts/req-${2}.sh              # Скрипт проверки вендора
+        SAMPLE="resources/samples/photo.png"   # Используемый в тесте файл. Файл необходимо расположить в папке resources
+        CTYPE="image/png"                      # content_type, указать image/jpeg для модальности photo или audio/pcm для модальности sound
+        BIOTEMPLATE="tmp/biotemplate"
         
-        VENDOR_URL=http://$4:$5/v1                  # URL
+        SERVER=$4
+        PORT=$5                  # URL
         
-        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -JRamp='$RAMP' -Jtask='$JTASK' -Jcontent_type='$CTYPE' -Jdata='$SAMPLE' -Jsummariser.interval='$SUMINTERVAL' -Jvendor='$VENDOR_URL' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
+        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -JRamp='$RAMP' -Jmethod='$METHOD' -Jsample='$SAMPLE' -Jcontent_type='$CTYPE' -Jbiotemplate='$BIOTEMPLATE' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
 
         if [ "$BG" == 1 ]; then
             CMD='screen -dmS start.jmeter sh -c "'$CMD'"'

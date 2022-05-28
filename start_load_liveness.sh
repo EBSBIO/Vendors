@@ -37,7 +37,7 @@ else
     if [ "$#" -ne "4" ]; then
         f_usage
     else
-        JMX_FILE=resources/jmx/liveness_n.jmx   # Template jmeter
+        JMX_FILE=resources/jmx/liveness_local.jmx   # Template jmeter
         SUMINTERVAL=10                          # Интервал (в сек) обновления summariser (таблицы результатов в логе)
         
         SAMPLE="resources/samples/photo_velmozhin.jpg"  # Используемый в тесте файл. Файл необходимо расположить в папке resources
