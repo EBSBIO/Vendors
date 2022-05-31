@@ -37,20 +37,20 @@ else
     if [ "$#" -ne "4" ]; then
         f_usage
     else
-        JMX_FILE=resources/jmx/liveness_local.jmx   # Template jmeter
+        JMX_FILE=resources/jmx/liveness.jmx   # Template jmeter
         SUMINTERVAL=10                          # Интервал (в сек) обновления summariser (таблицы результатов в логе)
         
         SAMPLE="resources/samples/photo_velmozhin.jpg"  # Используемый в тесте файл. Файл необходимо расположить в папке resources
         CTYPE="image/jpeg"                      # content_type, указать image/jpeg для модальности photo или audio/pcm для модальности sound
         META="resources/metadata/meta.json"     # Metadata, json файл для теста liveness
-
-        REPORT=reports/${1}/liveness_${2}thr_${3}r_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv    # Отчет по запросам
-        PERFLOG=reports/${1}/liveness_${2}thr_${3}r_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
-        LOG=tmp/jmeter.log                     # Лог jmeter
-
-        THREADS=$2                              # Количество потоков (пользователей)
+        
+	THREADS=$2                              # Количество потоков (пользователей)
         LOOP="-1"                               # Количество повторов (-1 безконечно)
         [ -z $RAMP ] && RAMP=0                  # Длительность (в сек) для «наращивания» до полного числа выбранных потоков.
+
+        REPORT=reports/${1}/liveness_${2}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv    # Отчет по запросам
+        PERFLOG=reports/${1}/liveness_${2}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
+        LOG=tmp/jmeter.log                     # Лог jmeter
 
         SERVER=$3                               # DNS/IP имя сервера с развернутым БП
         PORT=$4                                 # Порт БП

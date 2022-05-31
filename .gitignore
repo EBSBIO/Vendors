@@ -1,4 +1,4 @@
-/tmp/
-/reports/
+/tmp/*
+/reports/*
 /old/
 /jmeter.log
