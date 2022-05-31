@@ -39,7 +39,7 @@ else
     if [ "$#" -ne "5" ]; then
         f_usage
     else
-        JMX_FILE=resources/jmx/verification_n.jmx     # Template jmeter
+        JMX_FILE=resources/jmx/verification.jmx     # Template jmeter
         SUMINTERVAL=10                              # Интервал (в сек) обновления summariser (таблицы результатов в логе)
         
         METHOD=$2
