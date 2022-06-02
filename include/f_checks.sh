@@ -70,7 +70,7 @@ f_check() {
     fi
 
     if [ "$MESSAGE_CHECK" == 1 ] && [ "$MESSAGE_RESULT" != "OK" ] && [ -n "$FAIL_MESSAGE" ]; then
-        MESSAGE_RESULT="$HTTP_RESULT $FAIL_MESSAGE"
+        MESSAGE_RESULT="$MESSAGE_RESULT $FAIL_MESSAGE"
     fi
    
     if [[ ( "$FAIL" == 1 && "$V" == 1 ) || "$V" == 2 ]]; then
