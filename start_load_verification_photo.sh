@@ -7,7 +7,7 @@
 ##########################
 
 f_usage(){
-echo Usage: "$0 [OPTIONS] TASK_NAME THREADS RAMP URL PORT
+echo Usage: "$0 [OPTIONS] TASK_NAME METHOD THREADS RAMP URL PORT
     
     OPTIONS:
     -b              Start in background (screen)
@@ -47,8 +47,8 @@ else
         LOOP="-1"                                   # количество повторов (-1 безконечно)
         [ -z $RAMP ] && RAMP=0                      # Длительность (в сек) для «наращивания» до полного числа выбранных потоков.
 
-        REPORT=reports/${1}/$METHOD_${THREADS}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv  # Отчет по запросам
-        PERFLOG=reports/${1}/$METHOD_${THREADS}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
+        REPORT=reports/${1}/${METHOD}_${THREADS}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv  # Отчет по запросам
+        PERFLOG=reports/${1}/${METHOD}_${THREADS}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
         LOG=tmp/jmeter.log                          # Лог jmeter
         
         SAMPLE="resources/samples/photo.png"   # Используемый в тесте файл. Файл необходимо расположить в папке resources
