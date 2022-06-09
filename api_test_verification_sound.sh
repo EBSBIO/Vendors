@@ -17,7 +17,7 @@ SAMPLE_PNG="resources/samples/photo.png"
 BIOTEMPLATE="tmp/biotemplate"
 
 f_test_extract () {
-    VENDOR_URL="http://$URL/v1/pattern/extract"
+    VENDOR_URL="$BASE_URL/extract"
     BODY="tmp/responce_body"
 
     TEST_NAME="Positive extraction test.1 Extract pcm sound"
@@ -52,7 +52,7 @@ f_test_extract () {
 
 
 f_test_compare() {
-    VENDOR_URL="http://$URL/v1/pattern/compare"
+    VENDOR_URL="$BASE_URL/compare"
 
     # Create template for compare
     REQUEST='curl -s -H "Content-Type:audio/pcm" -H "Expect:" --data-binary @'$SAMPLE_WAV' --output '$BIOTEMPLATE' http://'$URL'/v1/pattern/extract'
@@ -99,7 +99,7 @@ f_test_compare() {
 
 
 f_test_verify() {
-    VENDOR_URL="http://$URL/v1/pattern/verify"
+    VENDOR_URL="$BASE_URL/verify"
 
     # Create biotemplate
     REQUEST='curl -s -H "Content-Type:audio/pcm" -H "Expect:" --data-binary @'$SAMPLE_WAV' --output '$BIOTEMPLATE' http://'$URL'/v1/pattern/extract'
@@ -169,7 +169,8 @@ f_print_usage() {
 echo "Usage: $0 [OPTIONS] URL
 
 OPTIONS:
-    -t  list        Set test method: all (default), extract, compare, verify
+    -t  string      Set test method: all (default), extract, compare, verify
+    -p  prefix      Prefix
     -v              Verbose FAIL checks
     -vv             Verbose All checks
 
@@ -187,6 +188,7 @@ else
     while [ -n "$1" ]; do
         case "$1" in
             -t) TASK="$2"; shift; shift;;
+            -p) P="$2"; shift; shift;;
             -v) V=1; shift;;
             -vv) V=2; shift;;
             -*) shift;;
@@ -198,7 +200,12 @@ else
     else
         URL=$1
 
-        VENDOR_URL="http://$URL/v1/pattern/health"
+        if [ -n $P ]; then
+            BASE_URL="http://$URL/v1/$P/pattern"
+        else
+            BASE_URL="http://$URL/v1/pattern"
+        fi
+        VENDOR_URL="$BASE_URL/health"
         BODY="tmp/responce_body"
         TEST_NAME="Healt.200"
         REQUEST='curl -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL

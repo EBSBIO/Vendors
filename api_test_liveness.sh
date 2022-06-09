@@ -21,7 +21,7 @@ META_WD="resources/metadata/meta_without_duration.json"
 META_WMSG="resources/metadata/meta_without_message.json"
 
 f_test_liveness() {
-    VENDOR_URL="http://$URL/v1/liveness/detect"
+    VENDOR_URL="$BASE_URL/detect"
 
     TEST_NAME="Positive test 1. detect photo.jpeg"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
@@ -97,6 +97,7 @@ f_print_usage() {
 echo "Usage: $0 [OPTIONS] URL
 
     OPTIONS:
+        -p  string      Prefix
         -v              Verbose FAIL checks
         -vv             Verbose All checks
 
@@ -110,6 +111,7 @@ else
     V=0
     while [ -n "$1" ]; do
         case "$1" in
+            -P) P=$2; shift; shift;;
             -v) V=1; shift;;
             -vv) V=2; shift;;
             -*) shift;;
@@ -121,7 +123,12 @@ else
     else
         URL=$1
 
-        VENDOR_URL="http://$URL/v1/liveness/health"
+        if [ -n $P ]; then
+            BASE_URL="http://$URL/v1/$P/liveness"
+        else
+            BASE_URL="http://$URL/v1/liveness"
+        fi
+        VENDOR_URL="$BASE_URL/health"
         BODY="tmp/responce_body"
         TEST_NAME="Healt.200"
         REQUEST='curl -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL

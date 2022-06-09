@@ -12,6 +12,7 @@ echo Usage: "$0 [OPTIONS] TASK_NAME METHOD THREADS URL PORT
     OPTIONS:
     -b              Start in background (screen)
     -r  num         Ramp-up period (sec, default 0)
+    -p string       Prefix
     
     TASK_NAME       Vendor name
     METHOD          extract, verify, compare
@@ -26,14 +27,10 @@ if [ -z $1 ]; then
 else
     while [ -n "$1" ]; do
         case "$1" in
-            -b) BG=1
-                shift
-            ;;
-            -r) RAMP=$2
-                shift; shift
-            ;;
-            *) break
-            ;;
+            -b) BG=1; shift;;
+            -r) RAMP=$2; shift; shift;;
+            -p) P=$2; shift; shift;;
+            *) break;;
         esac
     done
     if [ "$#" -ne "5" ]; then

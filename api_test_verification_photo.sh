@@ -21,7 +21,7 @@ BIOTEMPLATE_0X00="resources/biotemplate_0X00"
 
 
 f_test_extract () {
-    VENDOR_URL="$API_PATH/extract"
+    VENDOR_URL="$BASE_URL/extract"
     BODY="tmp/responce_body"
 
     TEST_NAME="extract.200.JPG"
@@ -68,10 +68,10 @@ f_test_extract () {
 
 
 f_test_compare() {
-    VENDOR_URL="$API_PATH/compare"
+    VENDOR_URL="$BASE_URL/compare"
 
     # Create template for compare
-    REQUEST='curl -s -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$API_PATH'/extract'
+    REQUEST='curl -s -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$BASE_URL'/extract'
     eval $REQUEST
 
     # Tests
@@ -107,10 +107,10 @@ f_test_compare() {
 
 
 f_test_verify() {
-    VENDOR_URL="$API_PATH/verify"
+    VENDOR_URL="$BASE_URL/verify"
 
     # Create biotemplate
-    REQUEST='curl -s -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$API_PATH'/extract'
+    REQUEST='curl -s -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$BASE_URL'/extract'
     eval $REQUEST
     
 
@@ -202,11 +202,11 @@ else
         URL=$1
         
         if [ -n $P ]; then
-            API_PATH="http://$URL/v1/$P/pattern/"
+            BASE_URL="http://$URL/v1/$P/pattern"
         else
-            API_PATH="http://$URL/v1/pattern/"
+            BASE_URL="http://$URL/v1/pattern"
         fi
-        VENDOR_URL="$API_PATH/health"
+        VENDOR_URL="$BASE_URL/health"
         BODY="tmp/responce_body"
         TEST_NAME="Healt.200"
         REQUEST='curl -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL
