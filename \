@@ -71,7 +71,7 @@ f_test_compare() {
     VENDOR_URL="$API_PATH/compare"
 
     # Create template for compare
-    REQUEST='curl -s -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$API_PATH'/extract'
+    REQUEST='curl -s -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' http://'$URL'/v1/pattern/extract'
     eval $REQUEST
 
     # Tests
@@ -110,7 +110,7 @@ f_test_verify() {
     VENDOR_URL="$API_PATH/verify"
 
     # Create biotemplate
-    REQUEST='curl -s -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$API_PATH'/extract'
+    REQUEST='curl -s -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' http://'$URL'/v1/pattern/extract'
     eval $REQUEST
     
 

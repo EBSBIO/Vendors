@@ -1,0 +1,14 @@
+# General Requirements
+requests
+numpy
+# To draw progress bars
+tqdm
+# To draw results
+pandas
+matplotlib
+IPython
+# Normal distribution percentiles
+scipy
+# Acquire system info
+py-cpuinfo
+psutil
