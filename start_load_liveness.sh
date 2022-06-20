@@ -53,17 +53,17 @@ else
         PORT=$4                                 # Порт БП
 
         if [ -n $PREFIX ]; then
-            PATH="/v1/$PREFIX/liveness/detect"
+            LOCATION="/v1/$PREFIX/liveness/detect"
         else
-            PATH="/v1/liveness/detect"
+            LOCATION="/v1/liveness/detect"
         fi
         
-        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$PATH' -Jcontent_type='$CTYPE' -Jsample='$SAMPLE' -Jmeta='$META' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
+        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$LOCATION' -Jpath='$PATH' -Jcontent_type='$CTYPE' -Jsample='$SAMPLE' -Jmeta='$META' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
         if [ "$BG" == 1 ]; then
             CMD='screen -dmS start.jmeter sh -c "'$CMD'"'
         fi
         echo -e "\nCMD: $CMD\n"
-        eval $CMD
+        $CMD
     fi
 fi
 

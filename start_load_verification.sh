@@ -55,7 +55,7 @@ else
         SERVER=$4
         PORT=$5                  # URL
         
-        if [ $TYPE == "sound" ] ; then
+        if [ "$TYPE" == "sound" ]; then
             SAMPLE="resources/samples/sound.wav"   # Используемый в тесте файл.
             CTYPE="audio/pcm"                      # content_type
         else
@@ -64,12 +64,12 @@ else
         fi
         
         if [ -n $PREFIX ]; then
-            PATH="/v1/$PREFIX/pattern/$METHOD"
+            LOCATION="/v1/$PREFIX/pattern/$METHOD"
         else
-            PATH="/v1/pattern/$METHOD"
+            LOCATION="/v1/pattern/$METHOD"
         fi
         
-        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$PATH' -Jmethod='$METHOD' -Jsample='$SAMPLE' -Jcontent_type='$CTYPE' -Jbiotemplate='$BIOTEMPLATE' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
+        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jmethod='$METHOD' -Jsample='$SAMPLE' -Jcontent_type='$CTYPE' -Jbiotemplate='$BIOTEMPLATE' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
 
         if [ "$BG" == 1 ]; then
             CMD='screen -dmS start.jmeter sh -c "'$CMD'"'
