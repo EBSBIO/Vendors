@@ -111,7 +111,7 @@ else
     V=0
     while [ -n "$1" ]; do
         case "$1" in
-            -P) P=$2; shift; shift;;
+            -p) P=$2; shift; shift;;
             -v) V=1; shift;;
             -vv) V=2; shift;;
             -*) shift;;
