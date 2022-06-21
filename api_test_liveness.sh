@@ -8,7 +8,7 @@
 # include functions
 source include/f_checks.sh
 BODY="tmp/responce_body"
-SAMPLE_JPG="resources/samples/photo_velmozhin.jpg"
+SAMPLE_JPG="resources/samples/photo_shumskiy.jpg"
 SAMPLE_PNG="resources/samples/photo.png"
 SAMPLE_WAV="resources/samples/sound.wav"
 SAMPLE_WEBM="resources/samples/video.mov"

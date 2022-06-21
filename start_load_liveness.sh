@@ -37,7 +37,7 @@ else
         JMX_FILE=resources/jmx/liveness.jmx   # Template jmeter
         SUMINTERVAL=10                          # Интервал (в сек) обновления summariser (таблицы результатов в логе)
         
-        SAMPLE="resources/samples/photo_velmozhin.jpg"  # Используемый в тесте файл. Файл необходимо расположить в папке resources
+        SAMPLE="resources/samples/photo_shumskiy.jpg"  # Используемый в тесте файл. Файл необходимо расположить в папке resources
         CTYPE="image/jpeg"                      # content_type, указать image/jpeg для модальности photo или audio/pcm для модальности sound
         META="resources/metadata/meta.json"     # Metadata, json файл для теста liveness
         
