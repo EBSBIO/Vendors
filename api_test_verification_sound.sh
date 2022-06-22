@@ -170,6 +170,7 @@ echo "Usage: $0 [OPTIONS] URL
 
 OPTIONS:
     -t  string      Set test method: all (default), extract, compare, verify
+    -r  string      Release/Version (from method URL)
     -p  prefix      Prefix
     -v              Verbose FAIL checks
     -vv             Verbose All checks
@@ -188,6 +189,7 @@ else
     while [ -n "$1" ]; do
         case "$1" in
             -t) TASK="$2"; shift; shift;;
+            -r) VERSION="$2"; shift; shift;;
             -p) P="$2"; shift; shift;;
             -v) V=1; shift;;
             -vv) V=2; shift;;
@@ -200,11 +202,21 @@ else
     else
         URL=$1
 
-        if [ -n $P ]; then
+        #echo "P = $P"
+        #echo "VER = $VERSION"
+
+        if [[ ( -n "$P" ) && ( -n "$VERSION" ) ]]; then
+            BASE_URL="http://$URL/v$VERSION/$P/pattern"
+        elif [[ ( -n "$P" ) && ( -z "$VERSION" ) ]]; then
             BASE_URL="http://$URL/v1/$P/pattern"
+        elif [[ ( -z "$P" ) && ( -n "$VERSION" ) ]]; then
+            BASE_URL="http://$URL/v$VERSION/pattern"
         else
             BASE_URL="http://$URL/v1/pattern"
         fi
+        
+        #echo "B_URL = $BASE_URL"
+        
         VENDOR_URL="$BASE_URL/health"
         BODY="tmp/responce_body"
         TEST_NAME="Healt.200"
