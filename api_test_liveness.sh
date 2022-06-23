@@ -123,7 +123,7 @@ else
     else
         URL=$1
 
-        if [ -n $P ]; then
+        if [ -n "$P" ]; then
             BASE_URL="http://$URL/v1/$P/liveness"
         else
             BASE_URL="http://$URL/v1/liveness"
