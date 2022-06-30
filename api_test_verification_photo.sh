@@ -189,6 +189,7 @@ else
     while [ -n "$1" ]; do
         case "$1" in
             -t) TASK="$2"; shift; shift;;
+            -r) R="$2"; shift; shift;;
             -p) P=$2; shift; shift;;
             -v) V=1; shift;;
             -vv) V=2; shift;;
@@ -200,16 +201,19 @@ else
         f_print_usage
     else
         URL=$1
+        [ -z $R ] && R="v1" # version
         
         if [ -n "$P" ]; then
-            BASE_URL="http://$URL/v1/$P/pattern"
+            BASE_URL="http://$URL/$R/$P/pattern"
         else
-            BASE_URL="http://$URL/v1/pattern"
+            BASE_URL="http://$URL/$R/pattern"
         fi
+
         VENDOR_URL="$BASE_URL/health"
         BODY="tmp/responce_body"
         TEST_NAME="Healt.200"
         REQUEST='curl -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL
+        mkdir -p tmp
         f_check -r 200 -m "\"?[Ss]tatus\"?:\s?0"
 
         if [ "$FAIL" -eq 0 ]; then
