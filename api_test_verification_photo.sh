@@ -68,11 +68,13 @@ f_test_extract () {
 
 
 f_test_compare() {
-    VENDOR_URL="$BASE_URL/compare"
+    VENDOR_URL="$BASE_URL/extract"
 
     # Create template for compare
-    REQUEST='curl -s -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$BASE_URL'/extract'
+    REQUEST='curl -s -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$VENDOR_URL
     eval $REQUEST
+   
+    VENDOR_URL="$BASE_URL/compare"
 
     # Tests
     TEST_NAME="compare.200 "
@@ -107,11 +109,13 @@ f_test_compare() {
 
 
 f_test_verify() {
-    VENDOR_URL="$BASE_URL/verify"
+    VENDOR_URL="$BASE_URL/extract"
 
     # Create biotemplate
-    REQUEST='curl -s -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$BASE_URL'/extract'
+    REQUEST='curl -s -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$VENDOR_URL
     eval $REQUEST
+    
+    VENDOR_URL="$BASE_URL/verify"
     
 
     TEST_NAME="verify.200"
