@@ -13,6 +13,7 @@ echo Usage: "$0 [OPTIONS] TASK_NAME METHOD THREADS URL PORT
     -b              Start in background (screen)
     -r num          Ramp-up period (sec, default 0)
     -p string       Prefix
+    -v string       Version
     -t string       Type (sound|photo)
     
     TASK_NAME       Vendor name
@@ -30,6 +31,7 @@ else
         case "$1" in
             -b) BG=1; shift;;
             -r) RAMP=$2; shift; shift;;
+            -v) VERSION=$2; shift; shift;;
             -p) PREFIX=$2; shift; shift;;
             -t) TYPE=$2; shift; shift;;
             *) break;;
@@ -45,6 +47,7 @@ else
         THREADS=$3                                  # Количество потоков (пользователей)
         LOOP="-1"                                   # количество повторов (-1 безконечно)
         [ -z $RAMP ] && RAMP=0                      # Длительность (в сек) для «наращивания» до полного числа выбранных потоков.
+        [ -z $VERSION ] && VERSION="v1"             
 
         REPORT=reports/${1}/${METHOD}_${THREADS}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv  # Отчет по запросам
         PERFLOG=reports/${1}/${METHOD}_${THREADS}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
@@ -64,9 +67,9 @@ else
         fi
         
         if [ -n $PREFIX ]; then
-            LOCATION="/v1/$PREFIX/pattern/$METHOD"
+            LOCATION="/$VERSION/$PREFIX/pattern/$METHOD"
         else
-            LOCATION="/v1/pattern/$METHOD"
+            LOCATION="/$VERSION/pattern/$METHOD"
         fi
         
         CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jmethod='$METHOD' -Jsample='$SAMPLE' -Jcontent_type='$CTYPE' -Jbiotemplate='$BIOTEMPLATE' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
