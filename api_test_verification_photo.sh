@@ -104,6 +104,13 @@ f_test_compare() {
     TEST_NAME="compare.400.BPE-002004.bio_template_0X00"
     REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$BIOTEMPLATE_0X00';type=application/octet-stream" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002004"
+    
+    TEST_NAME="compare.200.no_filename"
+    echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_feature"\r\nContent-Type: application/octet-stream\r\n\r\n' >> tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--72468--\r\n' >> tmp/request_body
+    REQUEST='curl --max-time 15000 -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 }
 
 
