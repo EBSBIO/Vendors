@@ -47,7 +47,7 @@ f_test_liveness() {
 
     TEST_NAME="Negative test 0. Cat photo"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_CAT_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 400 -m "LDE-003002"
 
     TEST_NAME="Negative test 1. Incorrect Content-Type"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:application/json" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
