@@ -65,29 +65,29 @@ f_test_liveness() {
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$EMPTY';type=audio/wav" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "LDE-002004"
 
-    TEST_NAME="Negative test 4. Incorrect Content-Type part of multipart"
+    TEST_NAME="Negative test 4. Request with video."
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WEBM';type=audio/wav" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002004"
+
+    TEST_NAME="Negative test 5. Incorrect Content-Type part of multipart metadata"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=image/jpeg" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "LDE-002005"
 
-    TEST_NAME="Negative test 5. Incorrect Content-Type part of multipart"
+    TEST_NAME="Negative test 6. Incorrect Content-Type part of multipart bio_sampl = wav " 
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=application/json" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "LDE-002005"
     
-    TEST_NAME="Negative test 6. Request with photo. Content-Type part of multipart"
+    TEST_NAME="Negative test 7. Incorect Content-Type part of multipart bio_smpl = jpg"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=application/json" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "LDE-002005"
 
-    TEST_NAME="Negative test 7. Request with photo"
+    TEST_NAME="Negative test 8. Incorect Content-Type part of multipart bio_smpl = jpg"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002004"
-
-    TEST_NAME="Negative test 8. Request with video. Content-Type part of multipart"
-    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WEBM';type=audio/wav" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "LDE-002005"
 
-    TEST_NAME="Negative test 9. Request with video"
+    TEST_NAME="Negative test 9. Incorect Content-Type part of multipart bio_sampl = video"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WEBM';type=video/webm" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002004"
+    f_check -r 400 -m "LDE-002005"
 
     TEST_NAME="Negative test 10. Request with no voice"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_NV';type=audio/wav" --output '$BODY' '$VENDOR_URL
