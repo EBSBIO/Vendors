@@ -34,15 +34,15 @@ f_test_liveness() {
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
     
-    TEST_NAME="Positive test 2. detect sound.pcm"
-    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_PCM';type=audio/pcm" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+#    TEST_NAME="Positive test 2. detect sound.pcm"
+#    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_PCM';type=audio/pcm" --output '$BODY' '$VENDOR_URL
+#    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 
-    TEST_NAME="Positive test 3. detect sound.wav metadata charset=UTF-8"
+    TEST_NAME="Positive test 2. detect sound.wav metadata charset=UTF-8"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json;charset=UTF-8" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 
-    TEST_NAME="Positive test 4. 200.no_filename"
+    TEST_NAME="Positive test 3. 200.no_filename"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_sample"\r\nContent-Type: audio/wav\r\n\r\n' >> tmp/request_body; cat $SAMPLE_WAV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
