@@ -48,9 +48,9 @@ else
             CTYPE="image/jpeg"                              # content_type, указать image/jpeg для модальности photo или audio/wav для модальности sound
             META="resources/metadata/meta.json"             # Metadata, json файл для теста liveness
         elif [ "$TYPE" == "sound" ]; then
-            SAMPLE="resources/samples/sound.wav"
+            SAMPLE="resources/samples/sound_10s.wav"
             CTYPE="audio/wav"                               # content_type, указать для модальности sound audio/wav
-            META="resources/metadata/meta_lv_sound_passive.json"       # Metadata, json файл для теста liveness
+            META="resources/metadata/meta_lv_s_p_10s.json"       # Metadata, json файл для теста liveness
         else
             f_usage; exit
         fi

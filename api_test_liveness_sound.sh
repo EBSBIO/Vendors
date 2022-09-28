@@ -176,12 +176,12 @@ else
         f_check -r 200 -m "\"?[Ss]tatus\"?:\s?0"
 
         if [ "$FAIL" -eq 0 ]; then
-            SUCCES=0
+            SUCCESS=0
             ERROR=0
 
             f_test_liveness
 
-            echo -e "\n\nSCORE: succes $SUCCES, error $ERROR"
+            echo -e "\n\nSCORE: success $SUCCESS, error $ERROR"
         fi
     fi
 fi
