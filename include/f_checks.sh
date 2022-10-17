@@ -66,7 +66,7 @@ f_check() {
         ERROR=$(($ERROR+1))
     else
         FAIL=0
-        SUCCES=$(($SUCCES+1))
+        SUCCESS=$(($SUCCESS+1))
     fi
 
     if [ "$MESSAGE_CHECK" == 1 ] && [ "$MESSAGE_RESULT" != "OK" ] && [ -n "$FAIL_MESSAGE" ]; then

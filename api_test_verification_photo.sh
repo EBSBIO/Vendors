@@ -247,7 +247,7 @@ else
                 f_test_verify
             ;;
             esac
-            echo -e "\n\nSCORE: succes $SUCCES, error $ERROR"
+            echo -e "\n\nSCORE: success $SUCCESS, error $ERROR"
         fi
     fi
 fi

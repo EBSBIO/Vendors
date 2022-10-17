@@ -177,7 +177,7 @@ else
 
             f_test_liveness
 
-            echo -e "\n\nSCORE: succes $SUCCES, error $ERROR"
+            echo -e "\n\nSCORE: success $SUCCESS, error $ERROR"
         fi
     fi
 fi
