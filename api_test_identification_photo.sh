@@ -3,7 +3,7 @@
 #                        #
 # Author: kflirik        #
 #                        #
-# Ver: 1.24              #
+# Ver: 1.24.1             #
 #                        #
 ##########################
 
@@ -143,7 +143,7 @@ f_test_add() {
     f_check -r 400 -m "BPE-00502"
 
     TEST_NAME="add.400.BPE-00502.no_template_file"
-    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@;type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL 
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$EMPTY';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL 
     f_check -r 400 -m "BPE-00502"
 
     TEST_NAME="add.400.BPE-00502.no_template_part"
@@ -221,7 +221,7 @@ f_test_update() {
     f_check -r 400 -m "BPE-00502"
 
     TEST_NAME="update.400.BPE-00502.no_template_data"
-    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@;type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$EMPTY';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00502"
 
     TEST_NAME="update.400.BPE-00502.no_template_form"
@@ -277,7 +277,7 @@ f_test_delete() {
     f_check -r 400 -m "BPE-00005"
 
     TEST_NAME="delete.400.BPE-00502"
-    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" --data "metadata={}" --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" --data '$RDATA_NOID' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00502"
 
     #TEST_NAME="update.400.BPE-00506.invalid_param_value"
@@ -327,7 +327,7 @@ f_test_match(){
     f_check -r 400 -m "BPE-00005"
 
     TEST_NAME="match.400.BPE-00005.no_template"
-    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@;type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$EMPTY';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00005"
 
     TEST_NAME="match.400.BPE-00502.no_limit"
