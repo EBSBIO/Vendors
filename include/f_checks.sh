@@ -42,7 +42,7 @@ f_check() {
                 if [ -s $BODY ]; then
                     #MESSAGE=$(head -n 5 $BODY)
                     #cat $BODY
-                    MESSAGE=$(grep --binary-files=text -e '{.*}' $BODY)
+                    MESSAGE=$(grep --binary-files=text -e '{.*}' -zo $BODY | tr -d '\0')
                     if [[ $MESSAGE  =~ $2 ]]; then
                         MESSAGE_RESULT="OK"
                     else
