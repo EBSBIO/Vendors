@@ -182,6 +182,7 @@ echo "Usage: $0 [OPTIONS] URL
 
 OPTIONS:
     -t  string      Set test method: all (default), extract, compare, verify
+    -r  string      Version api
     -p  string      Prefix
     -v              Verbose FAIL checks
     -vv             Verbose All checks

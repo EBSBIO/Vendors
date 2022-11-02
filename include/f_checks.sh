@@ -14,6 +14,7 @@ f_check() {
     HTTP_CHECK=0
     BODY_CHECK=0
     MESSAGE_CHECK=0
+    SAVE_BODY=0
     unset BODY_RESULT HTTP_RESULT
     unset FAIL_MESSAGE MESSAGE
 
@@ -57,6 +58,7 @@ f_check() {
             -f) FAIL_MESSAGE="$2";
                 shift
             ;;
+            -s) SAVE_BODY=1;;
         esac
         shift
     done
@@ -109,5 +111,7 @@ f_check() {
         fi
     fi
 
-    rm -f $BODY
+    if [ "$SAVE_BODY" != "1" ]; then
+        rm -f $BODY
+    fi
 }
