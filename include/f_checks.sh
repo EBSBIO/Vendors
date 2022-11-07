@@ -14,6 +14,7 @@ f_check() {
     HTTP_CHECK=0
     BODY_CHECK=0
     MESSAGE_CHECK=0
+    SAVE_BODY=0
     unset BODY_RESULT HTTP_RESULT
     unset FAIL_MESSAGE MESSAGE
 
@@ -42,7 +43,7 @@ f_check() {
                 if [ -s $BODY ]; then
                     #MESSAGE=$(head -n 5 $BODY)
                     #cat $BODY
-                    MESSAGE=$(grep --binary-files=text -e '{.*}' $BODY)
+                    MESSAGE=$(grep --binary-files=text -e '{.*}' -zo $BODY | tr -d '\0')
                     if [[ $MESSAGE  =~ $2 ]]; then
                         MESSAGE_RESULT="OK"
                     else
@@ -57,6 +58,7 @@ f_check() {
             -f) FAIL_MESSAGE="$2";
                 shift
             ;;
+            -s) SAVE_BODY=1;;
         esac
         shift
     done
@@ -66,7 +68,7 @@ f_check() {
         ERROR=$(($ERROR+1))
     else
         FAIL=0
-        SUCCES=$(($SUCCES+1))
+        SUCCESS=$(($SUCCESS+1))
     fi
 
     if [ "$MESSAGE_CHECK" == 1 ] && [ "$MESSAGE_RESULT" != "OK" ] && [ -n "$FAIL_MESSAGE" ]; then
@@ -109,5 +111,7 @@ f_check() {
         fi
     fi
 
-    rm -f $BODY
+    if [ "$SAVE_BODY" != "1" ]; then
+        rm -f $BODY
+    fi
 }

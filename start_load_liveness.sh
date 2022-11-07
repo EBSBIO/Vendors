@@ -3,6 +3,8 @@
 #                        #
 # Author: kflirik        #
 #                        #
+# Version 1.24.0         #
+#                        #
 ##########################
 
 f_usage(){
@@ -12,6 +14,7 @@ echo Usage: "$0 [OPTIONS] TASK_NAME THREADS RAMP URL PORT
     -b              Start in background (screen)
     -r  num         Ramp-up period (sec, default 0)
     -p string       Prefix
+    -t              Type (photo|sound, default photo)
     
     TASK_NAME       Vendor name
     THREADS         Sum threads(users)
@@ -28,6 +31,7 @@ else
             -b) BG=1; shift;;
             -r) RAMP=$2; shift; shift;;
             -p) PREFIX=$2; shift; shift;;
+            -t) TYPE=$2; shift; shift;;
             *) break ;;
         esac
     done
@@ -37,9 +41,20 @@ else
         JMX_FILE=resources/jmx/liveness.jmx   # Template jmeter
         SUMINTERVAL=10                          # Интервал (в сек) обновления summariser (таблицы результатов в логе)
         
-        SAMPLE="resources/samples/photo_shumskiy.jpg"  # Используемый в тесте файл. Файл необходимо расположить в папке resources
-        CTYPE="image/jpeg"                      # content_type, указать image/jpeg для модальности photo или audio/pcm для модальности sound
-        META="resources/metadata/meta.json"     # Metadata, json файл для теста liveness
+        [ -z $TYPE ] && TYPE="photo"
+        echo $TYPE
+        if [ "$TYPE" == "photo" ]; then
+            SAMPLE="resources/samples/photo_shumskiy.jpg"   # Используемый в тесте файл. Файл необходимо расположить в папке resources
+            CTYPE="image/jpeg"                              # content_type, указать image/jpeg для модальности photo или audio/wav для модальности sound
+            META="resources/metadata/meta.json"             # Metadata, json файл для теста liveness
+        elif [ "$TYPE" == "sound" ]; then
+            SAMPLE="resources/samples/sound_10s.wav"
+            CTYPE="audio/wav"                               # content_type, указать для модальности sound audio/wav
+            META="resources/metadata/meta_lv_s_p_10s.json"       # Metadata, json файл для теста liveness
+        else
+            f_usage; exit
+        fi
+
         
         THREADS=$2                              # Количество потоков (пользователей)
         LOOP="-1"                               # Количество повторов (-1 безконечно)

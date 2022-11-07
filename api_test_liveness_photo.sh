@@ -12,6 +12,9 @@ SAMPLE_JPG="resources/samples/photo_shumskiy.jpg"
 SAMPLE_PNG="resources/samples/photo.png"
 SAMPLE_WAV="resources/samples/sound.wav"
 SAMPLE_WEBM="resources/samples/video.mov"
+SAMPLE_NF="resources/samples/no_face.jpg"
+SAMPLE_TF="resources/samples/two_face.jpg"
+SAMPLE_CAT_JPG="resources/samples/cat.jpg"
 EMPTY="resources/samples/empty"
 META="resources/metadata/meta.json"
 META_WM="resources/metadata/meta_without_mnemonic.json"
@@ -42,17 +45,21 @@ f_test_liveness() {
     REQUEST='curl --max-time 15000 -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 
-    TEST_NAME="Negative test 1. Request with incorrect HTTP method"
+    TEST_NAME="Negative test 0. Cat photo"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_CAT_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-003002"
+
+    TEST_NAME="Negative test 1. Incorrect Content-Type"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:application/json" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-002001"
+
+    TEST_NAME="Negative test 2. Request with incorrect HTTP method"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpg" -X GET --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "LDE-002002"
 
-    TEST_NAME="Negative test 2. Request with empty bio_sample"
+    TEST_NAME="Negative test 3. Request with empty bio_sample"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$EMPTY';type=image/jpeg" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "LDE-002004"
-
-    TEST_NAME="Negative test 3. Incorrect Content-Type"
-    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:application/json" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002001"
 
     TEST_NAME="Negative test 4. Incorrect Content-Type part of multipart"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=image/jpeg" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
@@ -78,25 +85,33 @@ f_test_liveness() {
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WEBM';type=video/webm" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "LDE-002005"
 
-    TEST_NAME="Negative test 10. Request with meta without mnemonic"
+    TEST_NAME="Negative test 10. Request with no face"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_NF';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-003002"
+
+    TEST_NAME="Negative test 11. Request with two face"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_TF';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "LDE-003003"
+
+    TEST_NAME="Negative test 12. Request with meta without mnemonic"
     REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WM';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002003"
+    f_check -r 400 -m "LDE-003004"
 
-    TEST_NAME="Negative test 11. Request with meta without action"
+    TEST_NAME="Negative test 13. Request with meta without action"
     REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WA';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002003"
+    f_check -r 400 -m "LDE-003004"
 
-    TEST_NAME="Negative test 12. Request with meta without action.type"
+    TEST_NAME="Negative test 14. Request with meta without action.type"
     REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WT';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002003"
+    f_check -r 400 -m "LDE-003004"
 
-    TEST_NAME="Negative test 13. Request with meta without action.duration"
+    TEST_NAME="Negative test 15. Request with meta without action.duration"
     REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WD';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002003"
+    f_check -r 400 -m "LDE-003004"
 
-    TEST_NAME="Negative test 14. Request with meta without action.message"
+    TEST_NAME="Negative test 16. Request with meta without action.message"
     REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WMSG';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002003"
+    f_check -r 400 -m "LDE-003004"
 }
 
 
@@ -162,7 +177,7 @@ else
 
             f_test_liveness
 
-            echo -e "\n\nSCORE: succes $SUCCES, error $ERROR"
+            echo -e "\n\nSCORE: success $SUCCESS, error $ERROR"
         fi
     fi
 fi
