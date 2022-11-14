@@ -491,9 +491,11 @@ else
         [ -z $R ] && R="v1" # version
         
         if [ -n "$P" ]; then
-            BASE_URL="http://$URL/$R/$P/pattern"
+            #BASE_URL="http://$URL/$R/$P/pattern"
+            BASE_URL="http://$URL/$R/$P"
         else
-            BASE_URL="http://$URL/$R/pattern"
+            #BASE_URL="http://$URL/$R/pattern"
+            BASE_URL="http://$URL/$R"
         fi
 
         VENDOR_URL="$BASE_URL/health"
