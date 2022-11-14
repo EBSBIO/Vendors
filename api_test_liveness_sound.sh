@@ -34,10 +34,6 @@ f_test_liveness() {
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
     
-#    TEST_NAME="Positive test 2. detect sound.pcm"
-#    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_PCM';type=audio/pcm" --output '$BODY' '$VENDOR_URL
-#    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
-
     TEST_NAME="Positive test 2. detect sound.wav metadata charset=UTF-8"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json;charset=UTF-8" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
@@ -48,10 +44,6 @@ f_test_liveness() {
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl --max-time 15000 -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
-
-#    TEST_NAME="Negative test 0. Cat photo"
-#    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_CAT_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-#    f_check -r 400 -m "LDE-003002"
 
     TEST_NAME="Negative test 1. Incorrect Content-Type"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:application/json" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
@@ -93,9 +85,9 @@ f_test_liveness() {
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_NV';type=audio/wav" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "LDE-003002"
 
-    TEST_NAME="Negative test 11. Request with two voice"
-    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_DV';type=audio/wav" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-003003"
+#    TEST_NAME="Negative test 11. Request with two voice"
+#    REQUEST='curl -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_DV';type=audio/wav" --output '$BODY' '$VENDOR_URL
+#    f_check -r 400 -m "LDE-003003"
 
     TEST_NAME="Negative test 12. Request with meta without mnemonic"
     REQUEST='curl -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WM';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
@@ -158,16 +150,6 @@ else
             BASE_URL="http://$URL/$R/liveness"
         fi
         
-#        if [[ ( -n "$P" ) && ( -n "$VERSION" ) ]]; then
-#            BASE_URL="http://$URL/v$VERSION/$P/liveness"
-#        elif [[ ( -n "$P" ) && ( -z "$VERSION" ) ]]; then
-#            BASE_URL="http://$URL/v1/$P/liveness"
-#        elif [[ ( -z "$P" ) && ( -n "$VERSION" ) ]]; then
-#            BASE_URL="http://$URL/v$VERSION/liveness"
-#        else
-#            BASE_URL="http://$URL/v1/liveness"
-#        fi
-
         VENDOR_URL="$BASE_URL/health"
         BODY="tmp/responce_body"
         TEST_NAME="Healt.200"
