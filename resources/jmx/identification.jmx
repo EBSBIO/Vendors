@@ -145,6 +145,10 @@
                   <stringProp name="Header.name">Content-Type</stringProp>
                   <stringProp name="Header.value">application/json</stringProp>
                 </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">User-Agent</stringProp>
+                  <stringProp name="Header.value">fucking jmeter</stringProp>
+                </elementProp>
               </collectionProp>
             </HeaderManager>
             <hashTree/>
