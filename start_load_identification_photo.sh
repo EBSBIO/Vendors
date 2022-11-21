@@ -38,7 +38,7 @@ else
     if [ "$#" -ne "5" ]; then
         f_usage
     else
-        JMX_FILE=resources/jmx/verification.jmx     # Template jmeter
+        JMX_FILE=resources/jmx/identification.jmx     # Template jmeter
         SUMINTERVAL=10                              # Интервал (в сек) обновления summariser (таблицы результатов в логе)
         
         METHOD=$2
@@ -51,6 +51,9 @@ else
         LOG=tmp/jmeter.log                          # Лог jmeter
 
         BIOTEMPLATE="tmp/biotemplate"
+        META=\''metadata={"template_id":"12345"};type=application/json'\'
+        MMETA=\''metadata={"threshold": 0.3, "limit": 5};type=application/json'\'
+        TEMPLATE_ID="12345"
         
         SERVER=$4
         PORT=$5                  # URL
@@ -69,7 +72,7 @@ else
             LOCATION="/v1/pattern/$METHOD"
         fi
         
-        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jmethod='$METHOD' -Jsample='$SAMPLE' -Jcontent_type='$CTYPE' -Jbiotemplate='$BIOTEMPLATE' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
+        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jmethod='$METHOD' -Jsample='$SAMPLE' -Jcontent_type='$CTYPE' -Jtemplate='$BIOTEMPLATE' -Jmeta='$META' -Jmmeta='$MMETA' -Jtemplate_id='$TEMPLATE_ID' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
 
         if [ "$BG" == 1 ]; then
             CMD='screen -dmS start.jmeter sh -c "'$CMD'"'

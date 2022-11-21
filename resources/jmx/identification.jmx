@@ -99,8 +99,8 @@
                   <stringProp name="File.paramname">template</stringProp>
                   <stringProp name="File.mimetype">application/octet-stream</stringProp>
                 </elementProp>
-                <elementProp name="${__P(metadata)}" elementType="HTTPFileArg">
-                  <stringProp name="File.path">${__P(metadata)}</stringProp>
+                <elementProp name="${__P(meta)}" elementType="HTTPFileArg">
+                  <stringProp name="File.path">${__P(meta)}</stringProp>
                   <stringProp name="File.paramname">metadata</stringProp>
                   <stringProp name="File.mimetype">application/json</stringProp>
                 </elementProp>
@@ -150,8 +150,8 @@
                   <stringProp name="File.paramname">template</stringProp>
                   <stringProp name="File.mimetype">application/octet-stream</stringProp>
                 </elementProp>
-                <elementProp name="${__P(metadata)}" elementType="HTTPFileArg">
-                  <stringProp name="File.path">${__P(metadata)}</stringProp>
+                <elementProp name="${__P(meta)}" elementType="HTTPFileArg">
+                  <stringProp name="File.path">${__P(meta)}</stringProp>
                   <stringProp name="File.paramname">metadata</stringProp>
                   <stringProp name="File.mimetype">application/json</stringProp>
                 </elementProp>
@@ -194,22 +194,17 @@
         </IfController>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request - delete" enabled="true">
-            <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
-              <collectionProp name="HTTPFileArgs.files">
-                <elementProp name="${__P(template)}" elementType="HTTPFileArg">
-                  <stringProp name="File.path">${__P(template)}</stringProp>
-                  <stringProp name="File.paramname">template</stringProp>
-                  <stringProp name="File.mimetype">application/octet-stream</stringProp>
-                </elementProp>
-                <elementProp name="${__P(metadata)}" elementType="HTTPFileArg">
-                  <stringProp name="File.path">${__P(metadata)}</stringProp>
-                  <stringProp name="File.paramname">metadata</stringProp>
-                  <stringProp name="File.mimetype">application/json</stringProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="template_id" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${__P(template_id)}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  <stringProp name="Argument.name">template_id</stringProp>
+                  <stringProp name="HTTPArgument.content_type">application/json</stringProp>
                 </elementProp>
               </collectionProp>
-            </elementProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
-              <collectionProp name="Arguments.arguments"/>
             </elementProp>
             <stringProp name="HTTPSampler.domain">${__P(server)}</stringProp>
             <stringProp name="HTTPSampler.port">${__P(port)}</stringProp>
@@ -252,8 +247,8 @@
                   <stringProp name="File.paramname">template</stringProp>
                   <stringProp name="File.mimetype">application/octet-stream</stringProp>
                 </elementProp>
-                <elementProp name="${__P(metadata)}" elementType="HTTPFileArg">
-                  <stringProp name="File.path">${__P(metadata)}</stringProp>
+                <elementProp name="${__P(mmeta)}" elementType="HTTPFileArg">
+                  <stringProp name="File.path">${__P(mmeta)}</stringProp>
                   <stringProp name="File.paramname">metadata</stringProp>
                   <stringProp name="File.mimetype">application/json</stringProp>
                 </elementProp>
@@ -308,15 +303,15 @@
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request - identify" enabled="true">
             <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
               <collectionProp name="HTTPFileArgs.files">
-                <elementProp name="${__P(template)}" elementType="HTTPFileArg">
-                  <stringProp name="File.path">${__P(template)}</stringProp>
-                  <stringProp name="File.paramname">template</stringProp>
-                  <stringProp name="File.mimetype">application/octet-stream</stringProp>
-                </elementProp>
-                <elementProp name="${__P(metadata)}" elementType="HTTPFileArg">
-                  <stringProp name="File.path">${__P(metadata)}</stringProp>
+                <elementProp name="${__P(mmeta)}" elementType="HTTPFileArg">
+                  <stringProp name="File.path">${__P(mmeta)}</stringProp>
                   <stringProp name="File.paramname">metadata</stringProp>
                   <stringProp name="File.mimetype">application/json</stringProp>
+                </elementProp>
+                <elementProp name="${__P(photo)}" elementType="HTTPFileArg">
+                  <stringProp name="File.path">${__P(photo)}</stringProp>
+                  <stringProp name="File.paramname">photo</stringProp>
+                  <stringProp name="File.mimetype">${__P(content_type)}</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
