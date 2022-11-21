@@ -103,22 +103,22 @@
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request - add" enabled="true">
             <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
               <collectionProp name="HTTPFileArgs.files">
-                <elementProp name="${__P(template)}" elementType="HTTPFileArg">
-                  <stringProp name="File.path">${__P(template)}</stringProp>
+                <elementProp name="${__P(biotemplate)}" elementType="HTTPFileArg">
+                  <stringProp name="File.path">${__P(biotemplate)}</stringProp>
                   <stringProp name="File.paramname">template</stringProp>
                   <stringProp name="File.mimetype">application/octet-stream</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
               <collectionProp name="Arguments.arguments">
-                <elementProp name="" elementType="HTTPArgument">
+                <elementProp name="metatdata" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&#xd;
-	&quot;template_id&quot;:&quot;${__time()}&quot;&#xd;
-}</stringProp>
+                  <stringProp name="Argument.value">{&quot;template_id&quot;: &quot;${__time()}&quot;}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  <stringProp name="Argument.name">metatdata</stringProp>
+                  <stringProp name="HTTPArgument.content_type"> application/json</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -128,7 +128,7 @@
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">${__P(path)}</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
-            <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
             <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
             <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
