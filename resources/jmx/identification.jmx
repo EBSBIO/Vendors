@@ -95,7 +95,7 @@
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
+                <stringProp name="Header.value">multipart/form-data</stringProp>
               </elementProp>
             </collectionProp>
           </HeaderManager>
