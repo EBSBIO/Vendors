@@ -103,12 +103,12 @@
             </elementProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
               <collectionProp name="Arguments.arguments">
-                <elementProp name="metadata" elementType="HTTPArgument">
+                <elementProp name="metadata222" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&quot;template_id&quot;: &quot;43563456&quot;}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
-                  <stringProp name="Argument.name">metadata</stringProp>
+                  <stringProp name="Argument.name">metadata222</stringProp>
                   <stringProp name="HTTPArgument.content_type"> application/json</stringProp>
                 </elementProp>
               </collectionProp>
