@@ -108,11 +108,6 @@
                   <stringProp name="File.paramname">template</stringProp>
                   <stringProp name="File.mimetype">application/octet-stream</stringProp>
                 </elementProp>
-                <elementProp name="${__P(meta)}" elementType="HTTPFileArg">
-                  <stringProp name="File.path">${__P(meta)}</stringProp>
-                  <stringProp name="File.paramname">metadata</stringProp>
-                  <stringProp name="File.mimetype">application/json</stringProp>
-                </elementProp>
               </collectionProp>
             </elementProp>
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
