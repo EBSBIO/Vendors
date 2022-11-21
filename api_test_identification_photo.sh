@@ -496,11 +496,11 @@ else
         [ -z $R ] && R="v1" # version
         
         if [ -n "$P" ]; then
-            #BASE_URL="http://$URL/$R/$P/pattern"
-            BASE_URL="http://$URL/$R/$P"
+            BASE_URL="http://$URL/$R/$P/pattern"
+            #BASE_URL="http://$URL/$R/$P"
         else
-            #BASE_URL="http://$URL/$R/pattern"
-            BASE_URL="http://$URL/$R"
+            BASE_URL="http://$URL/$R/pattern"
+            #BASE_URL="http://$URL/$R"
         fi
 
         VENDOR_URL="$BASE_URL/health"
@@ -516,11 +516,17 @@ else
 
             case "$TASK" in
             all )
+                echo "------------ Begin: f_test_extract -------------"
                 f_test_extract
+                echo "------------ Begin: f_test_add -------------"
                 f_test_add
+                echo "------------ Begin: f_test_update -------------"
                 f_test_update
+                echo "------------ Begin: f_test_delete -------------"
                 f_test_delete
+                echo "------------ Begin: f_test_match -------------"
                 f_test_match
+                echo "------------ Begin: f_test_identify -------------"
                 f_test_identify
             ;;
             extract ) f_test_extract;;
