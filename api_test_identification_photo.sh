@@ -368,6 +368,11 @@ f_test_identify(){
     f_check -r 200
 
     dd if=/dev/urandom of=$SAMPLE_BR bs=1024 count=4 status=none
+
+    TEST_NAME="PREPARE - delete template_id: 12345"
+    RDATA_BIG=\''{"template_id": "12345"}'\'
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: 1c0944b1-0f46-4e51-a8b0-693e9e44952a" --data '$RDATA_BIG' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
     
     TEST_NAME="PREPARE - add biotemplate"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
