@@ -176,14 +176,14 @@ f_test_update() {
     f_check -r 200
 
     head --bytes=64 $BIOTEMPLATE > $BIOTEMPLATE_BR
-    
-    TEST_NAME="PREPARE - add biotemplate"
-    REQUEST='curl -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
+
+    TEST_NAME="PREPARE - delete template_id: 12345"
+    RDATA_BIG=\''{"template_id": "12345"}'\'
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: 1c0944b1-0f46-4e51-a8b0-693e9e44952a" --data '$RDATA_BIG' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
 
-    TEST_NAME="PREPARE - delete template_id: 12345100500"
-    RDATA_BIG=\''{"template_id": "12345100500"}'\'
-    REQUEST='curl -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: 1c0944b1-0f46-4e51-a8b0-693e9e44952a" --data '$RDATA_BIG' --output '$BODY' -X POST '$BASE_URL'/delete'
+    TEST_NAME="PREPARE - add biotemplate"
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
     f_check -r 200
 
 
@@ -248,6 +248,11 @@ f_test_delete() {
     ###### Prepare
     TEST_NAME="PREPARE - create biotemplate"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$BASE_URL'/extract'
+    f_check -r 200
+
+    TEST_NAME="PREPARE - delete template_id: 12345"
+    RDATA_BIG=\''{"template_id": "12345"}'\'
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: 1c0944b1-0f46-4e51-a8b0-693e9e44952a" --data '$RDATA_BIG' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
 
     TEST_NAME="PREPARE - add biotemplate"
@@ -363,6 +368,11 @@ f_test_identify(){
     f_check -r 200
 
     dd if=/dev/urandom of=$SAMPLE_BR bs=1024 count=4 status=none
+
+    TEST_NAME="PREPARE - delete template_id: 12345"
+    RDATA_BIG=\''{"template_id": "12345"}'\'
+    REQUEST='curl -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: 1c0944b1-0f46-4e51-a8b0-693e9e44952a" --data '$RDATA_BIG' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
     
     TEST_NAME="PREPARE - add biotemplate"
     REQUEST='curl -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
@@ -491,11 +501,11 @@ else
         [ -z $R ] && R="v1" # version
         
         if [ -n "$P" ]; then
-            #BASE_URL="http://$URL/$R/$P/pattern"
-            BASE_URL="http://$URL/$R/$P"
+            BASE_URL="http://$URL/$R/$P/pattern"
+            #BASE_URL="http://$URL/$R/$P"
         else
-            #BASE_URL="http://$URL/$R/pattern"
-            BASE_URL="http://$URL/$R"
+            BASE_URL="http://$URL/$R/pattern"
+            #BASE_URL="http://$URL/$R"
         fi
 
         VENDOR_URL="$BASE_URL/health"
@@ -511,11 +521,17 @@ else
 
             case "$TASK" in
             all )
+                echo "------------ Begin: f_test_extract -------------"
                 f_test_extract
+                echo "------------ Begin: f_test_add -------------"
                 f_test_add
+                echo "------------ Begin: f_test_update -------------"
                 f_test_update
+                echo "------------ Begin: f_test_delete -------------"
                 f_test_delete
+                echo "------------ Begin: f_test_match -------------"
                 f_test_match
+                echo "------------ Begin: f_test_identify -------------"
                 f_test_identify
             ;;
             extract ) f_test_extract;;
