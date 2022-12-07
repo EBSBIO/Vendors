@@ -111,59 +111,59 @@ f_test_verify() {
     VENDOR_URL="$BASE_URL/verify"
 
     TEST_NAME="verify.200"
-    REQUEST='curl -m $TIMEOUT --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/pcm" --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/pcm" --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "\"?[Ss]core\"?:\s?[0-1].[0-9]"
     
     TEST_NAME="Negative verify test 1. Invalid http request method"
-    REQUEST='curl -m $TIMEOUT --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/pcm" -X GET --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/pcm" -X GET --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002002" -f "Error expected BPE-002002"
     
     TEST_NAME="Negative verify test 2. Uses in request incorrect content-type"
-    REQUEST='curl -m $TIMEOUT --max-time 15000 -s -w "%{http_code}" -H "Content-type:image/jpeg" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:image/jpeg" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002001" -f "Error expected BPE-002001"
     
     TEST_NAME="Negative verify test 3. Attempting to extract a template from a file of zero size"
-    REQUEST='curl -m $TIMEOUT --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_EMPTY';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_EMPTY';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002003" -f "Error expected BPE-002003"
     
     TEST_NAME="Negative verify test 4. Trying to compose an empty template with an good sound"
-    REQUEST='curl -m $TIMEOUT --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$SAMPLE_EMPTY';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$SAMPLE_EMPTY';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002004" -f "Error expected BPE-002004"
     
     TEST_NAME="Negative verify test 5. Comparing an empty template with an empty file"
-    REQUEST='curl -m $TIMEOUT --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$SAMPLE_EMPTY';type=application/octet-stream" -F "sample=@'$SAMPLE_EMPTY';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$SAMPLE_EMPTY';type=application/octet-stream" -F "sample=@'$SAMPLE_EMPTY';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00200[3-4]"
 
     TEST_NAME="Negative verify test 6. Attempting to extract a template from a file without voice"
-    REQUEST='curl -m $TIMEOUT --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_SWV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_SWV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-003001"
     
     TEST_NAME="Negative verify test 7. Attempting to extract a template from a file with more than one voice"
-    REQUEST='curl -m $TIMEOUT --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_SDV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_SDV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-003003"
     
     TEST_NAME="Negative verify test 8. Incorrect Content-Type for sample"
-    REQUEST='curl -m $TIMEOUT --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=image/jpeg"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=image/jpeg"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
     
     TEST_NAME="Negative verify test 9. Incorrect Content-Type for bio_template"
-    REQUEST='curl -m $TIMEOUT --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=image/jpeg" -F "sample=@'$SAMPLE_WAV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=image/jpeg" -F "sample=@'$SAMPLE_WAV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
     
     TEST_NAME="Negative verify test 10. Extract template from photo"
-    REQUEST='curl -m $TIMEOUT --max-time 15000 -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_JPG';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_JPG';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
     
     TEST_NAME="verify.200.boundary_no_hyphens"
     cat resources/body/body_stream $BIOTEMPLATE resources/body/body_sound $SAMPLE_WAV resources/body/body_end > tmp/request_body
-    REQUEST='curl -m $TIMEOUT --max-time 15000 -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
     
     TEST_NAME="verify.200.no_filename"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="sample"\r\nContent-Type: audio/pcm\r\n\r\n' >> tmp/request_body; cat $SAMPLE_WAV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
-    REQUEST='curl -m $TIMEOUT --max-time 15000 -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 }
 
