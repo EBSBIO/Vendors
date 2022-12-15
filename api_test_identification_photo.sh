@@ -424,7 +424,7 @@ f_test_identify(){
     f_check -r 400 -m "BPE-00502"
 
     TEST_NAME="identify.400.BPE-00502.no_photo"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$EMPTY';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058"  -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00502"
 
     TEST_NAME="identify.400.BPE-00502.no_photo"

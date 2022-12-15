@@ -43,7 +43,7 @@ else
         
         METHOD=$2
         THREADS=$3                                  # Количество потоков (пользователей)
-        LOOP="-1"                                   # количество повторов (-1 безконечно)
+        LOOP="3"                                   # количество повторов (-1 безконечно)
         [ -z $RAMP ] && RAMP=0                      # Длительность (в сек) для «наращивания» до полного числа выбранных потоков.
 
         REPORT=reports/${1}/${METHOD}_${THREADS}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv  # Отчет по запросам
@@ -52,7 +52,8 @@ else
 
         BIOTEMPLATE="tmp/biotemplate"
         META=\''metadata={"template_id":"12345"};type=application/json'\'
-        MMETA=\''metadata={"threshold": 0.3, "limit": 5};type=application/json'\'
+        MMETA=resources/metadata/mmeta.json
+        UUID="4896c91b-9e61-3129-87b6-8aa299028058"
         TEMPLATE_ID="12345"
         
         SERVER=$4
@@ -72,7 +73,7 @@ else
             LOCATION="/v1/pattern/$METHOD"
         fi
         
-        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jmethod='$METHOD' -Jsample='$SAMPLE' -Jcontent_type='$CTYPE' -Jbiotemplate='$BIOTEMPLATE' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
+        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jmethod='$METHOD' -Jsample='$SAMPLE' -Jphoto='$SAMPLE' -Jcontent_type='$CTYPE' -Jbiotemplate='$BIOTEMPLATE' -Jmmeta='$MMETA' -JUUID='$UUID' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
 
         if [ "$BG" == 1 ]; then
             CMD='screen -dmS start.jmeter sh -c "'$CMD'"'
