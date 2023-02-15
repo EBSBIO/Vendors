@@ -267,6 +267,18 @@
             <stringProp name="-1993889503">Memory</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
+          <collectionProp name="405342129">
+            <stringProp name="1147929741">10.113.128.188</stringProp>
+            <stringProp name="1600768">4444</stringProp>
+            <stringProp name="2112896831">Disks I/O</stringProp>
+            <stringProp name="0"></stringProp>
+          </collectionProp>
+          <collectionProp name="406474187">
+            <stringProp name="1147929742">10.113.128.189</stringProp>
+            <stringProp name="1600768">4444</stringProp>
+            <stringProp name="2112896831">Disks I/O</stringProp>
+            <stringProp name="0"></stringProp>
+          </collectionProp>
         </collectionProp>
       </kg.apc.jmeter.perfmon.PerfMonCollector>
       <hashTree/>

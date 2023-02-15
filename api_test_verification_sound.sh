@@ -22,15 +22,15 @@ f_test_extract () {
     BODY="tmp/responce_body"
 
     TEST_NAME="Positive extraction test.1 Extract pcm sound"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:audio/pcm" -H "Expect:" --data-binary @'$SAMPLE_WAV' --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:audio/wav" -H "Expect:" --data-binary @'$SAMPLE_WAV' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -b
     
     TEST_NAME="Negative extraction test 1. Attempting to extract a template from a file of zero size"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:audio/pcm" -H "Expect:" --data-binary @'$SAMPLE_EMPTY' --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:audio/wav" -H "Expect:" --data-binary @'$SAMPLE_EMPTY' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002003"
 
     TEST_NAME="Negative extraction test 2. Attempting to extract a template from a file without voice"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:audio/pcm" -H "Expect:" --data-binary @'$SAMPLE_SWV' --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:audio/wav" -H "Expect:" --data-binary @'$SAMPLE_SWV' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-003002"
     
     #TEST_NAME="Negative extraction test 3. Attempting to extract a template from a file with more than one voice"
@@ -42,11 +42,11 @@ f_test_extract () {
     f_check -r 400 -m "BPE-002001"
     
     TEST_NAME="Negative extraction test 5. Invalid http request method"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:audio/pcm" -H "Expect:" --data-binary @'$SAMPLE_WAV' -X GET --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:audio/wav" -H "Expect:" --data-binary @'$SAMPLE_WAV' -X GET --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002002"
 
     TEST_NAME="Negative extraction test 6. Trying to create a template from photo"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:audio/pcm" -H "Expect:" --data-binary @'$SAMPLE_PNG'  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:audio/wav" -H "Expect:" --data-binary @'$SAMPLE_PNG'  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002003"
 }
 
@@ -56,7 +56,7 @@ f_test_compare() {
     VENDOR_URL="$BASE_URL/extract"
 
     # Create template for compare
-    REQUEST='curl -m $TIMEOUT -s -H "Content-Type:audio/pcm" -H "Expect:" --data-binary @'$SAMPLE_WAV' --output '$BIOTEMPLATE' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -H "Content-Type:audio/wav" -H "Expect:" --data-binary @'$SAMPLE_WAV' --output '$BIOTEMPLATE' '$VENDOR_URL
     eval $REQUEST
 
     VENDOR_URL="$BASE_URL/compare"
@@ -105,41 +105,41 @@ f_test_verify() {
     VENDOR_URL="$BASE_URL/extract"
 
     # Create biotemplate
-    REQUEST='curl -m $TIMEOUT -s -H "Content-Type:audio/pcm" -H "Expect:" --data-binary @'$SAMPLE_WAV' --output '$BIOTEMPLATE' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -H "Content-Type:audio/wav" -H "Expect:" --data-binary @'$SAMPLE_WAV' --output '$BIOTEMPLATE' '$VENDOR_URL
     eval $REQUEST
 
     VENDOR_URL="$BASE_URL/verify"
 
     TEST_NAME="verify.200"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/pcm" --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "\"?[Ss]core\"?:\s?[0-1].[0-9]"
     
     TEST_NAME="Negative verify test 1. Invalid http request method"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/pcm" -X GET --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/wav" -X GET --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002002" -f "Error expected BPE-002002"
     
     TEST_NAME="Negative verify test 2. Uses in request incorrect content-type"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:image/jpeg" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:image/jpeg" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/wav"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002001" -f "Error expected BPE-002001"
     
     TEST_NAME="Negative verify test 3. Attempting to extract a template from a file of zero size"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_EMPTY';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_EMPTY';type=audio/wav"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002003" -f "Error expected BPE-002003"
     
     TEST_NAME="Negative verify test 4. Trying to compose an empty template with an good sound"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$SAMPLE_EMPTY';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$SAMPLE_EMPTY';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=audio/wav"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002004" -f "Error expected BPE-002004"
     
     TEST_NAME="Negative verify test 5. Comparing an empty template with an empty file"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$SAMPLE_EMPTY';type=application/octet-stream" -F "sample=@'$SAMPLE_EMPTY';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$SAMPLE_EMPTY';type=application/octet-stream" -F "sample=@'$SAMPLE_EMPTY';type=audio/wav"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00200[3-4]"
 
     TEST_NAME="Negative verify test 6. Attempting to extract a template from a file without voice"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_SWV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_SWV';type=audio/wav"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-003001"
     
     TEST_NAME="Negative verify test 7. Attempting to extract a template from a file with more than one voice"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_SDV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_SDV';type=audio/wav"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-003003"
     
     TEST_NAME="Negative verify test 8. Incorrect Content-Type for sample"
@@ -147,11 +147,11 @@ f_test_verify() {
     f_check -r 400 -m "BPE-002005"
     
     TEST_NAME="Negative verify test 9. Incorrect Content-Type for bio_template"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=image/jpeg" -F "sample=@'$SAMPLE_WAV';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=image/jpeg" -F "sample=@'$SAMPLE_WAV';type=audio/var"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
     
     TEST_NAME="Negative verify test 10. Extract template from photo"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_JPG';type=audio/pcm"  --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_JPG';type=audio/wav"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
     
     TEST_NAME="verify.200.boundary_no_hyphens"
