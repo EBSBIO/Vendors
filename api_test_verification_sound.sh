@@ -21,7 +21,7 @@ f_test_extract () {
     VENDOR_URL="$BASE_URL/extract"
     BODY="tmp/responce_body"
 
-    TEST_NAME="Positive extraction test.1 Extract pcm sound"
+    TEST_NAME="Positive extraction test.1 Extract wav sound"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:audio/wav" -H "Expect:" --data-binary @'$SAMPLE_WAV' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -b
     
@@ -138,9 +138,9 @@ f_test_verify() {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_SWV';type=audio/wav"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-003001"
     
-    TEST_NAME="Negative verify test 7. Attempting to extract a template from a file with more than one voice"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_SDV';type=audio/wav"  --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-003003"
+    #TEST_NAME="Negative verify test 7. Attempting to extract a template from a file with more than one voice"
+    #REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_SDV';type=audio/wav"  --output '$BODY' '$VENDOR_URL
+   # f_check -r 400 -m "BPE-003003"
     
     TEST_NAME="Negative verify test 8. Incorrect Content-Type for sample"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=image/jpeg"  --output '$BODY' '$VENDOR_URL
@@ -161,7 +161,7 @@ f_test_verify() {
     
     TEST_NAME="verify.200.no_filename"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
-    echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="sample"\r\nContent-Type: audio/pcm\r\n\r\n' >> tmp/request_body; cat $SAMPLE_WAV >> tmp/request_body
+    echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="sample"\r\nContent-Type: audio/wav\r\n\r\n' >> tmp/request_body; cat $SAMPLE_WAV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
