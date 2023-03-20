@@ -7,7 +7,7 @@
 ##########################
 
 f_usage(){
-echo Usage: "$0 [OPTIONS] TASK_NAME METHOD THREADS URL PORT
+echo Usage: "$0 [OPTIONS] TASK_NAME METHOD THREADS URL PORT SAMPLE_DIR
     
     OPTIONS:
     -b              Start in background (screen)
@@ -19,7 +19,8 @@ echo Usage: "$0 [OPTIONS] TASK_NAME METHOD THREADS URL PORT
     METHOD          extract, verify, compare
     THREADS         Sum threads(users)
     URL             IP
-    PORT            TCP порт БП"
+    PORT            TCP порт БП
+    SAMPLE_DIR      Директория где лежат семплы для тестирования"
 }
 
 
@@ -58,12 +59,13 @@ else
         
         SERVER=$4
         PORT=$5                  # URL
+        SAMPLE_DIR=$6            # SAMPLE_DIR
         
         if [ "$TYPE" == "sound" ]; then
-            SAMPLE="resources/samples/sound.wav"   # Используемый в тесте файл.
+            SAMPLE="*.wav"   # Используемый в тесте файл.
             CTYPE="audio/pcm"                      # content_type
         else
-            SAMPLE="resources/samples/photo.png"
+            SAMPLE="*.png"
             CTYPE="image/png"
         fi
         
@@ -72,8 +74,11 @@ else
         else
             LOCATION="/v1/pattern/$METHOD"
         fi
-        
-        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jmethod='$METHOD' -Jsample='$SAMPLE' -Jphoto='$SAMPLE' -Jcontent_type='$CTYPE' -Jbiotemplate='$BIOTEMPLATE' -Jmmeta='$MMETA' -JUUID='$UUID' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
+
+        for sample in $(find $SAMPLE_DIR -type f -iname "$SAMPLE")
+        do
+          CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jmethod='$METHOD' -Jsample='$sample' -Jphoto='$sample' -Jcontent_type='$CTYPE' -Jbiotemplate='$BIOTEMPLATE' -Jmmeta='$MMETA' -JUUID='$UUID' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
+        done
 
         if [ "$BG" == 1 ]; then
             CMD='screen -dmS start.jmeter sh -c "'$CMD'"'
