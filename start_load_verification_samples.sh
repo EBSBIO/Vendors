@@ -7,7 +7,7 @@
 ##########################
 
 f_usage() {
-echo Usage: "$0 [OPTIONS] TASK_NAME METHOD THREADS URL PORT
+echo Usage: "$0 [OPTIONS] SAMPLE_DIR TASK_NAME METHOD THREADS URL PORT
     
     OPTIONS:
     -d              Delete previously extracted templates
@@ -27,7 +27,9 @@ echo Usage: "$0 [OPTIONS] TASK_NAME METHOD THREADS URL PORT
 
 rm_templates() {
         local IFS=$'\n'
-        rm -f $(find $1 -type f -iname "*.octet-stream")
+        rm -f $(find $1 -type f -iname "*.octet-stream*" -o -iname "*.json")
+        cat /dev/null > resources/csv_configs/many_samples.csv
+        cat /dev/null > resources/csv_configs/many_biotemplates.csv
 }
 
 if [ -z $1 ]; then
@@ -68,10 +70,18 @@ else
         if [ "$DEL" == 1 ]; then
             echo
             echo "The previous templates will be deleted"
-            read -p "Are you sure you want to continue ('y' / 'n or any value')? " answer
-            if [ $answer = 'y' ]; then
-                rm_templates $SAMPLE_DIR                         # Выполнить удаление ранее извлеченных шаблонов *.octet-stream
-                echo "Templates have been removed"
+            read -p "Are you sure you want to continue ('y' / 'n or any value')? " USER_ANSWER
+            if [ $USER_ANSWER = 'y' ]; then
+                echo
+                read -p "Do you want to continue testing after cleaning? ('y' / 'n or any value')? " USER_ANSWER
+                if [ $USER_ANSWER = 'y' ]; then
+                    rm_templates $SAMPLE_DIR
+                    echo "Templates have been removed"
+                else
+                    rm_templates $SAMPLE_DIR                       # Выполнить удаление ранее извлеченных шаблонов *.octet-stream
+                    echo "Templates have been removed. Exit test"
+                    exit
+                fi
             else
                 echo
                 echo "Remove the key \"-d\" from the script parameters"
@@ -80,8 +90,7 @@ else
         fi
 
         if [ "$TYPE" == "sound" ]; then
-            #SAMPLE="resources/samples/sound.wav"                 # Используемый в тесте файл
-            CTYPE="audio/pcm"                                    # content_type
+            CTYPE="audio/pcm"                                      # content_type
             if [ $(find $SAMPLE_DIR -type f -iname "*.wav" | wc -l) -ne $(cat resources/csv_configs/many_samples.csv | wc -l) ]; then
                 find $SAMPLE_DIR -type f -iname "*.wav" > resources/csv_configs/many_samples.csv                    # Обновить список сэмплов
             fi
@@ -102,7 +111,7 @@ else
             LOCATION="/$VERSION/pattern/$METHOD"
         fi
 
-        cat /dev/null > tmp/http_errors.log                      # Очистить лог http-запросов к БП, которые завершились с ошибкой
+        #cat /dev/null > tmp/http_errors.log                        # Очистить лог http-запросов к БП, которые завершились с ошибкой
 
         CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jmethod='$METHOD' -Jcontent_type='$CTYPE' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
 
