@@ -35,6 +35,12 @@ rm_templates() {
         cat /dev/null > resources/csv_configs/many_biotemplates.csv
 }
 
+biotemplates() {
+    if [ $(find $1 -type f -iname "*.octet-stream" | wc -l) -ne $(cat resources/csv_configs/many_biotemplates.csv | wc -l) ]; then
+        find $1 -type f -iname "*.octet-stream" > resources/csv_configs/many_biotemplates.csv
+    fi
+}
+
 if [ -z $1 ]; then
     f_usage
 else
@@ -108,32 +114,24 @@ else
         if [ "$TYPE" == "sound" ]; then
             CTYPE="audio/wav"                                    # content_type
             if [ -z $SAMPLE_DIR ]; then
-                echo "$SINGLE_SAMPLE_DIR/$SOUND_SAMPLE" > resources/csv_configs/many_samples.csv                                   # Внести один сэмпл
-                if [ $(find $SINGLE_SAMPLE_DIR -type f -iname "*.octet-stream" | wc -l) -ne $(cat resources/csv_configs/many_biotemplates.csv | wc -l) ]; then
-                    find $SINGLE_SAMPLE_DIR -type f -iname "*.octet-stream" > resources/csv_configs/many_biotemplates.csv          # Внести один вектор
-                fi
+                echo "$SINGLE_SAMPLE_DIR/$SOUND_SAMPLE" > resources/csv_configs/many_samples.csv                    # Внести один сэмпл
+                biotemplates $SINGLE_SAMPLE_DIR                                                                     # Внести один вектор для методов compare и verify
             else
                 if [ $(find $SAMPLE_DIR -type f -iname "*.wav" | wc -l) -ne $(cat resources/csv_configs/many_samples.csv | wc -l) ]; then
-                    find $SAMPLE_DIR -type f -iname "*.wav" > resources/csv_configs/many_samples.csv                               # Обновить список сэмплов
+                    find $SAMPLE_DIR -type f -iname "*.wav" > resources/csv_configs/many_samples.csv                # Обновить список сэмплов
                 fi
-                if [ $(find $SAMPLE_DIR -type f -iname "*.octet-stream" | wc -l) -ne $(cat resources/csv_configs/many_biotemplates.csv | wc -l) ]; then
-                    find $SAMPLE_DIR -type f -iname "*.octet-stream" > resources/csv_configs/many_biotemplates.csv                 # Обновить список векторов для методов compare и verify
-                fi
+                biotemplates $SAMPLE_DIR                                                                            # Обновить список векторов для методов compare и verify
             fi
         else
             CTYPE="image/jpeg"
             if [ -z $SAMPLE_DIR ]; then
-                echo "$SINGLE_SAMPLE_DIR/$PHOTO_SAMPLE" > resources/csv_configs/many_samples.csv                                   # Внести один сэмпл
-                if [ $(find $SINGLE_SAMPLE_DIR -type f -iname "*.octet-stream" | wc -l) -ne $(cat resources/csv_configs/many_biotemplates.csv | wc -l) ]; then
-                    find $SINGLE_SAMPLE_DIR -type f -iname "*.octet-stream" > resources/csv_configs/many_biotemplates.csv          # Внести один вектор
-                fi
+                echo "$SINGLE_SAMPLE_DIR/$PHOTO_SAMPLE" > resources/csv_configs/many_samples.csv                    # Внести один сэмпл
+                biotemplates $SINGLE_SAMPLE_DIR                                                                     # Внести один вектор для методов compare и verify
             else
                 if [ $(find $SAMPLE_DIR -type f -iname "*.jpg" | wc -l) -ne $(cat resources/csv_configs/many_samples.csv | wc -l) ]; then
-                    find $SAMPLE_DIR -type f -iname "*.jpg" > resources/csv_configs/many_samples.csv                               # Обновить список сэмплов
+                    find $SAMPLE_DIR -type f -iname "*.jpg" > resources/csv_configs/many_samples.csv                # Обновить список сэмплов
                 fi
-                if [ $(find $SAMPLE_DIR -type f -iname "*.octet-stream" | wc -l) -ne $(cat resources/csv_configs/many_biotemplates.csv | wc -l) ]; then
-                    find $SAMPLE_DIR -type f -iname "*.octet-stream" > resources/csv_configs/many_biotemplates.csv                 # Обновить список векторов для методов compare и verify
-                fi
+                biotemplates $SAMPLE_DIR                                                                            # Обновить список векторов для методов compare и verify
             fi
         fi
 
