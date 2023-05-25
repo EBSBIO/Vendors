@@ -63,20 +63,20 @@ https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.
 
 
 ### Установка RedOS7.3 (Centos7)
-Ядро
+Ядро  
     dnf install redos-kernels-release
     dnf update
 
-Docker
+Docker  
     curl -s -L https://download.docker.com/linux/centos/docker-ce.repo > /etc/yum.repos.d/docker-ce.repo
     sed '7i priority=1' -i /etc/yum.repos.d/docker-ce.repo
     dnf install docker-ce docker-ce-cli
 
-Nvidia container toolkit 
+Nvidia container toolkit  
     curl -s -L https://nvidia.github.io/libnvidia-container/centos7/libnvidia-container.repo > /etc/yum.repos.d/libnvidia-container.repo
     yum install nvidia-container-toolkit nvidia-kmod nvidia-modprobe nvidia-persistenced xorg-x11-drv-nvidia-cuda xorg-x11-drv-nvidia-cuda-libs
 
-#### Загрузка
+Загрузка  
 Edit /etc/default/grub. Append the following  to “GRUB_CMDLINE_LINUX” rd.driver.blacklist=nouveau nouveau.modeset=0  
 Generate a new grub configuration to include the above changes.  
     grub2-mkconfig -o /boot/grub2/grub.cfg
@@ -84,9 +84,11 @@ Generate a new grub configuration to include the above changes.
 Edit/create /etc/modprobe.d/blacklist.conf and append: blacklist nouveau
 
 
-### Настройка
+### Настройка  
 /etc/docker/daemon.json  
-в node-generic-resources прописываем ID своих видеокарт nvidia-smi -a | grep UUID | awk '{print "NVIDIA-GPU="substr($4,0,12)}'  
+в node-generic-resources прописываем ID своих видеокарт  
+    nvidia-smi -a | grep UUID | awk '{print "NVIDIA-GPU="substr($4,0,12)}'
+
 https://gist.github.com/tomlankhorst/33da3c4b9edbde5c83fc1244f010815c?permalink_comment_id=3641014#gistcomment-3641014  
 https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.html#daemon-configuration-file
 
