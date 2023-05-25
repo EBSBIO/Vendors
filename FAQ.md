@@ -1,7 +1,7 @@
 # Имена образов
-- в .env (APP_IMAGE, APP_TAG), в sha256.scv одинаковые <app_image>:<tag>
-- имя архива такое же, двоеточие заменяется на подчёркивание <app_image>_<tag>.tar.gz
-- образы загруженные из архива (docker load -i <app_image>_<tag>.tar.gz), должны иметь имя ${REGISTRY_Url}/${VENDOR}/${APP_IMAGE}:${APP_TAG}. Это имя складывается из переменных в .env и используется в compose
+- в .env `(APP_IMAGE, APP_TAG)`, в sha256.scv одинаковые `<app_image>:<tag>`
+- имя архива такое же, двоеточие заменяется на подчёркивание `<app_image>_<tag>.tar.gz`
+- образы загруженные из архива `(docker load -i <app_image>_<tag>.tar.gz)`, должны иметь имя `${REGISTRY_Url}/${VENDOR}/${APP_IMAGE}:${APP_TAG}`. Это имя складывается из переменных в .env и используется в compose
                    
 # sha256.csv
 ``` bash
