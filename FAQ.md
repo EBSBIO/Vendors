@@ -1,13 +1,13 @@
-### Имена образов
+#### Имена образов
 - в .env (APP_IMAGE, APP_TAG), в sha256.scv одинаковые <app_image>:<tag>
 - имя архива такое же, двоеточие заменяется на подчёркивание <app_image>_<tag>.tar.gz
 - образы загруженные из архива (docker load -i <app_image>_<tag>.tar.gz), должны иметь имя ${REGISTRY_Url}/${VENDOR}/${APP_IMAGE}:${APP_TAG}. Это имя складывается из переменных в .env и используется в compose
                    
-### sha256.csv
+#### sha256.csv
 - docker inspect --format='{{index .Id}}' <app_image>:<tag>
 
 
-### Расположение файлов на ftp
+#### Расположение файлов на ftp
 vendor_name
 ├── liveness_engine_cpu_v3.6.2.tar.gz
 ├── liveness_engine_cpu_v3.6.3.tar.gz
@@ -109,7 +109,7 @@ https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.htm
 
 ### Проверка
 ## Run
-docker run --rm --gpus all,capabilities=utility nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi
+    docker run --rm --gpus all,capabilities=utility nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi
 
 ## Service
 # https://docs.docker.com/engine/reference/commandline/service_create/#create-services-requesting-generic-resources
@@ -118,22 +118,20 @@ docker exec -it  $(docker service ps --no-trunc --format "{{.Name}}.{{.ID}}" nvi
 docker service rm nvidia-cuda
 
 ## Stack
-echo 'version: "3.5"
-services:
-  cuda:
-    image: nvidia/cuda:11.8.0-base-ubuntu22.04
-    command: "sleep 5000"' > cuda-stack.yml
+    echo 'version: "3.5"
+    services:
+      cuda:
+        image: nvidia/cuda:11.8.0-base-ubuntu22.04
+        command: "sleep 5000"' > cuda-stack.yml
 
-docker stack deploy -c cuda-stack.yml nvidia
-docker exec -it  $(docker service ps --no-trunc --format "{{.Name}}.{{.ID}}" nvidia_cuda) nvidia-smi
-docker stack rm nvidia
+    docker stack deploy -c cuda-stack.yml nvidia
+    docker exec -it  $(docker service ps --no-trunc --format "{{.Name}}.{{.ID}}" nvidia_cuda) nvidia-smi
+    docker stack rm nvidia
 
-
-                   5) Как сократить размер образа
+#### Как сократить размер образа
 # посмотреть инфу о слоях в образе:
-- docker history
-- docker run --rm -it  -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest <имя_образа>
-
+    docker history
+    docker run --rm -it  -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest <имя_образа>
 
 # Dockerfile
 - Группируйте ваши команды
