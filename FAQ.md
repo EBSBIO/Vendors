@@ -57,9 +57,8 @@ docker inspect --format='{{index .Id}}' <app_image>:<tag>
     eix-update
     emerge -av nvidia-container-toolkit
 
-В одиночном режиме все заработает, но для swarm еще нужен файл nvidia-container-runtime, хз почему он не ставится из порта nvidia-container-toolkit
-
-Скачиваем nvidia-container-toolkit-1.9.0-1.x86_64.rpm (версию берем как установили с порта) и закидываем в /usr/bin/nvidia-container-runtime
+В одиночном режиме все заработает, но для swarm еще нужен файл nvidia-container-runtime, хз почему он не ставится из порта nvidia-container-toolkit  
+Скачиваем nvidia-container-toolkit-1.9.0-1.x86_64.rpm (версию берем как установили с порта) и закидываем в /usr/bin/nvidia-container-runtime  
 https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#id3
 
 
@@ -78,20 +77,17 @@ https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.
     yum install nvidia-container-toolkit nvidia-kmod nvidia-modprobe nvidia-persistenced xorg-x11-drv-nvidia-cuda xorg-x11-drv-nvidia-cuda-libs
 
 #### Загрузка
-Edit /etc/default/grub. Append the following  to “GRUB_CMDLINE_LINUX” rd.driver.blacklist=nouveau nouveau.modeset=0
+Edit /etc/default/grub. Append the following  to “GRUB_CMDLINE_LINUX” rd.driver.blacklist=nouveau nouveau.modeset=0  
 Generate a new grub configuration to include the above changes.
     grub2-mkconfig -o /boot/grub2/grub.cfg
 Edit/create /etc/modprobe.d/blacklist.conf and append: blacklist nouveau
 
 
 ### Настройка
-/etc/docker/daemon.json
-
-в node-generic-resources прописываем ID своих видеокарт nvidia-smi -a | grep UUID | awk '{print "NVIDIA-GPU="substr($4,0,12)}'
-
-https://gist.github.com/tomlankhorst/33da3c4b9edbde5c83fc1244f010815c?permalink_comment_id=3641014#gistcomment-3641014
-
-https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.html#daemon-configuration-file
+/etc/docker/daemon.json  
+в node-generic-resources прописываем ID своих видеокарт nvidia-smi -a | grep UUID | awk '{print "NVIDIA-GPU="substr($4,0,12)}'  
+https://gist.github.com/tomlankhorst/33da3c4b9edbde5c83fc1244f010815c?permalink_comment_id=3641014#gistcomment-3641014  
+https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.html#daemon-configuration-file  
     {
         "runtimes": {
             "nvidia": {
@@ -105,8 +101,7 @@ https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.htm
         ]  
     }
 
-/etc/nvidia-container-runtime/config.toml
-
+/etc/nvidia-container-runtime/config.toml  
 разкоментируем строку swarm-resource = "DOCKER_RESOURCE_GPU"
 
 
