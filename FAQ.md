@@ -115,7 +115,7 @@ https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.htm
     docker run --rm --gpus all,capabilities=utility nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi
 
 #### Service  
-https://docs.docker.com/engine/reference/commandline/service_create/#create-services-requesting-generic-resources
+https://docs.docker.com/engine/reference/commandline/service_create/#create-services-requesting-generic-resources  
     docker service create --generic-resource "NVIDIA-GPU=0" --replicas 1 --name nvidia-cuda --entrypoint "sleep 5000" nvidia/cuda:11.8.0-base-ubuntu22.04
     docker exec -it  $(docker service ps --no-trunc --format "{{.Name}}.{{.ID}}" nvidia-cuda) nvidia-smi
     docker service rm nvidia-cuda
