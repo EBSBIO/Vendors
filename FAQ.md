@@ -63,23 +63,24 @@ https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.
 
 
 ### Установка RedOS7.3 (Centos7)
-#### Ядро
+Ядро
     dnf install redos-kernels-release
     dnf update
 
-#### Docker
+Docker
     curl -s -L https://download.docker.com/linux/centos/docker-ce.repo > /etc/yum.repos.d/docker-ce.repo
     sed '7i priority=1' -i /etc/yum.repos.d/docker-ce.repo
     dnf install docker-ce docker-ce-cli
 
-#### Nvidia container toolkit 
+Nvidia container toolkit 
     curl -s -L https://nvidia.github.io/libnvidia-container/centos7/libnvidia-container.repo > /etc/yum.repos.d/libnvidia-container.repo
     yum install nvidia-container-toolkit nvidia-kmod nvidia-modprobe nvidia-persistenced xorg-x11-drv-nvidia-cuda xorg-x11-drv-nvidia-cuda-libs
 
 #### Загрузка
 Edit /etc/default/grub. Append the following  to “GRUB_CMDLINE_LINUX” rd.driver.blacklist=nouveau nouveau.modeset=0  
-Generate a new grub configuration to include the above changes.
+Generate a new grub configuration to include the above changes.  
     grub2-mkconfig -o /boot/grub2/grub.cfg
+
 Edit/create /etc/modprobe.d/blacklist.conf and append: blacklist nouveau
 
 
@@ -87,7 +88,9 @@ Edit/create /etc/modprobe.d/blacklist.conf and append: blacklist nouveau
 /etc/docker/daemon.json  
 в node-generic-resources прописываем ID своих видеокарт nvidia-smi -a | grep UUID | awk '{print "NVIDIA-GPU="substr($4,0,12)}'  
 https://gist.github.com/tomlankhorst/33da3c4b9edbde5c83fc1244f010815c?permalink_comment_id=3641014#gistcomment-3641014  
-https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.html#daemon-configuration-file  
+https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.html#daemon-configuration-file
+
+
     {
         "runtimes": {
             "nvidia": {
@@ -106,16 +109,16 @@ https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.htm
 
 
 ### Проверка
-#### Run
+Run
     docker run --rm --gpus all,capabilities=utility nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi
 
-#### Service
+Service
 https://docs.docker.com/engine/reference/commandline/service_create/#create-services-requesting-generic-resources
     docker service create --generic-resource "NVIDIA-GPU=0" --replicas 1 --name nvidia-cuda --entrypoint "sleep 5000" nvidia/cuda:11.8.0-base-ubuntu22.04
     docker exec -it  $(docker service ps --no-trunc --format "{{.Name}}.{{.ID}}" nvidia-cuda) nvidia-smi
     docker service rm nvidia-cuda
 
-#### Stack
+Stack
     echo 'version: "3.5"
     services:
       cuda:
@@ -126,7 +129,7 @@ https://docs.docker.com/engine/reference/commandline/service_create/#create-serv
     docker exec -it  $(docker service ps --no-trunc --format "{{.Name}}.{{.ID}}" nvidia_cuda) nvidia-smi
     docker stack rm nvidia
 
-# Как сократить размер образа
+#### Как сократить размер образа
 посмотреть инфу о слоях в образе:
     docker history
     docker run --rm -it  -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest <имя_образа>
