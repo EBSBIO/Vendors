@@ -4,7 +4,7 @@
 - образы загруженные из архива (docker load -i <app_image>_<tag>.tar.gz), должны иметь имя ${REGISTRY_Url}/${VENDOR}/${APP_IMAGE}:${APP_TAG}. Это имя складывается из переменных в .env и используется в compose
                    
 # sha256.csv
-docker inspect --format='{{index .Id}}' <app_image>:<tag>
+    `docker inspect --format='{{index .Id}}' <app_image>:<tag>`
 
 
 # Расположение файлов на ftp
@@ -79,15 +79,13 @@ https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.
 #### Загрузка  
 Edit /etc/default/grub. Append the following  to “GRUB_CMDLINE_LINUX” rd.driver.blacklist=nouveau nouveau.modeset=0  
 Generate a new grub configuration to include the above changes.  
-    grub2-mkconfig -o /boot/grub2/grub.cfg
-
+    `grub2-mkconfig -o /boot/grub2/grub.cfg`
 Edit/create /etc/modprobe.d/blacklist.conf and append: blacklist nouveau
 
 
 ### Настройка  
-/etc/docker/daemon.json  
-в node-generic-resources прописываем ID своих видеокарт  
-    nvidia-smi -a | grep UUID | awk '{print "NVIDIA-GPU="substr($4,0,12)}'
+/etc/docker/daemon.json в node-generic-resources прописываем ID своих видеокарт  
+    `nvidia-smi -a | grep UUID | awk '{print "NVIDIA-GPU="substr($4,0,12)}'`
 
 https://gist.github.com/tomlankhorst/33da3c4b9edbde5c83fc1244f010815c?permalink_comment_id=3641014#gistcomment-3641014  
 https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.html#daemon-configuration-file
@@ -109,6 +107,22 @@ https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.htm
 /etc/nvidia-container-runtime/config.toml  
 разкоментируем строку swarm-resource = "DOCKER_RESOURCE_GPU"
 
+### SELinux
+Использование audit2allow для создания и сборки модульной политики  
+Смотрим что блокируется  
+    `cat /var/log/audit/audit.log | grep denied`
+
+Создание файла принудительного присвоения типов
+    `cat /var/log/audit/audit.log | grep nvc |audit2allow -M nvc`
+
+Компиляция политики
+    `checkmodule -M -m -o nvc.mod nvc.te`
+
+Сборка пакета:
+    `semodule_package -o nvc.pp -m nvc.mod`
+
+Чтобы загрузить созданный пакет политики в ядро, необходимо выполнить
+    `semodule -i nvc.pp`
 
 ### Проверка
 #### Run  
@@ -132,10 +146,11 @@ https://docs.docker.com/engine/reference/commandline/service_create/#create-serv
     docker stack rm nvidia
 
 # Как сократить размер образа
-посмотреть инфу о слоях в образе:
+посмотреть инфу о слоях в образе:  
     docker history
     docker run --rm -it  -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest <имя_образа>
-Dockerfile
+
+Dockerfile  
 - Группируйте ваши команды
 - Используете multi-stage builds
 - Применяйте опцию —squash при docker build
