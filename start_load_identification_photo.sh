@@ -27,7 +27,7 @@ echo Usage: "$0 [OPTIONS] TASK_NAME METHOD THREADS URL PORT
 rm_templates() {
         local IFS=$'\n'
         while [ -n "$1" ]; do
-            rm -f $(find $1 -type f -iname "*.octet-stream*" -o -iname "*.json")
+            rm -f $(find $1 -type f -iname "*.octet-stream*")
             shift;
         done
         cat /dev/null > resources/csv_configs/many_samples.csv
@@ -178,6 +178,12 @@ else
             CMD='screen -dmS start.jmeter sh -c "'$CMD'"'
         fi
         echo -e "\nCMD: $CMD\n"
+
+        if [ $(cat resources/csv_configs/many_samples.csv | wc -l) -eq 0 ]; then
+            echo "ERROR: no $CTYPE samples to test, check your sample directory or test type"
+            exit
+        fi
+
         eval $CMD
     fi
 fi
