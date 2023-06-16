@@ -27,6 +27,14 @@ f_check() {
                     HTTP_RESULT="OK"
                 else
                     HTTP_RESULT="FAIL (HTTP $REQUEST_CODE is expected)"
+                    MESSAGE_CHECK=1
+                    if [ -s $BODY ]; then  #
+                        MESSAGE=$(grep --binary-files=text -e '{.*}' -zo $BODY | tr -d '\0') #
+                        MESSAGE_RESULT="OK" #
+                    else #
+                        MESSAGE_RESULT="FAIL (message is empty)" #
+                    fi #
+
                 fi
                 shift
             ;;
@@ -54,6 +62,21 @@ f_check() {
                 fi
                 shift
             ;;
+
+            -m_200) MESSAGE_CHECK=1
+                if [ -s $BODY ]; then
+                    MESSAGE=$(echo -ne $(cat tmp/responce_body))
+                    if [[ ( $MESSAGE  =~ $2 ) || ( $MESSAGE == "[]" ) ]]; then
+                        MESSAGE_RESULT="OK"
+                    else
+                        MESSAGE_RESULT="FAIL ($2 is expected or empty array)"
+                    fi
+                else
+                    MESSAGE_RESULT="FAIL (message does not exist)"
+                fi
+                shift
+            ;;
+
             # fail message
             -f) FAIL_MESSAGE="$2";
                 shift

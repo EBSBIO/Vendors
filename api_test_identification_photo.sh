@@ -12,6 +12,7 @@ source include/f_checks.sh
 
 BODY="tmp/responce_body"
 SAMPLE_JPG="resources/samples/photo.jpg"
+SAMPLE_JPG_2="resources/samples/photo_shumskiy.jpg"
 SAMPLE_PNG="resources/samples/photo.png"
 SAMPLE_WAV="resources/samples/sound.wav"
 SAMPLE_WEBM="resources/samples/video.mov"
@@ -19,29 +20,39 @@ SAMPLE_NF="resources/samples/no_face.jpg"
 SAMPLE_TF="resources/samples/two_face.jpg"
 EMPTY="resources/samples/empty"
 BIOTEMPLATE="tmp/biotemplate"
+ANOTHER_BIOTEMPLATE="tmp/another_biotemplate"
 
 SAMPLE_BR="tmp/photo_br.jpg"
 BIOTEMPLATE_BR="tmp/biotemplate_br"
 
 META=\''metadata={"template_id":"12345"};type=application/json'\'
+META_WITH_CHARSET=\''metadata={"template_id":"12345"};type=application/json;charset=UTF-8'\'
+META_ID='{"template_id": "12345"}'
 META_BIGID=\''metadata={"template_id":"12345100500"};type=application/json'\'
 META_NOID=\''metadata={"id":"12345"};type=application/json'\'
 META_EMPTY=\''metadata=;type=application/json'\'
 META_BAD=\''metadata={"template_id":"12345",};type=application/json'\'
 META_BROKEN=\''metadata={"eyJ0ZW1wbGF0ZV9pZCI6IjEyMzQ1In0="};type=application/json'\'
-META_IPV=\''metadata={"template_id":"HFS_@#-12345"};type=application/json'\'
+META_IPV=\''metadata={"template_id":12345};type=application/json'\'
 
 MMETA=\''metadata={"threshold": 0.3, "limit": 5};type=application/json'\'
+MMETA_WITH_CHARSET=\''metadata={"threshold": 0.3, "limit": 5};type=application/json;charset=UTF-8'\'
+MMETA_NUMBER=\''metadata={"threshold": 0.3, "limit": 1E2};type=application/json'\'
+MMETA_00=\''metadata={"threshold": 0.0, "limit": 5};type=application/json'\'
+MMETA_10=\''metadata={"threshold": 1.0, "limit": 5};type=application/json'\'
+MMETA_ID='{"threshold": 0.3, "limit": 5}'
 MMETA_NOLIM=\''metadata={"threshold": 0.3};type=application/json'\'
 MMETA_NOTH=\''metadata={"limit": 5};type=application/json'\'
 MMETA_BAD=\''metadata={"threshold": 0.3, "limit": 5,};type=application/json'\'
 MMETA_BADTYPE=\''metadata={"threshold": 0.3, "limit": 5};type=image/jpeg'\'
+MMETA_IPV=\''metadata={"threshold": 0.3, "limit": "5"};type=application/json'\'
 
 RDATA=\''{"template_id": "12345"}'\'
 RDATA_BIG=\''{"template_id": "12345100500"}'\'
 RDATA_NOID=\''{"id":"12345"}'\'
 RDATA_BAD=\''{"template_id":"12345",}'\'
 RDATA_BROKEN=\''{"eyJ0ZW1wbGF0ZV9pZCI6IjEyMzQ1In0="}'\'
+RDATA_IPV=\''{"template_id": 12345}'\'
 
 
 f_test_extract () {
@@ -103,16 +114,42 @@ f_test_add() {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$BASE_URL'/extract'
     f_check -r 200
 
+    TEST_NAME="PREPARE - create another biotemplate"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_JPG_2' --output '$ANOTHER_BIOTEMPLATE' '$BASE_URL'/extract'
+    f_check -r 200
+
     TEST_NAME="PREPARE - delete template_id: 12345"
     RDATA_BIG=\''{"template_id": "12345"}'\'
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: 1c0944b1-0f46-4e51-a8b0-693e9e44952a" --data '$RDATA_BIG' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
 
     ##### TESTS
+    TEST_NAME="add.200_without_filename_parameter"
+    echo $(cat /dev/null) > tmp/request_body
+    echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$META_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+    
+    TEST_NAME="PREPARE - delete template_id: 12345"
+    RDATA_BIG=\''{"template_id": "12345"}'\'
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: 1c0944b1-0f46-4e51-a8b0-693e9e44952a" --data '$RDATA_BIG' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
+
+    TEST_NAME="add.200 with charset=UTF-8"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_WITH_CHARSET' --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+
+    TEST_NAME="PREPARE - delete template_id: 12345"
+    RDATA_BIG=\''{"template_id": "12345"}'\'
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: 1c0944b1-0f46-4e51-a8b0-693e9e44952a" --data '$RDATA_BIG' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
+
     TEST_NAME="add.200"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 200
-    
+
 #    TEST_NAME="PREPARE - add biotemplate"
 #    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
 #    f_check -r 200
@@ -126,7 +163,7 @@ f_test_add() {
     f_check -r 400 -m "BPE-002002"
 
     TEST_NAME="add.400.BPE-002004 Не удалось прочитать биометрический шаблон"
-    curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:application/json" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --output $BODY --data $META $BASE_URL/delete
+    #curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:application/json" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --output $BODY --data $META $BASE_URL/delete
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$EMPTY';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002004"
 
@@ -138,7 +175,7 @@ f_test_add() {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BAD' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00005"
 
-    TEST_NAME="add.400.BPE-00502 "
+    TEST_NAME="add.400.BPE-00502.bad_parameter_\"template_id\""
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_NOID' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00502"
 
@@ -158,11 +195,16 @@ f_test_add() {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00502"
     
-    TEST_NAME="add.400.BPE-00506"
+    TEST_NAME="add.400.BPE-00506.invalid_parameter_value"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_IPV' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-00506"
 
-    TEST_NAME="add.400.BPE-00507"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL 
+    TEST_NAME="add.400.BPE-00507.duplicate_template_id"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-00507"
+
+    TEST_NAME="add.400.BPE-00507.duplicate_template_id_but_different_vector"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$ANOTHER_BIOTEMPLATE';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00507"
 }
 
@@ -192,19 +234,31 @@ f_test_update() {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 200
 
-    TEST_NAME="update.400.BPE-002001"
+    TEST_NAME="update.200 with charset=UTF-8"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_WITH_CHARSET' --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+
+    TEST_NAME="update.200_without_filename_parameter"
+    echo $(cat /dev/null) > tmp/request_body
+    echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$META_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+
+    TEST_NAME="update.400.BPE-002001 Неверный Content-Type HTTP-запроса"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:pplication/form-Fata" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002001"
 
-    TEST_NAME="update.400.BPE-002002"
+    TEST_NAME="update.400.BPE-002002 Неверный метод HTTP-запроса"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' --output '$BODY' -X GET '$VENDOR_URL
     f_check -r 400 -m "BPE-002002"
 
-    TEST_NAME="update.400.BPE-002004"
+    TEST_NAME="update.400.BPE-002004 Не удалось прочитать биометрический шаблон"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE_BR';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002004"
 
-    TEST_NAME="update.400.BPE-002404"
+    TEST_NAME="update.400.BPE-002404 Не найден биометрический шаблон с заданным идентификатором"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BIGID' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002404"
 
@@ -236,9 +290,9 @@ f_test_update() {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00502"
 
-#    TEST_NAME="update.400.BPE-00506.invalid_param_value"
-#    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_IPV' --output '$BODY' '$VENDOR_URL
-#    f_check -r 400 -m "BPE-00506"
+    TEST_NAME="update.400.BPE-00506.invalid_parameter_value"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_IPV' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-00506"
 }
 
 
@@ -265,11 +319,11 @@ f_test_delete() {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data '$RDATA' --output '$BODY' '$VENDOR_URL
     f_check -r 200
     
-    TEST_NAME="delete.400.BPE-002002"
+    TEST_NAME="delete.400.BPE-002002 Неверный метод HTTP-запроса"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data '$RDATA' --output '$BODY' -X GET '$VENDOR_URL
     f_check -r 400 -m "BPE-002002"
 
-    TEST_NAME="delete.400.BPE-002404"
+    TEST_NAME="delete.400.BPE-002404 Не найден биометрический шаблон с заданным идентификатором"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data '$RDATA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002404"
 
@@ -281,13 +335,13 @@ f_test_delete() {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data '$RDATA_BROKEN' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00005"
 
-    TEST_NAME="delete.400.BPE-00502"
+    TEST_NAME="delete.400.BPE-00502 Запрос не содержит обязательных данных"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" --data '$RDATA_NOID' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00502"
 
-    #TEST_NAME="update.400.BPE-00506.invalid_param_value"
-    #REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data "{"template_id":"HFS_@#-12345"}" --output '$BODY' '$VENDOR_URL
-    #f_check -r 400 -m "BPE-00506"
+    TEST_NAME="delete.400.BPE-00506.invalid_parameter_value"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data '$RDATA_IPV' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-00506"
 }
 
 
@@ -304,22 +358,47 @@ f_test_match(){
     TEST_NAME="PREPARE - add biotemplate"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
     f_check -r 200
-
+    
+    sleep 5
 
     ##### TESTS
     TEST_NAME="match.200"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- format double is expected"
 
-    TEST_NAME="match.400.BPE-002001"
+    TEST_NAME="match.200 with charset=UTF-8"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_WITH_CHARSET' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="match.200 where limit is number"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_NUMBER' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="match.200 with threshold 0.0"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_00' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="match.200 with threshold 1.0"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_10' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_200 "[0-1].[0-9]" -f "- format double or empty array is expected"
+
+    TEST_NAME="match.200_without_filename_parameter"
+    echo $(cat /dev/null) > tmp/request_body
+    echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="match.400.BPE-002001 Неверный Content-Type HTTP-запроса"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:ppplication/form-Fata" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002001"
 
-    TEST_NAME="match.400.BPE-002002"
+    TEST_NAME="match.400.BPE-002002 Неверный метод HTTP-запроса"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA' --output '$BODY' -X GET '$VENDOR_URL
     f_check -r 400 -m "BPE-002002"
 
-    TEST_NAME="match.400.BPE-002004"
+    TEST_NAME="match.400.BPE-002004 Не удалось прочитать биометрический шаблон"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE_BR';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002004"
 
@@ -351,10 +430,9 @@ f_test_match(){
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F "metadata={};type=application/json" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00502"
 
-#    TEST_NAME="match.400.BPE-00506"
-#    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" --output '$BODY' '$VENDOR_URL
-#    f_check -r 400 -m "BPE-00506"
-
+    TEST_NAME="match.400.BPE-00506.invalid_parameter_value"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_IPV' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-00506"
 }
 
 
@@ -378,20 +456,46 @@ f_test_identify(){
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
     f_check -r 200
     
+    sleep 5
+
     #### TESTS
     TEST_NAME="identify.200"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
+    
+    TEST_NAME="identify.200 with charset=UTF-8"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_WITH_CHARSET' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
 
-    TEST_NAME="identify.400.BPE-002001"
+    TEST_NAME="identify.200 where limit is number"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_NUMBER' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="identify.200 with threshold 0.0"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_00' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="identify.200 with threshold 1.0"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_10' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_200 "[0-1].[0-9]" -f "- format double or empty array is expected"
+
+    TEST_NAME="identify.200_without_filename_parameter"
+    echo $(cat /dev/null) > tmp/request_body
+    echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="photo"\r\nContent-Type: image/jpeg\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="identify.400.BPE-002001 Неверный Content-Type HTTP-запроса"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:part/fordata" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002001"
 
-    TEST_NAME="identify.400.BPE-002002"
+    TEST_NAME="identify.400.BPE-002002 Неверный метод HTTP-запроса"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA' --output '$BODY' -X GET '$VENDOR_URL
     f_check -r 400 -m "BPE-002002"
 
-    TEST_NAME="identify.400.BPE-002003"
+    TEST_NAME="identify.400.BPE-002003 Не удалось прочитать биометрический образец"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_BR';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002003"
 
@@ -439,11 +543,11 @@ f_test_identify(){
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00502"
 
-#    TEST_NAME="match.400.BPE-00506"
-#    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" --output "$BODY" '$VENDOR_URL
-#    f_check -r 400 -m "BPE-00506"
+    TEST_NAME="identify.400.BPE-00506.invalid_parameter_value"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_IPV' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-00506"
 
-    TEST_NAME="identify.400.BPE-002003.emty"
+    TEST_NAME="identify.400.BPE-002003.empty"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$EMPTY';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002003"
 
@@ -461,8 +565,6 @@ f_test_identify(){
 }
 
 
-
-
 f_print_usage() {
 echo "Usage: $0 [OPTIONS] URL TIMEOUT
 
@@ -476,7 +578,6 @@ URL                 <ip>:<port>
 TIMEOUT             <seconds> Maximum time in seconds that you allow the whole operation to take.
 "
 }
-
 
 
 if [ -z "$1" ]; then
@@ -503,16 +604,14 @@ else
         [ -z $R ] && R="v1" # version
         
         if [ -n "$P" ]; then
-            BASE_URL="http://$URL/$R/$P/pattern"
-            #BASE_URL="http://$URL/$R/$P"
+            BASE_URL="http://$URL/$R/$P"
         else
-            BASE_URL="http://$URL/$R/pattern"
-            #BASE_URL="http://$URL/$R"
+            BASE_URL="http://$URL/$R"
         fi
 
         VENDOR_URL="$BASE_URL/health"
         BODY="tmp/responce_body"
-        TEST_NAME="Healt.200"
+        TEST_NAME="health.200"
         REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL
         mkdir -p tmp
         f_check -r 200 -m "\"?[Ss]tatus\"?:\s?0"
