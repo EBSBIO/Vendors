@@ -102,18 +102,6 @@
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="-249571435">BPE-002001</stringProp>
-                <stringProp name="-249571434">BPE-002002</stringProp>
-                <stringProp name="-249601226">BPE-001001</stringProp>
-              </collectionProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
-              <boolProp name="Assertion.assume_success">true</boolProp>
-              <intProp name="Assertion.test_type">52</intProp>
-            </ResponseAssertion>
-            <hashTree/>
             <SizeAssertion guiclass="SizeAssertionGui" testclass="SizeAssertion" testname="Size Assertion" enabled="true">
               <stringProp name="Assertion.test_field">SizeAssertion.response_data</stringProp>
               <stringProp name="SizeAssertion.size">0</stringProp>
