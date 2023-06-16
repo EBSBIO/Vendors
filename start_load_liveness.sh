@@ -94,6 +94,12 @@ else
             CMD='screen -dmS start.jmeter sh -c "'$CMD'"'
         fi
         echo -e "\nCMD: $CMD\n"
+
+        if [ $(cat resources/csv_configs/many_samples.csv | wc -l) -eq 0 ]; then
+            echo "ERROR: no $CTYPE samples to test, check your sample directory or test type"
+            exit
+        fi
+
         eval $CMD
     fi
 fi
