@@ -10,6 +10,7 @@ source include/f_checks.sh
 BODY="tmp/responce_body"
 SAMPLE_JPG="resources/samples/photo_shumskiy.jpg"
 SAMPLE_PNG="resources/samples/photo.png"
+BIG_SAMPLE_PNG="resources/samples/big.png"
 SAMPLE_WAV="resources/samples/sound.wav"
 SAMPLE_WEBM="resources/samples/video.mov"
 SAMPLE_NF="resources/samples/no_face.jpg"
@@ -34,11 +35,15 @@ f_test_liveness() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_PNG';type=image/png" --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 
-    TEST_NAME="Positive test 3. detect photo.jpeg metadata charset=UTF-8"
+    TEST_NAME="Positive test 3. detect big.png"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$BIG_SAMPLE_PNG';type=image/png" --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+
+    TEST_NAME="Positive test 4. detect photo.jpeg metadata charset=UTF-8"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json;charset=UTF-8" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 
-    TEST_NAME="Positive test 4. 200.no_filename"
+    TEST_NAME="Positive test 5. 200.no_filename"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_sample"\r\nContent-Type: image/jpeg\r\n\r\n' >> tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body

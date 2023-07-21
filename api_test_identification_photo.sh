@@ -14,6 +14,7 @@ BODY="tmp/responce_body"
 SAMPLE_JPG="resources/samples/photo.jpg"
 SAMPLE_JPG_2="resources/samples/photo_shumskiy.jpg"
 SAMPLE_PNG="resources/samples/photo.png"
+BIG_SAMPLE_PNG="resources/samples/big.png"
 SAMPLE_WAV="resources/samples/sound.wav"
 SAMPLE_WEBM="resources/samples/video.mov"
 SAMPLE_NF="resources/samples/no_face.jpg"
@@ -65,6 +66,10 @@ f_test_extract () {
 
     TEST_NAME="extract.200.PNG"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:image/png" -H "Expect:" --data-binary @'$SAMPLE_PNG' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -b
+
+    TEST_NAME="extract.200.BIG_PNG"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:image/png" -H "Expect:" --data-binary @'$BIG_SAMPLE_PNG' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -b
 
     TEST_NAME="extract.content-type.lowercase.image/png with JPG"
@@ -462,7 +467,11 @@ f_test_identify(){
     TEST_NAME="identify.200"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
-    
+
+    TEST_NAME="identify.200_with_big_png"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$BIG_SAMPLE_PNG';type=image/png" -F '$MMETA' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
+
     TEST_NAME="identify.200 with charset=UTF-8"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_WITH_CHARSET' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
