@@ -369,23 +369,23 @@ f_test_match(){
     ##### TESTS
     TEST_NAME="match.200"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="match.200 with charset=UTF-8"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_WITH_CHARSET' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="match.200 where limit is number"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_NUMBER' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="match.200 with threshold 0.0"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_00' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="match.200 with threshold 1.0"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_10' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_200 "[0-1].[0-9]" -f "- format double or empty array is expected"
+    f_check -r 200 -m_thre "[0-1].[0-9]" -f "- format double or empty array is expected"
 
     TEST_NAME="match.200_without_filename_parameter"
     echo $(cat /dev/null) > tmp/request_body
@@ -393,7 +393,7 @@ f_test_match(){
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="match.400.BPE-002001 Неверный Content-Type HTTP-запроса"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:ppplication/form-Fata" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
@@ -466,27 +466,27 @@ f_test_identify(){
     #### TESTS
     TEST_NAME="identify.200"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="identify.200_with_big_png"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$BIG_SAMPLE_PNG';type=image/png" -F '$MMETA' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$BIG_SAMPLE_PNG';type=image/png" -F '$MMETA_00' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="identify.200 with charset=UTF-8"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_WITH_CHARSET' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="identify.200 where limit is number"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_NUMBER' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="identify.200 with threshold 0.0"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_00' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="identify.200 with threshold 1.0"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_10' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_200 "[0-1].[0-9]" -f "- format double or empty array is expected"
+    f_check -r 200 -m_thre "[0-1].[0-9]" -f "- format double or empty array is expected"
 
     TEST_NAME="identify.200_without_filename_parameter"
     echo $(cat /dev/null) > tmp/request_body
@@ -494,7 +494,7 @@ f_test_identify(){
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-9].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="identify.400.BPE-002001 Неверный Content-Type HTTP-запроса"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:part/fordata" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
