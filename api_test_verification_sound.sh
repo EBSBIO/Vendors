@@ -64,7 +64,7 @@ f_test_compare() {
     # Tests
     TEST_NAME="Positive compare"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -X POST --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -b
+    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 
     TEST_NAME="Negative compare test 1. Uses in request incorrect content-type"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:image/jpeg" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -X POST --output '$BODY' '$VENDOR_URL
@@ -97,6 +97,20 @@ f_test_compare() {
     TEST_NAME="Negative compare test 8. Compare template with sound file"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$SAMPLE_WAV';type=application/octet-stream" -X POST --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002004"
+
+    TEST_NAME="compare.200.no_filename"
+    echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_feature"\r\nContent-Type: application/octet-stream\r\n\r\n' >> tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--72468--\r\n' >> tmp/request_body
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+
+    TEST_NAME="compare.200.reverse_order_of_headings"
+    echo -ne '--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_template"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_feature"\r\n\r\n' >> tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--72468--\r\n' >> tmp/request_body
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 }
 
 
@@ -162,6 +176,13 @@ f_test_verify() {
     TEST_NAME="verify.200.no_filename"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="sample"\r\nContent-Type: audio/wav\r\n\r\n' >> tmp/request_body; cat $SAMPLE_WAV >> tmp/request_body
+    echo -ne '\r\n--72468--\r\n' >> tmp/request_body
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+
+    TEST_NAME="verify.200.reverse_order_of_headings"
+    echo -ne '--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_template"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--72468\r\nContent-Type: audio/wav\r\nContent-Disposition: form-data; name="sample"\r\n\r\n' >> tmp/request_body; cat $SAMPLE_WAV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
@@ -233,7 +254,7 @@ else
         f_check -r 200 -m "\"?[Ss]tatus\"?:\s?0"
 
         if [ "$FAIL" -eq 0 ]; then
-            SUCCES=0
+            SUCCESS=0
             ERROR=0
 
             case "$TASK" in
@@ -252,7 +273,7 @@ else
                 f_test_verify
             ;;
             esac
-            echo -e "\n\nSCORE: succes $SUCCES, error $ERROR"
+            echo -e "\n\nSCORE: success $SUCCESS, error $ERROR"
         fi
     fi
 fi
