@@ -63,13 +63,34 @@ f_check() {
                 shift
             ;;
 
-            -m_200) MESSAGE_CHECK=1
+            -m_thre) MESSAGE_CHECK=1
                 if [ -s $BODY ]; then
-                    MESSAGE=$(echo -ne $(cat tmp/responce_body))
-                    if [[ ( $MESSAGE  =~ $2 ) || ( $MESSAGE == "[]" ) ]]; then
+                    MESSAGE=$(grep --binary-files=text -e '{.*}' -z $BODY | tr -d '\0')
+                    if [[ $MESSAGE =~ :[[:blank:]]?1\.0}?,? ]]; then
+                        MESSAGE_RESULT="OK"
+                    elif
+                        MESSAGE=$(echo -ne $(cat tmp/responce_body))
+                        [[ $MESSAGE == "[]" ]]; then
                         MESSAGE_RESULT="OK"
                     else
                         MESSAGE_RESULT="FAIL ($2 is expected or empty array)"
+                    fi
+                else
+                    MESSAGE_RESULT="FAIL (message does not exist)"
+                fi
+                shift
+            ;;
+            
+            -m_simi) MESSAGE_CHECK=1
+                if [ -s $BODY ]; then
+                    MESSAGE=$(grep --binary-files=text -e '{.*}' -zo $BODY | tr -d '\0')
+                    if [[ $MESSAGE =~ :[[:blank:]]?0\.[0-9]+}?,? ]]; then
+                        MESSAGE_RESULT="OK"
+                    elif
+                       [[ $MESSAGE =~ :[[:blank:]]?1\.0} ]]; then
+                        MESSAGE_RESULT="OK"
+                    else
+                        MESSAGE_RESULT="FAIL ($2 is expected)"
                     fi
                 else
                     MESSAGE_RESULT="FAIL (message does not exist)"
