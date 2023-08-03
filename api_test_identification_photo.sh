@@ -27,7 +27,8 @@ SAMPLE_BR="tmp/photo_br.jpg"
 BIOTEMPLATE_BR="tmp/biotemplate_br"
 
 META=\''metadata={"template_id":"12345"};type=application/json'\'
-META_WITH_CHARSET=\''metadata={"template_id":"12345"};type=application/json;charset=UTF-8'\'
+META_WITH_CHARSET_1=\''metadata={"template_id":"12345"};type=application/json;charset=UTF-8'\'
+META_WITH_CHARSET_2=\''metadata={"template_id":"12345"};type=application/json; charset=UTF-8'\'
 META_ID='{"template_id": "12345"}'
 META_BIGID=\''metadata={"template_id":"12345100500"};type=application/json'\'
 META_NOID=\''metadata={"id":"12345"};type=application/json'\'
@@ -37,7 +38,8 @@ META_BROKEN=\''metadata={"eyJ0ZW1wbGF0ZV9pZCI6IjEyMzQ1In0="};type=application/js
 META_IPV=\''metadata={"template_id":12345};type=application/json'\'
 
 MMETA=\''metadata={"threshold": 0.3, "limit": 5};type=application/json'\'
-MMETA_WITH_CHARSET=\''metadata={"threshold": 0.3, "limit": 5};type=application/json;charset=UTF-8'\'
+MMETA_WITH_CHARSET_1=\''metadata={"threshold": 0.3, "limit": 5};type=application/json;charset=UTF-8'\'
+MMETA_WITH_CHARSET_2=\''metadata={"threshold": 0.3, "limit": 5};type=application/json; charset=UTF-8'\'
 MMETA_NUMBER=\''metadata={"threshold": 0.3, "limit": 1E2};type=application/json'\'
 MMETA_00=\''metadata={"threshold": 0.0, "limit": 5};type=application/json'\'
 MMETA_10=\''metadata={"threshold": 1.0, "limit": 5};type=application/json'\'
@@ -151,7 +153,15 @@ f_test_add() {
     f_check -r 200
 
     TEST_NAME="add.200 with charset=UTF-8"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_WITH_CHARSET' --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_WITH_CHARSET_1' --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+
+    TEST_NAME="PREPARE - delete template_id: 12345"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: 1c0944b1-0f46-4e51-a8b0-693e9e44952a" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
+
+    TEST_NAME="add.200 with charset=UTF-8"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_WITH_CHARSET_2' --output '$BODY' '$VENDOR_URL
     f_check -r 200
 
     TEST_NAME="PREPARE - delete template_id: 12345"
@@ -246,7 +256,11 @@ f_test_update() {
     f_check -r 200
 
     TEST_NAME="update.200 with charset=UTF-8"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_WITH_CHARSET' --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_WITH_CHARSET_1' --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+
+    TEST_NAME="update.200 with charset=UTF-8"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_WITH_CHARSET_2' --output '$BODY' '$VENDOR_URL
     f_check -r 200
 
     TEST_NAME="update.200_without_filename_parameter"
@@ -383,7 +397,11 @@ f_test_match(){
     f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="match.200 with charset=UTF-8"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_WITH_CHARSET' --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_WITH_CHARSET_1' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="match.200 with charset=UTF-8"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_WITH_CHARSET_2' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="match.200 where limit is number"
@@ -489,7 +507,11 @@ f_test_identify(){
     f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="identify.200 with charset=UTF-8"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_WITH_CHARSET' --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_WITH_CHARSET_1' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="identify.200 with charset=UTF-8"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_WITH_CHARSET_2' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="identify.200 where limit is number"
