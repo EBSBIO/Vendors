@@ -51,10 +51,10 @@
           <stringProp name="variableNames">path_to_biotemplates</stringProp>
         </CSVDataSet>
         <hashTree/>
-        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config - meta" enabled="true">
-          <stringProp name="filename">resources/csv_configs/many_meta.csv</stringProp>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config - template_ids" enabled="true">
+          <stringProp name="filename">resources/csv_configs/template_ids.csv</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="variableNames">path_to_metadata</stringProp>
+          <stringProp name="variableNames">path_to_ids</stringProp>
           <boolProp name="ignoreFirstLine">false</boolProp>
           <stringProp name="delimiter">,</stringProp>
           <boolProp name="quotedData">false</boolProp>
@@ -130,12 +130,12 @@
             <hashTree/>
           </hashTree>
         </hashTree>
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If Controller add" enabled="false">
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If Controller add" enabled="true">
           <stringProp name="IfController.condition">&quot;${__P(method)}&quot; == &quot;add&quot;</stringProp>
           <boolProp name="IfController.evaluateAll">false</boolProp>
         </IfController>
         <hashTree>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request - add" enabled="false">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request - add" enabled="true">
             <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
               <collectionProp name="HTTPFileArgs.files">
                 <elementProp name="${path_to_biotemplates}" elementType="HTTPFileArg">
@@ -149,18 +149,18 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="metadata" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&quot;template_id&quot;:&quot;${__UUID()}&quot;}</stringProp>
+                  <stringProp name="Argument.value">{&quot;template_id&quot;: &quot;${__RandomString(12,0123456789,random_id)}&quot;}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
                   <stringProp name="Argument.name">metadata</stringProp>
-                  <stringProp name="HTTPArgument.content_type">application/json</stringProp>
+                  <stringProp name="HTTPArgument.content_type">application/json; charset=utf-8</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
             <stringProp name="HTTPSampler.domain">${__P(server)}</stringProp>
             <stringProp name="HTTPSampler.port">${__P(port)}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
-            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">${__P(path)}</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
@@ -172,65 +172,24 @@
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion - response code" enabled="false">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="49586">200</stringProp>
-              </collectionProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
-              <intProp name="Assertion.test_type">2</intProp>
-              <stringProp name="Scope.variable">message</stringProp>
-            </ResponseAssertion>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="script">import org.apache.commons.io.FilenameUtils;
+
+var_1 = vars.get(&quot;random_id&quot;);
+
+f = new FileOutputStream(&quot;resources/csv_configs/template_ids.csv&quot;, true);
+p = new PrintStream(f);
+
+p.print(var_1 + &quot;\n&quot;);
+
+p.close();
+f.close();</stringProp>
+              <stringProp name="scriptLanguage">groovy</stringProp>
+            </JSR223PostProcessor>
             <hashTree/>
-          </hashTree>
-        </hashTree>
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If Controller add" enabled="true">
-          <stringProp name="IfController.condition">&quot;${__P(method)}&quot; == &quot;add&quot;</stringProp>
-          <boolProp name="IfController.evaluateAll">false</boolProp>
-        </IfController>
-        <hashTree>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="filename"></stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="script">vars.put(&apos;path_to_template&apos;, vars.get(&apos;path_to_metadata&apos;).replaceAll(&apos;.id&apos;, &apos;&apos;))</stringProp>
-            <stringProp name="scriptLanguage">groovy</stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request - add" enabled="true">
-            <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
-              <collectionProp name="HTTPFileArgs.files">
-                <elementProp name="${path_to_template}" elementType="HTTPFileArg">
-                  <stringProp name="File.path">${path_to_template}</stringProp>
-                  <stringProp name="File.paramname">template</stringProp>
-                  <stringProp name="File.mimetype">application/octet-stream</stringProp>
-                </elementProp>
-                <elementProp name="${path_to_metadata}" elementType="HTTPFileArg">
-                  <stringProp name="File.mimetype">application/json</stringProp>
-                  <stringProp name="File.path">${path_to_metadata}</stringProp>
-                  <stringProp name="File.paramname">metadata</stringProp>
-                </elementProp>
-              </collectionProp>
-            </elementProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
-            <stringProp name="HTTPSampler.domain">${__P(server)}</stringProp>
-            <stringProp name="HTTPSampler.port">${__P(port)}</stringProp>
-            <stringProp name="HTTPSampler.protocol"></stringProp>
-            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
-            <stringProp name="HTTPSampler.path">${__P(path)}</stringProp>
-            <stringProp name="HTTPSampler.method">POST</stringProp>
-            <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
-            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
-            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-            <boolProp name="HTTPSampler.DO_MULTIPART_POST">true</boolProp>
-            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
-            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
-            <stringProp name="HTTPSampler.response_timeout"></stringProp>
-          </HTTPSamplerProxy>
-          <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion - response code" enabled="true">
               <collectionProp name="Asserion.test_strings">
                 <stringProp name="49586">200</stringProp>
@@ -249,36 +208,32 @@
           <boolProp name="IfController.evaluateAll">false</boolProp>
         </IfController>
         <hashTree>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="filename"></stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="script">vars.put(&apos;path_to_template&apos;, vars.get(&apos;path_to_metadata&apos;).replaceAll(&apos;.id&apos;, &apos;&apos;))</stringProp>
-            <stringProp name="scriptLanguage">groovy</stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request - update" enabled="true">
             <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
               <collectionProp name="HTTPFileArgs.files">
-                <elementProp name="${path_to_template}" elementType="HTTPFileArg">
-                  <stringProp name="File.path">${path_to_template}</stringProp>
+                <elementProp name="${path_to_biotemplates}" elementType="HTTPFileArg">
+                  <stringProp name="File.path">${path_to_biotemplates}</stringProp>
                   <stringProp name="File.paramname">template</stringProp>
                   <stringProp name="File.mimetype">application/octet-stream</stringProp>
-                </elementProp>
-                <elementProp name="${path_to_metadata}" elementType="HTTPFileArg">
-                  <stringProp name="File.mimetype">application/json</stringProp>
-                  <stringProp name="File.path">${path_to_metadata}</stringProp>
-                  <stringProp name="File.paramname">metadata</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
-              <collectionProp name="Arguments.arguments"/>
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="metadata" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&quot;template_id&quot;: &quot;${path_to_ids}&quot;}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  <stringProp name="Argument.name">metadata</stringProp>
+                  <stringProp name="HTTPArgument.content_type">application/json; charset=utf-8</stringProp>
+                </elementProp>
+              </collectionProp>
             </elementProp>
             <stringProp name="HTTPSampler.domain">${__P(server)}</stringProp>
             <stringProp name="HTTPSampler.port">${__P(port)}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
-            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">${__P(path)}</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
@@ -318,17 +273,15 @@
           </HeaderManager>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request - delete" enabled="true">
-            <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
-              <collectionProp name="HTTPFileArgs.files">
-                <elementProp name="${path_to_metadata}" elementType="HTTPFileArg">
-                  <stringProp name="File.mimetype"></stringProp>
-                  <stringProp name="File.path">${path_to_metadata}</stringProp>
-                  <stringProp name="File.paramname"></stringProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&quot;template_id&quot;: &quot;${path_to_ids}&quot;}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
-            </elementProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
-              <collectionProp name="Arguments.arguments"/>
             </elementProp>
             <stringProp name="HTTPSampler.domain">${__P(server)}</stringProp>
             <stringProp name="HTTPSampler.port">${__P(port)}</stringProp>
@@ -396,16 +349,16 @@
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression - message" enabled="true">
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression - message" enabled="false">
               <stringProp name="RegexExtractor.useHeaders">false</stringProp>
               <stringProp name="RegexExtractor.refname">message</stringProp>
-              <stringProp name="RegexExtractor.regex">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,&quot;?[Ss]imilarity&quot;?:\s?[0-1].[0-9]+\}</stringProp>
+              <stringProp name="RegexExtractor.regex">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?[0-1].[0-9]+\}</stringProp>
               <stringProp name="RegexExtractor.template">$0$</stringProp>
               <stringProp name="RegexExtractor.default">error</stringProp>
               <stringProp name="RegexExtractor.match_number"></stringProp>
             </RegexExtractor>
             <hashTree/>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion - message" enabled="true">
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion - message" enabled="false">
               <collectionProp name="Asserion.test_strings">
                 <stringProp name="96784904">error</stringProp>
               </collectionProp>
@@ -417,6 +370,38 @@
               <stringProp name="Scope.variable">message</stringProp>
             </ResponseAssertion>
             <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion 1 - message" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-126926479">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?0\}</stringProp>
+                <stringProp name="-126925518">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1\}</stringProp>
+                <stringProp name="2008650094">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1.[1-9]+\}</stringProp>
+                <stringProp name="725520131">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1.0[0-9]+\}</stringProp>
+                <stringProp name="689458353">\{&quot;?[Ss]imilarity&quot;?:\s?0,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
+                <stringProp name="1019224114">\{&quot;?[Ss]imilarity&quot;?:\s?1,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
+                <stringProp name="-234484780">\{&quot;?[Ss]imilarity&quot;?:\s?1.[1-9]+,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
+                <stringProp name="1681844419">\{&quot;?[Ss]imilarity&quot;?:\s?1.0[0-9]+,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">6</intProp>
+              <stringProp name="Scope.variable">message</stringProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion 2 - message" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="1317659918">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?0.[0-9]+\}</stringProp>
+                <stringProp name="-1717779916">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1.0\}</stringProp>
+                <stringProp name="-1569097868">\{&quot;?[Ss]imilarity&quot;?:\s?0.[0-9]+,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
+                <stringProp name="-517836428">\{&quot;?[Ss]imilarity&quot;?:\s?1.0,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">34</intProp>
+              <stringProp name="Scope.variable">message</stringProp>
+            </ResponseAssertion>
+            <hashTree/>
           </hashTree>
         </hashTree>
         <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If Controller identify" enabled="true">
@@ -424,19 +409,11 @@
           <boolProp name="IfController.evaluateAll">false</boolProp>
         </IfController>
         <hashTree>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="filename"></stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="script">vars.put(&apos;path_to_sample&apos;, vars.get(&apos;path_to_biotemplates&apos;).replaceAll(&apos;.octet-stream&apos;, &apos;&apos;))</stringProp>
-            <stringProp name="scriptLanguage">groovy</stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request - identify" enabled="true">
             <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
               <collectionProp name="HTTPFileArgs.files">
-                <elementProp name="${path_to_sample}" elementType="HTTPFileArg">
-                  <stringProp name="File.path">${path_to_sample}</stringProp>
+                <elementProp name="${path_to_samples}" elementType="HTTPFileArg">
+                  <stringProp name="File.path">${path_to_samples}</stringProp>
                   <stringProp name="File.paramname">photo</stringProp>
                   <stringProp name="File.mimetype">${__P(content_type)}</stringProp>
                 </elementProp>
@@ -465,16 +442,16 @@
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression - message" enabled="true">
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression - message" enabled="false">
               <stringProp name="RegexExtractor.useHeaders">false</stringProp>
               <stringProp name="RegexExtractor.refname">message</stringProp>
-              <stringProp name="RegexExtractor.regex">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,&quot;?[Ss]imilarity&quot;?:\s?[0-1].[0-9]+\}</stringProp>
+              <stringProp name="RegexExtractor.regex">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?[0-1].[0-9]+\}</stringProp>
               <stringProp name="RegexExtractor.template">$0$</stringProp>
               <stringProp name="RegexExtractor.default">error</stringProp>
               <stringProp name="RegexExtractor.match_number"></stringProp>
             </RegexExtractor>
             <hashTree/>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion - message" enabled="true">
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion - message" enabled="false">
               <collectionProp name="Asserion.test_strings">
                 <stringProp name="96784904">error</stringProp>
               </collectionProp>
@@ -483,6 +460,38 @@
               <boolProp name="Assertion.assume_success">false</boolProp>
               <intProp name="Assertion.test_type">12</intProp>
               <stringProp name="Assertion.scope">variable</stringProp>
+              <stringProp name="Scope.variable">message</stringProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion 1 - message" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-126926479">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?0\}</stringProp>
+                <stringProp name="-126925518">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1\}</stringProp>
+                <stringProp name="2008650094">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1.[1-9]+\}</stringProp>
+                <stringProp name="725520131">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1.0[0-9]+\}</stringProp>
+                <stringProp name="689458353">\{&quot;?[Ss]imilarity&quot;?:\s?0,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
+                <stringProp name="1019224114">\{&quot;?[Ss]imilarity&quot;?:\s?1,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
+                <stringProp name="-234484780">\{&quot;?[Ss]imilarity&quot;?:\s?1.[1-9]+,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
+                <stringProp name="1681844419">\{&quot;?[Ss]imilarity&quot;?:\s?1.0[0-9]+,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">6</intProp>
+              <stringProp name="Scope.variable">message</stringProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion 2 - message" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="1317659918">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?0.[0-9]+\}</stringProp>
+                <stringProp name="-1717779916">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1.0\}</stringProp>
+                <stringProp name="-1569097868">\{&quot;?[Ss]imilarity&quot;?:\s?0.[0-9]+,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
+                <stringProp name="-517836428">\{&quot;?[Ss]imilarity&quot;?:\s?1.0,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">34</intProp>
               <stringProp name="Scope.variable">message</stringProp>
             </ResponseAssertion>
             <hashTree/>
