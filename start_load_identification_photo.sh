@@ -10,7 +10,7 @@ f_usage() {
 echo Usage: "$0 [OPTIONS] TASK_NAME METHOD THREADS URL PORT
     
     OPTIONS:
-    -d              Delete previously extracted templates
+    -d              Delete previously extracted templates or ID list
     -b              Start in background (screen)
     -s              Absolute path to the directory where samples for testing
     -r num          Ramp-up period (sec, default 0)
@@ -32,30 +32,12 @@ rm_templates() {
         done
         cat /dev/null > resources/csv_configs/many_samples.csv
         cat /dev/null > resources/csv_configs/many_biotemplates.csv
-        cat /dev/null > resources/csv_configs/many_meta.csv
+        cat /dev/null > resources/csv_configs/template_ids.csv
 }
 
 biotemplates() {
     if [ $(find $1 -type f -iname "*.octet-stream" | wc -l) -ne $(cat resources/csv_configs/many_biotemplates.csv | wc -l) ]; then
         find $1 -type f -iname "*.octet-stream" > resources/csv_configs/many_biotemplates.csv
-    fi
-}
-
-create_metadata() {
-local IFS=$'\n'
-COUNT=1
-if [ $(find $1 -type f -iname "*.octet-stream" | wc -l) -gt 0 ]; then
-    for i in $(cat resources/csv_configs/many_biotemplates.csv); do
-        META=${i}.id
-        echo {\"template_id\":\""$COUNT"\"} > "$META"
-        COUNT=$(( $COUNT + 1 ))
-    done
-fi
-}
-
-metadata() {
-    if [ $(find $1 -type f -iname "*.octet-stream.id" | wc -l) -ne $(cat resources/csv_configs/many_meta.csv | wc -l) ]; then
-        find $1 -type f -iname "*.octet-stream.id" > resources/csv_configs/many_meta.csv
     fi
 }
 
@@ -97,36 +79,63 @@ else
         PORT=$5                                                    # URL
 
         if [ "$DEL" == 1 ]; then
-            echo
-            echo "The previous templates will be deleted"
-            read -p "Are you sure you want to continue ('y' / 'n or any value')? " USER_ANSWER
+            echo; echo "Запущен сценарий удаления ранее извлеченных шаблонов и списка идентификаторов"
+            read -p "Продолжить ('y' / 'n или любой символ')? " USER_ANSWER
             if [ $USER_ANSWER = 'y' ]; then
-                echo
-                read -p "Do you want to continue testing after cleaning? ('y' / 'n or any value')? " USER_ANSWER
+                echo; read -p "Продолжить тестирование после очистки? ('y' / 'n или любой символ')? " USER_ANSWER
                 if [ $USER_ANSWER = 'y' ]; then
-                    if [ -z $SAMPLE_DIR ]; then
-                        rm_templates $SINGLE_SAMPLE_DIR
-                        echo "Templates have been removed"
-                    else
-                        rm_templates $SAMPLE_DIR $SINGLE_SAMPLE_DIR
-                        echo "Templates have been removed"
-                    fi
+                    echo; echo "Доступные режимы очистки:
+        1 – удалить шаблоны и идентификаторы
+        2 – удалить только идентификаторы"
+                    while true; do
+                        echo; read -p "Выберете режим очистки: " USER_ANSWER
+                        if [ $USER_ANSWER = '1' ]; then
+                            if [ -z $SAMPLE_DIR ]; then
+                                rm_templates $SINGLE_SAMPLE_DIR
+                                echo "Шаблоны были удалены"
+                                break
+                            else
+                                rm_templates $SAMPLE_DIR $SINGLE_SAMPLE_DIR
+                                echo "Шаблоны были удалены"
+                                break
+                            fi
+                        elif [ $USER_ANSWER = '2' ]; then
+                            cat /dev/null > resources/csv_configs/template_ids.csv
+                            echo "Список очищен"
+                            break
+                        else    
+                            echo "Ошибка ввода. Пожалуйста, повторите попытку"
+                            continue
+                        fi
+                    done
                 else
-                    if [ -z $SAMPLE_DIR ]; then
-                        rm_templates $SINGLE_SAMPLE_DIR
-                        echo "Templates have been removed. Exit test"
-                        exit
-                    else
-                        rm_templates $SAMPLE_DIR $SINGLE_SAMPLE_DIR
-                        echo "Templates have been removed. Exit test"
-                        exit
-                    fi
+                    echo; echo "Доступные режимы очистки:
+        1 – удалить шаблоны и идентификаторы
+        2 – удалить только идентификаторы"
+                    while true; do
+                        echo; read -p "Выберете режим очистки: " USER_ANSWER
+                        if [ $USER_ANSWER = '1' ]; then
+                            if [ -z $SAMPLE_DIR ]; then
+                                rm_templates $SINGLE_SAMPLE_DIR
+                                echo "Шаблоны были удалены"; exit
+                            else
+                                rm_templates $SAMPLE_DIR $SINGLE_SAMPLE_DIR
+                                echo "Шаблоны были удалены"; exit
+                            fi
+                        elif [ $USER_ANSWER = '2' ]; then 
+                            cat /dev/null > resources/csv_configs/template_ids.csv
+                            echo "Список очищен"; exit
+                        else
+                            echo "Ошибка ввода. Пожалуйста, повторите попытку"
+                            continue
+                        fi
+                    done
                 fi
             else
-                echo; echo "Remove the key \"-d\" from the script parameters"
+                echo; echo "Следует удалить ключ \"-d\" из передаваемых параметров"
                 exit
             fi
-        fi                    
+        fi
 
         if [ "$TYPE" == "sound" ]; then
             CTYPE="audio/wav"                                      # content_type
@@ -151,19 +160,7 @@ else
                 biotemplates $SAMPLE_DIR                                                                            # Обновить список векторов для методов match и identify
             fi
         fi
-        
-        if [ -z $SAMPLE_DIR ]; then
-            create_metadata $SINGLE_SAMPLE_DIR                                                                      # Создать файл с метаданными для методов add и update для теста в режиме одного сэмпла
-        else
-            create_metadata $SAMPLE_DIR                                                                             # Создать файлы с метаданными для методов add и update
-        fi
-
-        if [ -z $SAMPLE_DIR ]; then
-            metadata $SINGLE_SAMPLE_DIR
-        else
-            metadata $SAMPLE_DIR                                                                                    # Обновить список файлов с метаданными для методов add и update
-        fi
-
+       
         if [ -n "$PREFIX" ]; then
             LOCATION="/v1/$PREFIX/$METHOD"
         else
