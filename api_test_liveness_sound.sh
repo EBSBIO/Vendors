@@ -45,9 +45,30 @@ f_test_liveness() {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 
-    TEST_NAME="Positive test 4. reverse order of headings"
+    TEST_NAME="Positive test 4. reverse order of headings without filename"
     echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: audio/wav\r\nContent-Disposition: form-data; name="bio_sample"\r\n\r\n' >> tmp/request_body; cat $SAMPLE_WAV >> tmp/request_body
+    echo -ne '\r\n--72468--\r\n' >> tmp/request_body
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+
+    TEST_NAME="Positive test 5. reverse order of headings with filename 1"
+    echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
+    echo -ne '\r\n--72468\r\nContent-Type: audio/wav\r\nContent-Disposition: form-data; name="bio_sample"; filename="sound.wav"\r\n\r\n' >> tmp/request_body; cat $SAMPLE_WAV >> tmp/request_body
+    echo -ne '\r\n--72468--\r\n' >> tmp/request_body
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+
+    TEST_NAME="Positive test 6. reverse order of headings with filename 2"
+    echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="meta_lv_sound_passive.json"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
+    echo -ne '\r\n--72468\r\nContent-Type: audio/wav\r\nContent-Disposition: form-data; name="bio_sample"\r\n\r\n' >> tmp/request_body; cat $SAMPLE_WAV >> tmp/request_body
+    echo -ne '\r\n--72468--\r\n' >> tmp/request_body
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+
+    TEST_NAME="Positive test 7. reverse order of headings with filename 3"
+    echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="meta_lv_sound_passive.json"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
+    echo -ne '\r\n--72468\r\nContent-Type: audio/wav\r\nContent-Disposition: form-data; name="bio_sample"; filename="sound.wav"\r\n\r\n' >> tmp/request_body; cat $SAMPLE_WAV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
