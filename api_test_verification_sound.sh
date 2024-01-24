@@ -105,6 +105,12 @@ f_test_compare() {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 
+    TEST_NAME="compare.200.no_filename_with_boundary_in_quotes"
+    echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_feature"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_template"\r\nContent-Type: application/octet-stream\r\n\r\n' >> tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--72468--\r\n' >> tmp/request_body
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=\"72468\"" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 
     TEST_NAME="compare.200.reverse_order_of_headings_without_filename"
     echo -ne '--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_template"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
@@ -112,7 +118,6 @@ f_test_compare() {
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
-
 
     TEST_NAME="compare.200.reverse_order_of_headings_with_filename_1"
     echo -ne '--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_template"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
@@ -134,7 +139,6 @@ f_test_compare() {
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
-
 
 }
 
@@ -205,6 +209,12 @@ f_test_verify() {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 
+    TEST_NAME="verify.200.no_filename_with_boundary_in_quotes"
+    echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="sample"\r\nContent-Type: audio/wav\r\n\r\n' >> tmp/request_body; cat $SAMPLE_WAV >> tmp/request_body
+    echo -ne '\r\n--72468--\r\n' >> tmp/request_body
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=\"72468\"" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 
     TEST_NAME="verify.200.reverse_order_of_headings_without_filename"
     echo -ne '--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_template"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
@@ -233,7 +243,6 @@ f_test_verify() {
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
-
 }
 
 
