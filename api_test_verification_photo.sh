@@ -12,6 +12,7 @@ BODY="tmp/responce_body"
 SAMPLE_JPG="resources/samples/photo.jpg"
 SAMPLE_PNG="resources/samples/photo.png"
 BIG_SAMPLE_PNG="resources/samples/big.png"
+SAMPLE_LSF="resources/samples/little_second_face.jpg"
 SAMPLE_WAV="resources/samples/sound.wav"
 SAMPLE_WEBM="resources/samples/video.mov"
 SAMPLE_NF="resources/samples/no_face.jpg"
@@ -35,6 +36,10 @@ f_test_extract () {
 
     TEST_NAME="extract.200.BIG_PNG"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:image/png" -H "Expect:" --data-binary @'$BIG_SAMPLE_PNG' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -b
+
+    TEST_NAME="extract.200.little_second_face.JPG"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_LSF' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -b
 
     TEST_NAME="extract.content-type.lowercase.image/png with JPG"
@@ -171,6 +176,10 @@ f_test_verify() {
 
     TEST_NAME="verify.200_with_big_png"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$BIG_SAMPLE_PNG';type=image/png" --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m "\"?[Ss]core\"?:\s?[0-1].[0-9]" -f "- Score format double is expected"
+
+    TEST_NAME="verify.200.little_second_face.JPG"
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_LSF';type=image/jpeg" --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "\"?[Ss]core\"?:\s?[0-1].[0-9]" -f "- Score format double is expected"
 
     TEST_NAME="verify.400.invalid_http_method"
