@@ -88,11 +88,11 @@ f_test_compare() {
     
     TEST_NAME="Negative compare test 6. Invalid Content-Type for bio_feature"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=image/jpeg" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -X POST --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002001"
+    f_check -r 400 -m "BPE-002005"
     
     TEST_NAME="Negative compare test 7. Invalid Content-Type for bio_template"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$BIOTEMPLATE';type=image/jpeg" -X POST --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002001"
+    f_check -r 400 -m "BPE-002005"
     
     TEST_NAME="Negative compare test 8. Compare template with sound file"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$SAMPLE_WAV';type=application/octet-stream" -X POST --output '$BODY' '$VENDOR_URL
@@ -179,7 +179,7 @@ f_test_verify() {
 
     TEST_NAME="Negative verify test 6. Attempting to extract a template from a file without voice"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_SWV';type=audio/wav"  --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-003001"
+    f_check -r 400 -m "BPE-003002"
     
     #TEST_NAME="Negative verify test 7. Attempting to extract a template from a file with more than one voice"
     #REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_SDV';type=audio/wav"  --output '$BODY' '$VENDOR_URL
@@ -195,7 +195,7 @@ f_test_verify() {
     
     TEST_NAME="Negative verify test 10. Extract template from photo"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_JPG';type=audio/wav"  --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002005"
+    f_check -r 400 -m "BPE-002003"
     
     TEST_NAME="verify.200.boundary_no_hyphens"
     cat resources/body/body_stream $BIOTEMPLATE resources/body/body_sound $SAMPLE_WAV resources/body/body_end > tmp/request_body

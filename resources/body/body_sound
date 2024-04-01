@@ -1,5 +1,5 @@
 
 --72468
 Content-Disposition: form-data; name="sample"; filename="sound.wav"
-Content-Type: audio/pcm
+Content-Type: audio/wav
 
