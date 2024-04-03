@@ -562,7 +562,7 @@ f_test_identify(){
     f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="identify.200.little_second_face.JPG"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_LSF';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_LSF';type=image/jpeg" -F '$MMETA_00' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="identify.200 with charset=UTF-8"
