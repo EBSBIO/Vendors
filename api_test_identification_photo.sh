@@ -45,6 +45,7 @@ MMETA_NUMBER=\''metadata={"threshold": 0.3, "limit": 5E1};type=application/json'
 MMETA_00=\''metadata={"threshold": 0.0, "limit": 5};type=application/json'\'
 MMETA_10=\''metadata={"threshold": 1.0, "limit": 5};type=application/json'\'
 MMETA_ID='{"threshold": 0.3, "limit": 5}'
+MMETA_ID_2='{"threshold": 0.0, "limit": 5}'
 MMETA_NOLIM=\''metadata={"threshold": 0.3};type=application/json'\'
 MMETA_NOTH=\''metadata={"limit": 5};type=application/json'\'
 MMETA_BAD=\''metadata={"threshold": 0.3, "limit": 5,};type=application/json'\'
@@ -588,6 +589,13 @@ f_test_identify(){
     TEST_NAME="identify.200_without_filename_parameter"
     echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="photo"\r\nContent-Type: image/jpeg\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="identify.200_without_filename_parameter_with_big_photo"
+    echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="photo"\r\nContent-Type: image/png\r\n\r\n' > tmp/request_body; cat $BIG_SAMPLE_PNG >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID_2\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
