@@ -21,7 +21,8 @@ echo Usage: "$0 [OPTIONS] TASK_NAME METHOD THREADS URL PORT
     METHOD          extract, add, update, delete, match, identify
     THREADS         Sum threads(users)
     URL             IP
-    PORT            TCP порт БП"
+    PORT            TCP порт БП
+    DURATION        Test duration in seconds"
 }
 
 rm_templates() {
@@ -55,7 +56,7 @@ else
             *) break;;
         esac
     done
-    if [ "$#" -ne "5" ]; then
+    if [ "$#" -ne "6" ]; then
         f_usage
     else
         JMX_FILE=resources/jmx/identification.jmx                  # Template jmeter
@@ -76,7 +77,8 @@ else
         LOG=tmp/jmeter.log                                         # Лог jmeter
         
         SERVER=$4
-        PORT=$5                                                    # URL
+        PORT=$5
+        DURATION=$6
 
         if [ "$DEL" == 1 ]; then
             echo; echo "Запущен сценарий удаления ранее извлеченных шаблонов и списка идентификаторов"
@@ -169,7 +171,7 @@ else
         
         cat /dev/null > tmp/http_errors.log                        # Очистить лог http-запросов к БП, которые завершились с ошибкой, перед очередным запуском теста
 
-        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jmethod='$METHOD' -Jcontent_type='$CTYPE' -Jmmeta='$MMETA' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
+        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jmethod='$METHOD' -Jcontent_type='$CTYPE' -Jmmeta='$MMETA' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -Jduration='$DURATION' -j '$LOG' -l '$REPORT
 
         if [ "$BG" == 1 ]; then
             CMD='screen -dmS start.jmeter sh -c "'$CMD'"'
