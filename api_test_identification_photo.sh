@@ -32,6 +32,7 @@ META_WITH_CHARSET_1=\''metadata={"template_id":"12345"};type=application/json;ch
 META_WITH_CHARSET_2=\''metadata={"template_id":"12345"};type=application/json; charset=UTF-8'\'
 META_ID='{"template_id": "12345"}'
 META_BIGID=\''metadata={"template_id":"12345100500"};type=application/json'\'
+META_BADTYPE=\''metadata={"template_id":"12345"};type=ppplication/gson'\'
 META_NOID=\''metadata={"id":"12345"};type=application/json'\'
 META_EMPTY=\''metadata=;type=application/json'\'
 META_BAD=\''metadata={"template_id":"12345",};type=application/json'\'
@@ -217,6 +218,14 @@ f_test_add() {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$EMPTY';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002004"
 
+    TEST_NAME="add 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid template type"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=image/jpeg" -F '$META' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-002005"
+
+    TEST_NAME="add 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid metadata type"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BADTYPE' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-002005"
+
     TEST_NAME="add.400.BPE-00005.broken"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BROKEN' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00005"
@@ -295,7 +304,7 @@ f_test_update() {
     echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$META_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type: multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200
 
     TEST_NAME="update.200_without_filename_parameter_with_boundary_in_quotes"
@@ -334,6 +343,14 @@ f_test_update() {
     TEST_NAME="update.400.BPE-002404 Не найден биометрический шаблон с заданным идентификатором"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BIGID' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002404"
+
+    TEST_NAME="update 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid template type"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=image/png" -F '$META' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-002005"
+
+    TEST_NAME="update 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid template type. Invalid metadata type"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BADTYPE' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-002005"
 
     TEST_NAME="update.400.BPE-00005.bad_meta"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BROKEN' --output '$BODY' '$VENDOR_URL
@@ -498,6 +515,14 @@ f_test_match(){
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE_BR';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002004"
 
+    TEST_NAME="match 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid template type"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-002005"
+
+    TEST_NAME="match 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid metadata type"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_BADTYPE' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-002005"
+
     TEST_NAME="match.400.BPE-00005.bad_meta"
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BROKEN' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00005"
@@ -638,7 +663,7 @@ f_test_identify(){
     f_check -r 400 -m "BPE-002005"
 
     TEST_NAME="identify.400.BPE-002005.metadata_type"
-    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=iage/jpeg" -F '$MMETA_BADTYPE' --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: 4896c91b-9e61-3129-87b6-8aa299028058" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_BADTYPE' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
 
     TEST_NAME="identify.400.BPE-002005.sample_type"
