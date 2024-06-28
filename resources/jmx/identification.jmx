@@ -21,8 +21,8 @@
         <stringProp name="ThreadGroup.ramp_time">${__P(ramp, 0)}</stringProp>
         <longProp name="ThreadGroup.start_time">1534169676000</longProp>
         <longProp name="ThreadGroup.end_time">1534169676000</longProp>
-        <boolProp name="ThreadGroup.scheduler">false</boolProp>
-        <stringProp name="ThreadGroup.duration"></stringProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">${__P(duration, 600)}</stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
       </ThreadGroup>
@@ -149,7 +149,7 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="metadata" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&quot;template_id&quot;: &quot;${__RandomString(12,0123456789,random_id)}&quot;}</stringProp>
+                  <stringProp name="Argument.value">{&quot;template_id&quot;: &quot;${__RandomString(32,0123456789abcdef,random_id)}&quot;}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
                   <stringProp name="Argument.name">metadata</stringProp>
@@ -178,15 +178,13 @@
               <stringProp name="parameters"></stringProp>
               <stringProp name="script">import org.apache.commons.io.FilenameUtils;
 
-var_1 = vars.get(&quot;random_id&quot;);
+try (f = new FileWriter(&quot;resources/csv_configs/template_ids.csv&quot;, true);
+     b = new BufferedWriter(f, 1024)) {
 
-f = new FileOutputStream(&quot;resources/csv_configs/template_ids.csv&quot;, true);
-p = new PrintStream(f);
-
-p.print(var_1 + &quot;\n&quot;);
-
-p.close();
-f.close();</stringProp>
+     b.write(vars.get(&quot;random_id&quot;));
+     b.newLine();
+}
+</stringProp>
               <stringProp name="scriptLanguage">groovy</stringProp>
             </JSR223PostProcessor>
             <hashTree/>

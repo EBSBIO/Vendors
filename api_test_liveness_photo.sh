@@ -25,6 +25,16 @@ META_WT="resources/metadata/meta_without_type.json"
 META_WD="resources/metadata/meta_without_duration.json"
 META_WMSG="resources/metadata/meta_without_message.json"
 
+
+f_test_health() {
+    VENDOR_URL="$BASE_URL/health"
+
+    TEST_NAME="health 400. LDE-002006 – Неверный запрос. Bad location"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL/health
+    f_check -r 400 -m "LDE-002006"
+}
+
+
 f_test_liveness() {
     VENDOR_URL="$BASE_URL/detect"
 
@@ -177,7 +187,7 @@ OPTIONS:
     -vv             Verbose All checks
 
 URL                 <ip>:<port>
-TIMEOUT             <seconds> Maximum time in seconds that you allow the whole operation to take.
+TIMEOUT             <seconds> – maximum time in seconds that you allow the whole operation to take
 "
 }
 
@@ -222,15 +232,16 @@ else
 
         VENDOR_URL="$BASE_URL/health"
         BODY="tmp/responce_body"
-        TEST_NAME="Healt.200"
+        TEST_NAME="Health 200"
         REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL
         mkdir -p tmp
         f_check -r 200 -m "\"?[Ss]tatus\"?:\s?0"
 
         if [ "$FAIL" -eq 0 ]; then
-            SUCCES=0
+            SUCCESS=0
             ERROR=0
 
+            f_test_health
             f_test_liveness
 
             echo -e "\n\nSCORE: success $SUCCESS, error $ERROR"
