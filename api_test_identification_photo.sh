@@ -27,17 +27,18 @@ ANOTHER_BIOTEMPLATE="tmp/another_biotemplate"
 SAMPLE_BR="tmp/photo_br.jpg"
 BIOTEMPLATE_BR="tmp/biotemplate_br"
 
-META=\''metadata={"template_id":"12345"};type=application/json'\'
-META_WITH_CHARSET_1=\''metadata={"template_id":"12345"};type=application/json;charset=UTF-8'\'
-META_WITH_CHARSET_2=\''metadata={"template_id":"12345"};type=application/json; charset=UTF-8'\'
-META_ID='{"template_id": "12345"}'
-META_BIGID=\''metadata={"template_id":"12345100500"};type=application/json'\'
-META_BADTYPE=\''metadata={"template_id":"12345"};type=ppplication/gson'\'
-META_NOID=\''metadata={"id":"12345"};type=application/json'\'
+META=\''metadata={"template_id":"722852fdf2ca4900be3707d80243fd70"};type=application/json'\'
+META_2=\''metadata={"template_id":"1234510050067890"};type=application/json'\'
+META_WITH_CHARSET_1=\''metadata={"template_id":"722852fdf2ca4900be3707d80243fd70"};type=application/json;charset=UTF-8'\'
+META_WITH_CHARSET_2=\''metadata={"template_id":"722852fdf2ca4900be3707d80243fd70"};type=application/json; charset=UTF-8'\'
+META_ID='{"template_id": "722852fdf2ca4900be3707d80243fd70"}'
+META_BIGID=\''metadata={"template_id":"722852fdf2ca4900be3707d80243fd7"};type=application/json'\'
+META_BADTYPE=\''metadata={"template_id":"722852fdf2ca4900be3707d80243fd70"};type=ppplication/gson'\'
+META_NOID=\''metadata={"id":"722852fdf2ca4900be3707d80243fd70"};type=application/json'\'
 META_EMPTY=\''metadata=;type=application/json'\'
-META_BAD=\''metadata={"template_id":"12345",};type=application/json'\'
+META_BAD=\''metadata={"template_id":"722852fdf2ca4900be3707d80243fd70",};type=application/json'\'
 META_BROKEN=\''metadata={"eyJ0ZW1wbGF0ZV9pZCI6IjEyMzQ1In0="};type=application/json'\'
-META_IPV=\''metadata={"template_id":12345};type=application/json'\'
+META_IPV=\''metadata={"template_id":1234510050067890};type=application/json'\'
 
 MMETA=\''metadata={"threshold": 0.3, "limit": 5};type=application/json'\'
 MMETA_WITH_CHARSET_1=\''metadata={"threshold": 0.3, "limit": 5};type=application/json;charset=UTF-8'\'
@@ -53,12 +54,13 @@ MMETA_BAD=\''metadata={"threshold": 0.3, "limit": 5,};type=application/json'\'
 MMETA_BADTYPE=\''metadata={"threshold": 0.3, "limit": 5};type=image/jpeg'\'
 MMETA_IPV=\''metadata={"threshold": 0.3, "limit": "5"};type=application/json'\'
 
-RDATA=\''{"template_id": "12345"}'\'
-RDATA_BIG=\''{"template_id": "12345100500"}'\'
-RDATA_NOID=\''{"id":"12345"}'\'
-RDATA_BAD=\''{"template_id":"12345",}'\'
+RDATA=\''{"template_id": "722852fdf2ca4900be3707d80243fd70"}'\'
+RDATA_2=\''{"template_id": "1234510050067890"}'\'
+RDATA_BIG=\''{"template_id": "722852fdf2ca4900be3707d80243fd7"}'\'
+RDATA_NOID=\''{"id":"722852fdf2ca4900be3707d80243fd70"}'\'
+RDATA_BAD=\''{"template_id":"722852fdf2ca4900be3707d80243fd70",}'\'
 RDATA_BROKEN=\''{"eyJ0ZW1wbGF0ZV9pZCI6IjEyMzQ1In0="}'\'
-RDATA_IPV=\''{"template_id": 12345}'\'
+RDATA_IPV=\''{"template_id": 1234510050067890}'\'
 
 
 f_test_health() {
@@ -140,9 +142,14 @@ f_test_add() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_JPG_2' --output '$ANOTHER_BIOTEMPLATE' '$BASE_URL'/extract'
     f_check -r 200
 
-    TEST_NAME="PREPARE - delete template_id: 12345"
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
+
+    TEST_NAME="PREPARE - delete template_id: 1234510050067890"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_2' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
+
 
     ##### TESTS
     TEST_NAME="add 200. Without filename parameter"
@@ -152,7 +159,7 @@ f_test_add() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200
     
-    TEST_NAME="PREPARE - delete template_id: 12345"
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
 
@@ -163,7 +170,7 @@ f_test_add() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=\"------------------------516695485518814e\"" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200
     
-    TEST_NAME="PREPARE - delete template_id: 12345"
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
 
@@ -174,7 +181,7 @@ f_test_add() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200
     
-    TEST_NAME="PREPARE - delete template_id: 12345"
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
 
@@ -185,7 +192,7 @@ f_test_add() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200
     
-    TEST_NAME="PREPARE - delete template_id: 12345"
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
 
@@ -193,7 +200,7 @@ f_test_add() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_WITH_CHARSET_1' --output '$BODY' '$VENDOR_URL
     f_check -r 200
 
-    TEST_NAME="PREPARE - delete template_id: 12345"
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
 
@@ -201,12 +208,16 @@ f_test_add() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_WITH_CHARSET_2' --output '$BODY' '$VENDOR_URL
     f_check -r 200
 
-    TEST_NAME="PREPARE - delete template_id: 12345"
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
 
     TEST_NAME="add 200"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+
+    TEST_NAME="add 200. ID made of digits"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_2' --output '$BODY' '$VENDOR_URL
     f_check -r 200
 
     TEST_NAME="add 400. BPE-002001 – Неверный Content-Type HTTP-запроса. Wrong content-type"
@@ -281,18 +292,30 @@ f_test_update() {
 
     head --bytes=64 $BIOTEMPLATE > $BIOTEMPLATE_BR
 
-    TEST_NAME="PREPARE - delete template_id: 12345"
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
+
+    TEST_NAME="PREPARE - delete template_id: 1234510050067890"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_2' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
 
     TEST_NAME="PREPARE - add biotemplate"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
     f_check -r 200
 
+    TEST_NAME="PREPARE - add biotemplate"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_2' '$BASE_URL'/add'
+    f_check -r 200
+
 
     ###### TESTS
     TEST_NAME="update 200"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+
+    TEST_NAME="update 200. ID made of digits"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_2' --output '$BODY' '$VENDOR_URL
     f_check -r 200
 
     TEST_NAME="update 200. With charset=UTF-8"
@@ -397,12 +420,20 @@ f_test_delete() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$BASE_URL'/extract'
     f_check -r 200
 
-    TEST_NAME="PREPARE - delete template_id: 12345"
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
+
+    TEST_NAME="PREPARE - delete template_id: 1234510050067890"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_2' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
 
     TEST_NAME="PREPARE - add biotemplate"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
+    f_check -r 200
+
+    TEST_NAME="PREPARE - add biotemplate"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_2' '$BASE_URL'/add'
     f_check -r 200
 
 
@@ -411,6 +442,10 @@ f_test_delete() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' '$VENDOR_URL
     f_check -r 200
     
+    TEST_NAME='delete 200. ID made of digits'
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_2' --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+
     TEST_NAME="delete 400. BPE-002001 – Неверный Content-Type HTTP-запроса. Wrong content-type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:ppplication/gson" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002001"
@@ -422,6 +457,18 @@ f_test_delete() {
     TEST_NAME="delete 400. BPE-002404 – Не найден биометрический шаблон с заданным идентификатором"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002404"
+
+    TEST_NAME="PREPARE - add biotemplate"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
+    f_check -r 200
+
+    TEST_NAME="delete 400. BPE-002404 – Не найден биометрический шаблон с заданным идентификатором"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_BIG' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-002404"
+
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
 
     TEST_NAME="delete 400. BPE-00005 – Не удалось прочитать метаданные. Extra comma in metadata"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_BAD' --output '$BODY' '$VENDOR_URL
@@ -455,6 +502,10 @@ f_test_match() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
     f_check -r 200
     
+    TEST_NAME="PREPARE - add biotemplate"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_2' '$BASE_URL'/add'
+    f_check -r 200
+
     sleep 5
 
     ##### TESTS
@@ -575,14 +626,22 @@ f_test_identify() {
 
     dd if=/dev/urandom of=$SAMPLE_BR bs=1024 count=4 status=none
 
-    TEST_NAME="PREPARE - delete template_id: 12345"
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
     
+    TEST_NAME="PREPARE - delete template_id: 1234510050067890"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_2' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
+
     TEST_NAME="PREPARE - add biotemplate"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
     f_check -r 200
     
+    TEST_NAME="PREPARE - add biotemplate"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_2' '$BASE_URL'/add'
+    f_check -r 200
+
     sleep 5
 
     #### TESTS
