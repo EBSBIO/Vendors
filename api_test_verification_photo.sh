@@ -22,7 +22,16 @@ BIOTEMPLATE="tmp/biotemplate"
 BIOTEMPLATE_0X00="resources/biotemplate_0X00"
 
 
-f_test_extract () {
+f_test_health() {
+    VENDOR_URL="$BASE_URL/health"
+    
+    TEST_NAME="health 400. BPE-002006 – Неверный запрос. Bad location"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL/health
+    f_check -r 400 -m "BPE-002006"
+}
+
+
+f_test_extract() {
     VENDOR_URL="$BASE_URL/extract"
     BODY="tmp/responce_body"
 
@@ -74,7 +83,6 @@ f_test_extract () {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Content-Type:image/jpeg" --data-binary @'$SAMPLE_WAV' --output '$BODY' '$VENDOR_URL
     f_check -r 400  -m "BPE-002003"
 }
-
 
 
 f_test_compare() {
@@ -157,7 +165,6 @@ f_test_compare() {
     REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
 }
-
 
 
 f_test_verify() {
@@ -270,12 +277,11 @@ f_test_verify() {
 }
 
 
-
 f_print_usage() {
 echo "Usage: $0 [OPTIONS] URL TIMEOUT
 
 OPTIONS:
-    -t  string      Set test method: all (default), extract, compare, verify
+    -t  string      Set test method: all (default), health, extract, compare, verify
     -r  string      Version api
     -p  string      Prefix
     -v              Verbose FAIL checks
@@ -285,7 +291,6 @@ URL                 <ip>:<port>
 TIMEOUT             <seconds> Maximum time in seconds that you allow the whole operation to take.
 "
 }
-
 
 
 if [ -z "$1" ]; then
@@ -319,20 +324,28 @@ else
 
         VENDOR_URL="$BASE_URL/health"
         BODY="tmp/responce_body"
-        TEST_NAME="Healt.200"
-        REQUEST='curl -m $TIMEOUT -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL
+        TEST_NAME="Health 200"
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL
         mkdir -p tmp
         f_check -r 200 -m "\"?[Ss]tatus\"?:\s?0"
 
         if [ "$FAIL" -eq 0 ]; then
-            SUCCES=0
+            SUCCESS=0
             ERROR=0
 
             case "$TASK" in
             all )
+                echo; echo; echo "------------ Begin: f_test_health -------------"
+                f_test_health
+                echo; echo; echo "------------ Begin: f_test_extract -------------"
                 f_test_extract
+                echo; echo; echo "------------ Begin: f_test_compare -------------"
                 f_test_compare
+                echo; echo; echo "------------ Begin: f_test_verify -------------"
                 f_test_verify
+            ;;
+            health ) 
+                f_test_health
             ;;
             extract )
                 f_test_extract

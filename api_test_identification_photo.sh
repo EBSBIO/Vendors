@@ -61,7 +61,16 @@ RDATA_BROKEN=\''{"eyJ0ZW1wbGF0ZV9pZCI6IjEyMzQ1In0="}'\'
 RDATA_IPV=\''{"template_id": 12345}'\'
 
 
-f_test_extract () {
+f_test_health() {
+    VENDOR_URL="$BASE_URL/health"
+    
+    TEST_NAME="health 400. BPE-002006 – Неверный запрос. Bad location"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL/health
+    f_check -r 400 -m "BPE-002006"
+}
+
+
+f_test_extract() {
     VENDOR_URL="$BASE_URL/extract"
     BODY="tmp/responce_body"
 
@@ -432,7 +441,7 @@ f_test_delete() {
 }
 
 
-f_test_match(){
+f_test_match() {
     VENDOR_URL="$BASE_URL/match"
 
     ###### Prepare
@@ -556,7 +565,7 @@ f_test_match(){
 
 
 
-f_test_identify(){
+f_test_identify() {
     VENDOR_URL="$BASE_URL/identify"
 
     ###### Prepare
@@ -722,7 +731,7 @@ f_print_usage() {
 echo "Usage: $0 [OPTIONS] URL TIMEOUT
 
 OPTIONS:
-    -t  string      Set test method: all (default), extract, add, update, delete, match, identify
+    -t  string      Set test method: all (default), health, extract, add, update, delete, match, identify
     -p  string      Prefix
     -v              Verbose FAIL checks
     -vv             Verbose All checks
@@ -775,19 +784,22 @@ else
 
             case "$TASK" in
             all )
-                echo; echo "------------ Begin: f_test_extract -------------"
+                echo; echo; echo "------------ Begin: f_test_health -------------"
+                f_test_health
+                echo; echo; echo "------------ Begin: f_test_extract -------------"
                 f_test_extract
-                echo; echo "------------ Begin: f_test_add -------------"
+                echo; echo; echo "------------ Begin: f_test_add -------------"
                 f_test_add
-                echo; echo "------------ Begin: f_test_update -------------"
+                echo; echo; echo "------------ Begin: f_test_update -------------"
                 f_test_update
-                echo; echo "------------ Begin: f_test_delete -------------"
+                echo; echo; echo "------------ Begin: f_test_delete -------------"
                 f_test_delete
-                echo; echo "------------ Begin: f_test_match -------------"
+                echo; echo; echo "------------ Begin: f_test_match -------------"
                 f_test_match
-                echo; echo "------------ Begin: f_test_identify -------------"
+                echo; echo; echo "------------ Begin: f_test_identify -------------"
                 f_test_identify
             ;;
+            health ) f_test_health;;
             extract ) f_test_extract;;
             add ) f_test_add;;
             update ) f_test_update;;
