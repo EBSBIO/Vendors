@@ -50,15 +50,15 @@
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Http request - detect photo" enabled="true">
           <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
             <collectionProp name="HTTPFileArgs.files">
-              <elementProp name="${path_to_samples}" elementType="HTTPFileArg">
-                <stringProp name="File.path">${path_to_samples}</stringProp>
-                <stringProp name="File.paramname">bio_sample</stringProp>
-                <stringProp name="File.mimetype">${__P(content_type)}</stringProp>
-              </elementProp>
               <elementProp name="${__P(meta)}" elementType="HTTPFileArg">
                 <stringProp name="File.path">${__P(meta)}</stringProp>
                 <stringProp name="File.paramname">metadata</stringProp>
                 <stringProp name="File.mimetype">application/json</stringProp>
+              </elementProp>
+              <elementProp name="${path_to_samples}" elementType="HTTPFileArg">
+                <stringProp name="File.path">${path_to_samples}</stringProp>
+                <stringProp name="File.paramname">bio_sample</stringProp>
+                <stringProp name="File.mimetype">${__P(content_type)}</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
