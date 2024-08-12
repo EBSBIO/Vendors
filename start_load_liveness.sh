@@ -15,7 +15,7 @@ echo Usage: "$0 [OPTIONS] TASK_NAME THREADS URL PORT
     -s              Absolute path to the directory where samples for testing
     -r num          Ramp-up period (sec, default 0)
     -p string       Prefix
-    -t              Type (photo|sound, default photo)
+    -t              Type (sound|photo|video, default photo)
 
     TASK_NAME       Vendor name
     THREADS         Sum threads(users)
@@ -39,25 +39,17 @@ else
     if [ "$#" -ne "4" ]; then
         f_usage
     else
-        JMX_FILE=resources/jmx/liveness.jmx                 # Template jmeter
-        SUMINTERVAL=10                                      # Интервал (в сек) обновления summariser (таблицы результатов в логе)  
-        PHOTO_SAMPLE="resources/samples/photo_shumskiy.jpg" # Используемый файл (photo) для теста в режиме одного сэмпла. Файл необходимо расположить в папке resources
-        SOUND_SAMPLE="resources/samples/sound_10s.wav"      # Используемый файл (sound) для теста в режиме одного сэмпла. Файл необходимо расположить в папке resources
+        JMX_FILE=resources/jmx/liveness.jmx                   # Template jmeter
+        SUMINTERVAL=10                                        # Интервал (в сек) обновления summariser (таблицы результатов в логе)  
+        SOUND_SAMPLE="resources/samples/sound_10s.wav"        # Используемый файл (sound) для теста в режиме одного сэмпла. Файл необходимо расположить в папке resources
+        PHOTO_SAMPLE="resources/samples/photo_shumskiy.jpg"   # Используемый файл (photo) для теста в режиме одного сэмпла. Файл необходимо расположить в папке resources
+        VIDEO_SAMPLE="resources/samples/vert_passive_video"   # Используемый файл (video) для теста в режиме одного сэмпла. Файл необходимо расположить в папке resources
         
         [ -z $TYPE ] && TYPE="photo"
         echo $TYPE
-        if [ "$TYPE" == "photo" ]; then
-            CTYPE="image/jpeg"                                  # content_type, указать image/jpeg для модальности photo или audio/wav для модальности sound
-            META="resources/metadata/meta.json"                 # Metadata, json файл для теста liveness
-            if [ -z $SAMPLE_DIR ]; then
-                echo "$PHOTO_SAMPLE" > resources/csv_configs/many_samples.csv                                                      # Внести один сэмпл
-            else
-                if [ $(find $SAMPLE_DIR -type f -iname "*.jpg" | wc -l) -ne $(cat resources/csv_configs/many_samples.csv | wc -l) ]; then
-                    find $SAMPLE_DIR -type f -iname "*.jpg" > resources/csv_configs/many_samples.csv                               # Обновить список сэмплов
-                fi
-            fi
-        elif [ "$TYPE" == "sound" ]; then
-            CTYPE="audio/wav"                                   # content_type, указать для модальности sound audio/wav
+        
+        if [ "$TYPE" == "sound" ]; then
+            CTYPE="audio/wav"                                   # content_type
             META="resources/metadata/meta_lv_s_p_10s.json"      # Metadata, json файл для теста liveness
             if [ -z $SAMPLE_DIR ]; then
                 echo "$SOUND_SAMPLE" > resources/csv_configs/many_samples.csv                                                      # Внести один сэмпл
@@ -66,13 +58,33 @@ else
                     find $SAMPLE_DIR -type f -iname "*.wav" > resources/csv_configs/many_samples.csv                               # Обновить список сэмплов
                 fi
             fi
+        elif [ "$TYPE" == "photo" ]; then
+            CTYPE="image/jpeg"                                  # content_type
+            META="resources/metadata/meta.json"                 # Metadata, json файл для теста liveness
+            if [ -z $SAMPLE_DIR ]; then
+                echo "$PHOTO_SAMPLE" > resources/csv_configs/many_samples.csv                                                      # Внести один сэмпл
+            else
+                if [ $(find $SAMPLE_DIR -type f -iname "*.jpg" | wc -l) -ne $(cat resources/csv_configs/many_samples.csv | wc -l) ]; then
+                    find $SAMPLE_DIR -type f -iname "*.jpg" > resources/csv_configs/many_samples.csv                               # Обновить список сэмплов
+                fi
+            fi
+        elif [ "$TYPE" == "video" ]; then
+            CTYPE="video/mov"                                   # content_type
+            META="resources/metadata/meta_lv_v_p.json"          # Metadata, json файл для теста liveness
+            if [ -z $SAMPLE_DIR ]; then
+                echo "$VIDEO_SAMPLE" > resources/csv_configs/many_samples.csv                                                      # Внести один сэмпл
+            else
+                if [ $(find $SAMPLE_DIR -type f -iname "*mov*" | wc -l) -ne $(cat resources/csv_configs/many_samples.csv | wc -l) ]; then
+                    find $SAMPLE_DIR -type f -iname "*mov*" > resources/csv_configs/many_samples.csv                               # Обновить список сэмплов
+                fi
+            fi
         else
             f_usage; exit
         fi
 
         THREADS=$2                              # Количество потоков (пользователей)
         LOOP="-1"                               # Количество повторов (-1 беcконечно)
-        [ -z $RAMP ] && RAMP=0                  # Длительность (в сек) для «наращивания» до полного числа выбранных потоков.
+        [ -z $RAMP ] && RAMP=0                  # Длительность (в сек) для «наращивания» до полного числа выбранных потоков
 
         REPORT=reports/${1}/liveness_${2}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv    # Отчет по запросам
         PERFLOG=reports/${1}/liveness_${2}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
@@ -96,7 +108,7 @@ else
         echo -e "\nCMD: $CMD\n"
 
         if [ $(cat resources/csv_configs/many_samples.csv | wc -l) -eq 0 ]; then
-            echo "ERROR: no $CTYPE samples to test, check your sample directory or test type"
+            echo; echo "ERROR: no $CTYPE samples to test, check your sample directory or test type"
             exit
         fi
 
