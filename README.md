@@ -7,7 +7,10 @@
 - для active liveness video требуется передать в параметры запуска мнемонику;
 - для active liveness video, если была выбрана мнемоника move, требуется передать в параметры запуска типы действий.
 
-Пример запуска API-автотеста верификации по фото метода extract:
+<br>**Если БП поддерживает одновременно работу по нескольким типам**, например, фото + пассивный по видео, то при запуске автотеста следует указывать именно фото+пассивное видео, чтобы корректно подобрался пул запросов.
+  
+
+<br>Пример запуска API-автотеста верификации по фото метода extract:
 ```bash
 ./api_test_verification_photo.sh -vv -t extract 127.0.0.1:{SOME_PORT} 10
 ```
@@ -27,10 +30,16 @@
 ./api_test_liveness.sh -t p_video -vv 127.0.0.1:{SOME_PORT} 10
 ```
 
+Запуск API-автотеста photo + passive liveness video:
+```bash
+./api_test_liveness.sh -t photo+p_video -vv 127.0.0.1:{SOME_PORT} 10
+```
+
 Запуск API-автотеста active liveness video мнемоники move-instructions:
 ```bash
 ./api_test_liveness.sh -t a_video -m move -a 1,2,3,4 -vv 127.0.0.1:{SOME_PORT} 10
 ```
+<br>
 
 ### Load tests
 Скрипты для нагрузочного тестирования могут выполнять тест в двух режимах:
@@ -58,7 +67,8 @@
 
 Скрипт stop_load.sh останавливает тест.
 
-Пример запуска теста в режиме "один сэмпл":
+
+<br>Пример запуска теста в режиме "один сэмпл":
 ```bash
 ./start_load_verification.sh tevian_gpu extract 3 127.0.0.1 {SOME_PORT}
 ```
