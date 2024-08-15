@@ -12,7 +12,10 @@ echo Usage: "$0 [OPTIONS] TASK_NAME THREADS URL PORT
     
     OPTIONS:
     -b              Start in background (screen)
+    
     -s              Absolute path to the directory where samples for testing
+                    For video type it's a must-have option
+
     -r num          Ramp-up period (sec, default 0)
     -p string       Prefix
     -t              Type (sound|photo|video, default photo)
@@ -43,12 +46,11 @@ else
         SUMINTERVAL=10                                        # Интервал (в сек) обновления summariser (таблицы результатов в логе)  
         SOUND_SAMPLE="resources/samples/sound_10s.wav"        # Используемый файл (sound) для теста в режиме одного сэмпла. Файл необходимо расположить в папке resources
         PHOTO_SAMPLE="resources/samples/photo_shumskiy.jpg"   # Используемый файл (photo) для теста в режиме одного сэмпла. Файл необходимо расположить в папке resources
-        VIDEO_SAMPLE="resources/samples/vert_passive_video"   # Используемый файл (video) для теста в режиме одного сэмпла. Файл необходимо расположить в папке resources
         
         [ -z $TYPE ] && TYPE="photo"
-        echo $TYPE
+        echo "Type – $TYPE"
         
-        if [ "$TYPE" == "sound" ]; then
+        if [[ "$TYPE" == "sound" ]]; then
             CTYPE="audio/wav"                                   # content_type
             META="resources/metadata/meta_lv_s_p_10s.json"      # Metadata, json файл для теста liveness
             if [ -z $SAMPLE_DIR ]; then
@@ -58,7 +60,7 @@ else
                     find $SAMPLE_DIR -type f -iname "*.wav" > resources/csv_configs/many_samples.csv                               # Обновить список сэмплов
                 fi
             fi
-        elif [ "$TYPE" == "photo" ]; then
+        elif [[ "$TYPE" == "photo" ]]; then
             CTYPE="image/jpeg"                                  # content_type
             META="resources/metadata/meta.json"                 # Metadata, json файл для теста liveness
             if [ -z $SAMPLE_DIR ]; then
@@ -68,14 +70,18 @@ else
                     find $SAMPLE_DIR -type f -iname "*.jpg" > resources/csv_configs/many_samples.csv                               # Обновить список сэмплов
                 fi
             fi
-        elif [ "$TYPE" == "video" ]; then
+        elif [[ "$TYPE" == "video" ]]; then
             CTYPE="video/mov"                                   # content_type
-            META="resources/metadata/meta_lv_v_p.json"          # Metadata, json файл для теста liveness
             if [ -z $SAMPLE_DIR ]; then
-                echo "$VIDEO_SAMPLE" > resources/csv_configs/many_samples.csv                                                      # Внести один сэмпл
+                echo; echo "You need to run the script with the \"-s\" option, specifying the path to the test samples with metadata"
+                exit
             else
+                if [ $(find $SAMPLE_DIR -type f -iname "*json*" | wc -l) -ne $(cat resources/csv_configs/metadata.csv | wc -l) ]; then
+                    find $SAMPLE_DIR -type f -iname "*json*" | sort > resources/csv_configs/metadata.csv                           # Обновить список сэмплов
+                fi
+
                 if [ $(find $SAMPLE_DIR -type f -iname "*mov*" | wc -l) -ne $(cat resources/csv_configs/many_samples.csv | wc -l) ]; then
-                    find $SAMPLE_DIR -type f -iname "*mov*" > resources/csv_configs/many_samples.csv                               # Обновить список сэмплов
+                    find $SAMPLE_DIR -type f -iname "*mov*" | sort > resources/csv_configs/many_samples.csv                        # Обновить список сэмплов
                 fi
             fi
         else
@@ -102,6 +108,7 @@ else
         cat /dev/null > tmp/http_errors.log     # Очистить лог http-запросов к БП, которые завершились с ошибкой, перед очередным запуском теста
 
         CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jcontent_type='$CTYPE' -Jmeta='$META' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
+        
         if [ "$BG" == 1 ]; then
             CMD='screen -dmS start.jmeter sh -c "'$CMD'"'
         fi
