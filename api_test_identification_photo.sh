@@ -14,6 +14,8 @@ BODY="tmp/responce_body"
 SAMPLE_JPG="resources/samples/photo.jpg"
 SAMPLE_JPG_2="resources/samples/photo_shumskiy.jpg"
 SAMPLE_PNG="resources/samples/photo.png"
+SAMPLE_JPG_WFE="resources/samples/jpeg_photo_wfe"
+SAMPLE_PNG_WFE="resources/samples/png_photo_wfe"
 BIG_SAMPLE_PNG="resources/samples/big.png"
 SAMPLE_LSF="resources/samples/little_second_face.jpg"
 SAMPLE_WAV="resources/samples/sound.wav"
@@ -88,6 +90,18 @@ f_test_extract() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/png" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_PNG' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -b
 
+    \cp $SAMPLE_JPG $SAMPLE_JPG_WFE
+    TEST_NAME="extract 200. JPG sample without filename extension"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_JPG_WFE' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -b
+    rm -f $SAMPLE_JPG_WFE
+
+    \cp $SAMPLE_PNG $SAMPLE_PNG_WFE
+    TEST_NAME="extract 200. PNG sample without filename extension"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/png" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_PNG_WFE' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -b
+    rm -f $SAMPLE_PNG_WFE
+
     TEST_NAME="extract 200. Big PNG sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/png" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$BIG_SAMPLE_PNG' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -b
@@ -133,7 +147,7 @@ f_test_extract() {
 f_test_add() {
     VENDOR_URL="$BASE_URL/add"
     
-    ###### Prepare
+    ###### prepare
     TEST_NAME="PREPARE - create biotemplate"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$BASE_URL'/extract'
     f_check -r 200
@@ -142,16 +156,18 @@ f_test_add() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_JPG_2' --output '$ANOTHER_BIOTEMPLATE' '$BASE_URL'/extract'
     f_check -r 200
 
+    ###### tests
+    TEST_NAME="add 200. With filename parameter"
+    echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="template"; filename="biotemplate"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$META_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+    
     TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
-
-    TEST_NAME="PREPARE - delete template_id: 1234510050067890"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_2' --output '$BODY' -X POST '$BASE_URL'/delete'
-    f_check -r 200
-
-
-    ##### TESTS
+    
     TEST_NAME="add 200. Without filename parameter"
     echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$META_ID\r\n" >> tmp/request_body
@@ -185,9 +201,31 @@ f_test_add() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
 
-    TEST_NAME="add 200. Reverse order of headings with filename"
+    TEST_NAME="add 200. Reverse order of headings with filename 1"
     echo -ne '--------------------------516695485518814e\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="template"; filename="biotemplate"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$META_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+    
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
+
+    TEST_NAME="add 200. Reverse order of headings with filename 2"
+    echo -ne '--------------------------516695485518814e\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="template"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$META_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+    
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
+
+    TEST_NAME="add 200. Reverse order of headings with filename 3"
+    echo -ne '--------------------------516695485518814e\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="template"; filename="biotemplate"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$META_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200
@@ -232,11 +270,11 @@ f_test_add() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$EMPTY';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002004"
 
-    TEST_NAME="add 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid template type"
+    TEST_NAME="add 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid template type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=image/jpeg" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
 
-    TEST_NAME="add 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid metadata type"
+    TEST_NAME="add 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid metadata type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BADTYPE' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
 
@@ -252,9 +290,9 @@ f_test_add() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_NOID' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00502"
 
-#    TEST_NAME="add 400. BPE-00502. No template file"
-#    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$EMPTY';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL 
-#    f_check -r 400 -m "BPE-00502"
+    # TEST_NAME="add 400. BPE-00502. No template file"
+    # REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$EMPTY';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL 
+    # f_check -r 400 -m "BPE-00502"
 
     TEST_NAME="add 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No template part"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F '$META' --output '$BODY' '$VENDOR_URL
@@ -279,37 +317,41 @@ f_test_add() {
     TEST_NAME="add 400. BPE-00507 – Шаблон не добавлен. Запись с данным идентификатором уже существует в базе. Duplicate template_id but different vector"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$ANOTHER_BIOTEMPLATE';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00507"
+
+    ###### cleaning
+    if [[ "$TASK" == "add" ]]; then
+        TEST_NAME="CLEANING - delete template_id: 722852fdf2ca4900be3707d80243fd70"
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
+        f_check -r 200
+
+        TEST_NAME="CLEANING - delete template_id: 1234510050067890"
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_2' --output '$BODY' -X POST '$BASE_URL'/delete'
+        f_check -r 200
+    fi
 }
 
 
 f_test_update() {
     VENDOR_URL="$BASE_URL/update"
 
-    ###### Prepare
+    ###### prepare
     TEST_NAME="PREPARE - create biotemplate"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$BASE_URL'/extract'
     f_check -r 200
 
     head --bytes=64 $BIOTEMPLATE > $BIOTEMPLATE_BR
 
-    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
-    f_check -r 200
+    if [[ "$TASK" == "update" ]]; then
+        TEST_NAME="PREPARE - add biotemplate"
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
+        f_check -r 200
 
-    TEST_NAME="PREPARE - delete template_id: 1234510050067890"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_2' --output '$BODY' -X POST '$BASE_URL'/delete'
-    f_check -r 200
+        TEST_NAME="PREPARE - add biotemplate"
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_2' '$BASE_URL'/add'
+        f_check -r 200
+    fi
 
-    TEST_NAME="PREPARE - add biotemplate"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
-    f_check -r 200
-
-    TEST_NAME="PREPARE - add biotemplate"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_2' '$BASE_URL'/add'
-    f_check -r 200
-
-
-    ###### TESTS
+    ###### tests
     TEST_NAME="update 200"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 200
@@ -324,6 +366,13 @@ f_test_update() {
 
     TEST_NAME="update 200. With charset=UTF-8"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_WITH_CHARSET_2' --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+
+    TEST_NAME="update 200. With filename parameter"
+    echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="template"; filename="biotemplate"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$META_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200
 
     TEST_NAME="update 200. Without filename parameter"
@@ -347,9 +396,23 @@ f_test_update() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200
 
-    TEST_NAME="update 200. Reverse order of headings with filename"
+    TEST_NAME="update 200. Reverse order of headings with filename 1"
     echo -ne '--------------------------516695485518814e\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="template"; filename="biotemplate"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$META_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+
+    TEST_NAME="update 200. Reverse order of headings with filename 2"
+    echo -ne '--------------------------516695485518814e\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="template"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$META_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200
+
+    TEST_NAME="update 200. Reverse order of headings with filename 3"
+    echo -ne '--------------------------516695485518814e\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="template"; filename="biotemplate"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$META_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200
@@ -370,11 +433,11 @@ f_test_update() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BIGID' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002404"
 
-    TEST_NAME="update 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid template type"
+    TEST_NAME="update 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid template type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=image/png" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
 
-    TEST_NAME="update 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid metadata type"
+    TEST_NAME="update 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid metadata type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BADTYPE' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
 
@@ -390,9 +453,9 @@ f_test_update() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_NOID' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00502"
 
-#    TEST_NAME="update 400. BPE-00502. No template data"
-#    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$EMPTY';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
-##    f_check -r 400 -m "BPE-00502"
+    # TEST_NAME="update 400. BPE-00502. No template data"
+    # REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$EMPTY';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
+    # f_check -r 400 -m "BPE-00502"
 
     TEST_NAME="update 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No template part"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F '$META' --output '$BODY' '$VENDOR_URL
@@ -409,35 +472,39 @@ f_test_update() {
     TEST_NAME="update 400. BPE-00506 – Недопустимое значение параметра {название параметра}. Invalid template_id parameter value"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_IPV' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00506"
+
+    ###### cleaning
+    if [[ "$TASK" == "update" ]]; then
+        TEST_NAME="CLEANING - delete template_id: 722852fdf2ca4900be3707d80243fd70"
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
+        f_check -r 200
+
+        TEST_NAME="CLEANING - delete template_id: 1234510050067890"
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_2' --output '$BODY' -X POST '$BASE_URL'/delete'
+        f_check -r 200
+    fi
 }
 
 
 f_test_delete() {
     VENDOR_URL="$BASE_URL/delete"
 
-    ###### Prepare
+    ###### prepare
     TEST_NAME="PREPARE - create biotemplate"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$BASE_URL'/extract'
     f_check -r 200
 
-    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
-    f_check -r 200
+    if [[ "$TASK" == "delete" ]]; then
+        TEST_NAME="PREPARE - add biotemplate"
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
+        f_check -r 200
 
-    TEST_NAME="PREPARE - delete template_id: 1234510050067890"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_2' --output '$BODY' -X POST '$BASE_URL'/delete'
-    f_check -r 200
+        TEST_NAME="PREPARE - add biotemplate"
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_2' '$BASE_URL'/add'
+        f_check -r 200
+    fi
 
-    TEST_NAME="PREPARE - add biotemplate"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
-    f_check -r 200
-
-    TEST_NAME="PREPARE - add biotemplate"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_2' '$BASE_URL'/add'
-    f_check -r 200
-
-
-    ##### TESTS
+    ###### tests
     TEST_NAME='delete 200'
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' '$VENDOR_URL
     f_check -r 200
@@ -491,7 +558,7 @@ f_test_delete() {
 f_test_match() {
     VENDOR_URL="$BASE_URL/match"
 
-    ###### Prepare
+    ###### prepare
     TEST_NAME="PREPARE - create biotemplate"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$BASE_URL'/extract'
     f_check -r 200
@@ -508,7 +575,7 @@ f_test_match() {
 
     sleep 5
 
-    ##### TESTS
+    ###### tests
     TEST_NAME="match 200"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
@@ -533,6 +600,13 @@ f_test_match() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_10' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m_thre "[0-1].[0-9]" -f "- format double or empty array is expected"
 
+    TEST_NAME="match 200. With filename parameter"
+    echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="template"; filename="biotemplate"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+
     TEST_NAME="match 200. Without filename parameter"
     echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
@@ -554,9 +628,23 @@ f_test_match() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
-    TEST_NAME="match 200. Reverse order of headings with filename"
+    TEST_NAME="match 200. Reverse order of headings with filename 1"
     echo -ne '--------------------------516695485518814e\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="template"; filename="biotemplate"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="match 200. Reverse order of headings with filename 2"
+    echo -ne '--------------------------516695485518814e\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="template"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="match 200. Reverse order of headings with filename 3"
+    echo -ne '--------------------------516695485518814e\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="template"; filename="biotemplate"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
@@ -573,11 +661,11 @@ f_test_match() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE_BR';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002004"
 
-    TEST_NAME="match 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid template type"
+    TEST_NAME="match 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid template type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
 
-    TEST_NAME="match 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid metadata type"
+    TEST_NAME="match 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid metadata type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_BADTYPE' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
 
@@ -589,9 +677,9 @@ f_test_match() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_BAD' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00005"
 
-#    TEST_NAME="match 400. BPE-00005. No template"
-#    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$EMPTY';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
-#    f_check -r 400 -m "BPE-00005"
+    # TEST_NAME="match 400. BPE-00005. No template"
+    # REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$EMPTY';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
+    # f_check -r 400 -m "BPE-00005"
 
     TEST_NAME="match 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No limit parameter"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_NOLIM' --output '$BODY' '$VENDOR_URL
@@ -612,42 +700,62 @@ f_test_match() {
     TEST_NAME="match 400. BPE-00506 – Недопустимое значение параметра {название параметра}. Invalid limit parameter value"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_IPV' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-00506"
-}
 
+    ###### cleaning
+    if [[ "$TASK" == "match" ]]; then
+        TEST_NAME="CLEANING - delete template_id: 722852fdf2ca4900be3707d80243fd70"
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
+        f_check -r 200
+
+        TEST_NAME="CLEANING - delete template_id: 1234510050067890"
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_2' --output '$BODY' -X POST '$BASE_URL'/delete'
+        f_check -r 200
+    fi
+}
 
 
 f_test_identify() {
     VENDOR_URL="$BASE_URL/identify"
 
-    ###### Prepare
+    ###### prepare
     TEST_NAME="PREPARE - create biotemplate"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$BASE_URL'/extract'
     f_check -r 200
 
     dd if=/dev/urandom of=$SAMPLE_BR bs=1024 count=4 status=none
 
-    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
-    f_check -r 200
-    
-    TEST_NAME="PREPARE - delete template_id: 1234510050067890"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_2' --output '$BODY' -X POST '$BASE_URL'/delete'
-    f_check -r 200
-
-    TEST_NAME="PREPARE - add biotemplate"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
-    f_check -r 200
-    
-    TEST_NAME="PREPARE - add biotemplate"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_2' '$BASE_URL'/add'
-    f_check -r 200
+    if [[ "$TASK" == "identify" ]]; then
+        TEST_NAME="PREPARE - add biotemplate"
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
+        f_check -r 200
+        
+        TEST_NAME="PREPARE - add biotemplate"
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_2' '$BASE_URL'/add'
+        f_check -r 200
+    fi
 
     sleep 5
 
-    #### TESTS
+    ###### tests
     TEST_NAME="identify 200. JPG sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="identify 200. PNG sample"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_PNG';type=image/png" -F '$MMETA' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+
+    \cp $SAMPLE_JPG $SAMPLE_JPG_WFE
+    TEST_NAME="identify 200. JPG sample without filename extension"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG_WFE';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    rm -f $SAMPLE_JPG_WFE
+
+    \cp $SAMPLE_PNG $SAMPLE_PNG_WFE
+    TEST_NAME="identify 200. PNG sample without filename extension"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_PNG_WFE';type=image/png" -F '$MMETA' --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    rm -f $SAMPLE_PNG_WFE
 
     TEST_NAME="identify 200. Big PNG sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$BIG_SAMPLE_PNG';type=image/png" -F '$MMETA_00' --output '$BODY' '$VENDOR_URL
@@ -676,6 +784,13 @@ f_test_identify() {
     TEST_NAME="identify 200. With threshold 1.0"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_10' --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m_thre "[0-1].[0-9]" -f "- format double or empty array is expected"
+    
+    TEST_NAME="identify 200. With filename parameter"
+    echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="photo"; filename="photo.jpg"\r\nContent-Type: image/jpeg\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
     TEST_NAME="identify 200. Without filename parameter"
     echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="photo"\r\nContent-Type: image/jpeg\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
@@ -705,9 +820,23 @@ f_test_identify() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
 
-    TEST_NAME="identify 200. Reverse order of headings with filename"
+    TEST_NAME="identify 200. Reverse order of headings with filename 1"
     echo -ne '--------------------------516695485518814e\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="photo"; filename="photo.jpg"\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="identify 200. Reverse order of headings with filename 2"
+    echo -ne '--------------------------516695485518814e\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="photo"\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
+    echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+
+    TEST_NAME="identify 200. Reverse order of headings with filename 3"
+    echo -ne '--------------------------516695485518814e\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="photo"; filename="photo.jpg"\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
+    echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
@@ -732,15 +861,15 @@ f_test_identify() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_WAV';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002003"
 
-    TEST_NAME="identify 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid sample type"
+    TEST_NAME="identify 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid sample type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=audio/pcm" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
 
-    TEST_NAME="identify 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid metadata type"
+    TEST_NAME="identify 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid metadata type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_BADTYPE' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
 
-    TEST_NAME="identify 400. BPE-002005 – Неверный Content-Type части multipart HTTP-запроса. Invalid sample type"
+    TEST_NAME="identify 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid sample type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=audio/wav" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002005"
 
@@ -783,6 +912,15 @@ f_test_identify() {
     TEST_NAME="identify 400. BPE-003003 – На биометрическом образце присутствует более, чем одно лицо. More than one face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_TF';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-003003"
+
+    ###### prepare
+    TEST_NAME="PREPARE - delete template_id: 722852fdf2ca4900be3707d80243fd70"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
+    
+    TEST_NAME="PREPARE - delete template_id: 1234510050067890"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_2' --output '$BODY' -X POST '$BASE_URL'/delete'
+    f_check -r 200
 }
 
 
