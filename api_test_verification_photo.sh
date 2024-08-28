@@ -16,7 +16,7 @@ SAMPLE_PNG_WFE="resources/samples/png_photo_wfe"
 BIG_SAMPLE_PNG="resources/samples/big.png"
 SAMPLE_LSF="resources/samples/little_second_face.jpg"
 SAMPLE_WAV="resources/samples/sound.wav"
-SAMPLE_WEBM="resources/samples/video.mov"
+VERTICAL_SAMPLE_MOV="resources/samples/vert_passive_video"
 SAMPLE_NF="resources/samples/no_face.jpg"
 SAMPLE_TF="resources/samples/two_face.jpg"
 EMPTY="resources/samples/empty"
@@ -87,7 +87,11 @@ f_test_extract() {
 
     TEST_NAME="extract 400. BPE-002003 – Не удалось прочитать биометрический образец. Sound file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" --data-binary @'$SAMPLE_WAV' --output '$BODY' '$VENDOR_URL
-    f_check -r 400  -m "BPE-002003"
+    f_check -r 400 -m "BPE-002003"
+
+    TEST_NAME="extract 400. BPE-002003 – Не удалось прочитать биометрический образец. Video file"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" --data-binary @'$VERTICAL_SAMPLE_MOV' --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-002003"
 
     TEST_NAME="extract 400. BPE-003002 – На биометрическом образце отсутствует лицо. No face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_NF' --output '$BODY' '$VENDOR_URL
@@ -290,6 +294,14 @@ f_test_verify() {
 
     TEST_NAME="verify 400. BPE-002003 – Не удалось прочитать биометрический образец. Empty file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$EMPTY';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-002003"
+
+    TEST_NAME="verify 400. BPE-002003 – Не удалось прочитать биометрический образец. Sound file"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-002003"
+
+    TEST_NAME="verify 400. BPE-002003 – Не удалось прочитать биометрический образец. Video file"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$VERTICAL_SAMPLE_MOV';type=image/jpeg" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002003"
 
     TEST_NAME="verify 400. BPE-002004 – Не удалось прочитать биометрический шаблон. Empty biotemplate"

@@ -21,7 +21,7 @@ f_test_passive_liveness_photo() {
 
     EMPTY="resources/samples/empty"
     SAMPLE_WAV="resources/samples/sound.wav"
-    VERTICAL_SAMPLE_MP4="resources/samples/vert_passive_video.mp4"
+    VERTICAL_SAMPLE_MOV="resources/samples/vert_passive_video"
     SAMPLE_CAT_JPG="resources/samples/cat.jpg"
     SAMPLE_NF="resources/samples/no_face.jpg"
     SAMPLE_TF="resources/samples/two_face.jpg"
@@ -138,7 +138,7 @@ f_test_passive_liveness_photo() {
     f_check -r 400 -m "LDE-002004"
 
     TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец. Video file"
-    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MP4';type=image/jpeg" --output '$BODY' '$VENDOR_URL
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=image/jpeg" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "LDE-002004"
 
     TEST_NAME="detect 400. LDE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid metadata type"
@@ -149,13 +149,13 @@ f_test_passive_liveness_photo() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=application/json" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "LDE-002005"
 
-    if [ "$TYPE" == "photo" ] ; then
+    if [ "$TYPE" == "photo" ]; then
         TEST_NAME="detect 400. LDE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid sample type"
         REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=audio/wav" --output '$BODY' '$VENDOR_URL
         f_check -r 400 -m "LDE-002005"
 
         TEST_NAME="detect 400. LDE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid sample type"
-        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=video/mp4" --output '$BODY' '$VENDOR_URL
+        REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=video/mov" --output '$BODY' '$VENDOR_URL
         f_check -r 400 -m "LDE-002005"
 
     elif [ "$TYPE" == "photo+p_video" ]; then

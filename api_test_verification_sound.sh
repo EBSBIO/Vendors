@@ -16,6 +16,7 @@ SAMPLE_SWV="resources/samples/sound_without_voice.wav"
 SAMPLE_SDV="resources/samples/sound_double_voice.wav"
 SAMPLE_PNG="resources/samples/photo.png"
 SAMPLE_JPG="resources/samples/photo.jpg"
+VERTICAL_SAMPLE_MOV="resources/samples/vert_passive_video"
 BIOTEMPLATE="tmp/biotemplate"
 
 
@@ -58,6 +59,10 @@ f_test_extract() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:audio/wav" -H "Expect:" --data-binary @'$SAMPLE_PNG'  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002003"
 
+    TEST_NAME="extract 400. BPE-002003 – Не удалось прочитать биометрический образец. Video file"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:audio/wav" -H "Expect:" --data-binary @'$VERTICAL_SAMPLE_MOV'  --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-002003"
+
     TEST_NAME="extract 400. BPE-003002 – На биометрическом образце отсутствует голос. No voice"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:audio/wav" -H "Expect:" --data-binary @'$SAMPLE_SWV' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-003002"
@@ -80,7 +85,7 @@ f_test_compare() {
     # Tests
     TEST_NAME="compare 200"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -X POST --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m "\"?[Ss]core\"?:\s?[0-1].[0-9]" -f "- Score format double is expected"
 
     TEST_NAME="compare 200. Without filename parameter"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_feature"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
@@ -238,6 +243,10 @@ f_test_verify() {
 
     TEST_NAME="verify 400. BPE-002003 – Не удалось прочитать биометрический образец. Photo file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_JPG';type=audio/wav"  --output '$BODY' '$VENDOR_URL
+    f_check -r 400 -m "BPE-002003"
+
+    TEST_NAME="verify 400. BPE-002003 – Не удалось прочитать биометрический образец. Video file"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$VERTICAL_SAMPLE_MOV';type=audio/wav"  --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "BPE-002003"
 
     TEST_NAME="verify 400. BPE-002004 – Не удалось прочитать биометрический шаблон. Empty biotemplate"
