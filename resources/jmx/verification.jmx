@@ -187,7 +187,7 @@
             <hashTree/>
           </hashTree>
         </hashTree>
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If Controller - compare" enabled="true">
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If Controller compare" enabled="true">
           <stringProp name="IfController.condition">&quot;${__P(method)}&quot; == &quot;compare&quot;</stringProp>
           <boolProp name="IfController.evaluateAll">false</boolProp>
         </IfController>
@@ -244,32 +244,32 @@
         <objProp>
           <name>saveConfig</name>
           <value class="SampleSaveConfiguration">
-            <time>true</time>
+            <time>false</time>
             <latency>false</latency>
             <timestamp>true</timestamp>
             <success>true</success>
-            <label>false</label>
+            <label>true</label>
             <code>true</code>
             <message>true</message>
-            <threadName>false</threadName>
-            <dataType>true</dataType>
+            <threadName>true</threadName>
+            <dataType>false</dataType>
             <encoding>false</encoding>
             <assertions>true</assertions>
-            <subresults>true</subresults>
+            <subresults>false</subresults>
             <responseData>true</responseData>
             <samplerData>true</samplerData>
             <xml>true</xml>
-            <fieldNames>false</fieldNames>
+            <fieldNames>true</fieldNames>
             <responseHeaders>true</responseHeaders>
             <requestHeaders>true</requestHeaders>
             <responseDataOnError>false</responseDataOnError>
             <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
             <assertionsResultsToSave>0</assertionsResultsToSave>
             <url>true</url>
-            <connectTime>true</connectTime>
+            <threadCounts>true</threadCounts>
           </value>
         </objProp>
-        <stringProp name="filename">tmp/http_errors.log</stringProp>
+        <stringProp name="filename">tmp/http_errors.xml</stringProp>
       </ResultCollector>
       <hashTree/>
       <kg.apc.jmeter.perfmon.PerfMonCollector guiclass="kg.apc.jmeter.vizualizers.PerfMonGui" testclass="kg.apc.jmeter.perfmon.PerfMonCollector" testname="jp@gc - PerfMon Metrics Collector" enabled="true">

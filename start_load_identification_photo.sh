@@ -169,7 +169,7 @@ else
             LOCATION="/v1/$METHOD"
         fi
         
-        cat /dev/null > tmp/http_errors.log                        # Очистить лог http-запросов к БП, которые завершились с ошибкой, перед очередным запуском теста
+        [[ -s "tmp/http_errors.xml" ]] && cat /dev/null > tmp/http_errors.xml                                       # Очистить лог http-запросов к БП, которые завершились с ошибкой, перед очередным запуском теста
 
         CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jmethod='$METHOD' -Jcontent_type='$CTYPE' -Jmmeta='$MMETA' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -Jduration='$DURATION' -j '$LOG' -l '$REPORT
 
