@@ -38,6 +38,7 @@ f_check() {
                 fi
                 shift
             ;;
+
             # body weight
             -b) BODY_CHECK=1
                 if [ -s $BODY ]; then
@@ -46,48 +47,14 @@ f_check() {
                     BODY_RESULT="FAIL (template is empty)"
                 fi
             ;;
+
             # body message
             -m) MESSAGE_CHECK=1
                 if [ -s $BODY ]; then
                     #MESSAGE=$(head -n 5 $BODY)
                     #cat $BODY
-                    MESSAGE=$(grep --binary-files=text -e '{.*}' -zo $BODY | tr -d '\0')
-                    if [[ $MESSAGE  =~ $2 ]]; then
-                        MESSAGE_RESULT="OK"
-                    else
-                        MESSAGE_RESULT="FAIL ($2 is expected)"
-                    fi
-                else
-                    MESSAGE_RESULT="FAIL (message does not exist)"
-                fi
-                shift
-            ;;
-
-            -m_thre) MESSAGE_CHECK=1
-                if [ -s $BODY ]; then
-                    MESSAGE=$(grep --binary-files=text -e '{.*}' -z $BODY | tr -d '\0')
-                    if [[ $MESSAGE =~ :[[:blank:]]?1\.0}?,? ]]; then
-                        MESSAGE_RESULT="OK"
-                    elif
-                        MESSAGE=$(echo -ne $(cat tmp/responce_body))
-                        [[ $MESSAGE == "[]" ]]; then
-                        MESSAGE_RESULT="OK"
-                    else
-                        MESSAGE_RESULT="FAIL ($2 is expected or empty array)"
-                    fi
-                else
-                    MESSAGE_RESULT="FAIL (message does not exist)"
-                fi
-                shift
-            ;;
-            
-            -m_simi) MESSAGE_CHECK=1
-                if [ -s $BODY ]; then
-                    MESSAGE=$(grep --binary-files=text -e '{.*}' -zo $BODY | tr -d '\0')
-                    if [[ $MESSAGE =~ :[[:blank:]]?0\.[0-9]+}?,? ]]; then
-                        MESSAGE_RESULT="OK"
-                    elif
-                       [[ $MESSAGE =~ :[[:blank:]]?1\.0} ]]; then
+                    MESSAGE=$(grep --binary-files=text -E '(\{.*\})|(\[.*\])' -zo $BODY | tr -d '\0')
+                    if [[ $MESSAGE =~ $2 ]]; then
                         MESSAGE_RESULT="OK"
                     else
                         MESSAGE_RESULT="FAIL ($2 is expected)"

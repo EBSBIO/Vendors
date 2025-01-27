@@ -7,6 +7,7 @@ f_test_active_liveness_video() {
     TYPE=$1
     MNEMONIC=$2
     ACTIONS=$3
+
     BODY="tmp/responce_body"
     
     TURN_RIGHT_VERTICAL_SAMPLE_MOV="resources/samples/vert_turn_right_video"
@@ -107,180 +108,191 @@ f_test_active_liveness_video() {
     [[ "$MNEMONIC" == "move" ]] && META_WD="$MOVE_META_WD" || META_WD="$TEXT_META_WD"
     [[ "$MNEMONIC" == "move" ]] && META_WMSG="$MOVE_META_WMSG" || META_WMSG="$TEXT_META_WMSG"
 
-    VENDOR_URL="$BASE_URL/detect"
+    ACTION_TYPE_LIST='(TURN_((RIGHT)|(LEFT)|(UP)|(DOWN)))|(SMILE)|(BLINK)|(DISTORTION)|(RAISE_EYEBROW)|(numbers-digits)'
+    DETECT_REGEX_START_PART='\{\s*"passed":\s?(false|true),\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*(,\s*"results":\s?\[\s*\{\s*"type":\s?"'
+    DETECT_REGEX_END_PART='",\s*"passed":\s?(false|true)\s*\}\s*\]\s*)?\}'
 
+    regex() {
+        LOCAL_META=$1
+        ACTION_TYPE=$(echo $LOCAL_META | grep -E "${ACTION_TYPE_LIST}" -o)
+
+        echo ${DETECT_REGEX_START_PART}${ACTION_TYPE}${DETECT_REGEX_END_PART}
+    }
+
+    VENDOR_URL="$BASE_URL/detect"
+    
 
     if [ "$MNEMONIC" == "move" ]; then
         if [[ "$ACTIONS" =~ 1  || "$ACTIONS" == "all" ]]; then
             TEST_NAME="detect 200. Vertical MOV video with TURN_RIGHT type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_TURN_RIGHT' -F "bio_sample=@'$TURN_RIGHT_VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_TURN_RIGHT}) -f "- Score format double is expected"
 
             TEST_NAME="detect 200. Horizontal MOV video with TURN_RIGHT type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_TURN_RIGHT' -F "bio_sample=@'$TURN_RIGHT_HORIZONTAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_TURN_RIGHT}) -f "- Score format double is expected"
         fi
 
         if [[ "$ACTIONS" =~ 2 || "$ACTIONS" == "all" ]]; then
             TEST_NAME="detect 200. Vertical MOV video with TURN_LEFT type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_TURN_LEFT' -F "bio_sample=@'$TURN_LEFT_VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_TURN_LEFT}) -f "- Score format double is expected"
 
             TEST_NAME="detect 200. Horizontal MOV video with TURN_LEFT type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_TURN_LEFT' -F "bio_sample=@'$TURN_LEFT_HORIZONTAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_TURN_LEFT}) -f "- Score format double is expected"
         fi
 
-        if [[ "$ACTIONS" =~ 3 || "$ACTIONS" == "all" ]]; then
+        if [[ "$ACTIONS" =~ 3 || "$ACTIONS" == "all" ]]; then           
             TEST_NAME="detect 200. Vertical MOV video with TURN_UP type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_TURN_UP' -F "bio_sample=@'$TURN_UP_VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_TURN_UP}) -f "- Score format double is expected"
 
             TEST_NAME="detect 200. Horizontal MOV video with TURN_UP type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_TURN_UP' -F "bio_sample=@'$TURN_UP_HORIZONTAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_TURN_UP}) -f "- Score format double is expected"
         fi
 
         if [[ "$ACTIONS" =~ 4 || "$ACTIONS" == "all" ]]; then
             TEST_NAME="detect 200. Vertical MOV video with TURN_DOWN type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_TURN_DOWN' -F "bio_sample=@'$TURN_DOWN_VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_TURN_DOWN}) -f "- Score format double is expected"
 
             TEST_NAME="detect 200. Horizontal MOV video with TURN_DOWN type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_TURN_DOWN' -F "bio_sample=@'$TURN_DOWN_HORIZONTAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_TURN_DOWN}) -f "- Score format double is expected"
         fi
 
         if [[ "$ACTIONS" =~ 5 || "$ACTIONS" == "all" ]]; then
             TEST_NAME="detect 200. Vertical MOV video with SMILE type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_SMILE' -F "bio_sample=@'$SMILE_VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_SMILE}) -f "- Score format double is expected"
 
             TEST_NAME="detect 200. Horizontal MOV video with SMILE type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_SMILE' -F "bio_sample=@'$SMILE_HORIZONTAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_SMILE}) -f "- Score format double is expected"
         fi
 
         if [[ "$ACTIONS" =~ 6 || "$ACTIONS" == "all" ]]; then
             TEST_NAME="detect 200. Vertical MOV video with BLINK type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_BLINK' -F "bio_sample=@'$BLINK_VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_BLINK}) -f "- Score format double is expected"
 
             TEST_NAME="detect 200. Horizontal MOV video with BLINK type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_BLINK' -F "bio_sample=@'$BLINK_HORIZONTAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_BLINK}) -f "- Score format double is expected"
         fi
 
         if [[ "$ACTIONS" =~ 7 || "$ACTIONS" == "all" ]]; then
             TEST_NAME="detect 200. Vertical MOV video with DISTORTION type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_DISTORTION' -F "bio_sample=@'$DISTORTION_VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_DISTORTION}) -f "- Score format double is expected"
 
             TEST_NAME="detect 200. Horizontal MOV video with DISTORTION type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_DISTORTION' -F "bio_sample=@'$DISTORTION_HORIZONTAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_DISTORTION}) -f "- Score format double is expected"
         fi
 
         if [[ "$ACTIONS" =~ 8 || "$ACTIONS" == "all" ]]; then
             TEST_NAME="detect 200. Vertical MOV video with RAISE_EYEBROW type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_RAISE_EYEBROW' -F "bio_sample=@'$RAISE_EYEBROW_VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_RAISE_EYEBROW}) -f "- Score format double is expected"
 
             TEST_NAME="detect 200. Horizontal MOV video with RAISE_EYEBROW type"
             REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_RAISE_EYEBROW' -F "bio_sample=@'$RAISE_EYEBROW_HORIZONTAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-            f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+            f_check -r 200 -m $(regex ${META_RAISE_EYEBROW}) -f "- Score format double is expected"
         fi
 
     elif [ "$MNEMONIC" == "text" ]; then
         TEST_NAME="detect 200. Vertical MOV video with numbers-digits type"
         REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$TEXT_META_1' -F "bio_sample=@'$NUMBERS_DIGITS_VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-        f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+        f_check -r 200 -m $(regex ${TEXT_META_1}) -f "- Score format double is expected"
 
         TEST_NAME="detect 200. Horizontal MOV video with numbers-digits type"
         REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$TEXT_META_2' -F "bio_sample=@'$NUMBERS_DIGITS_HORIZONTAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-        f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+        f_check -r 200 -m $(regex ${TEXT_META_2}) -f "- Score format double is expected"
     fi
 
     # TEST_NAME="detect 200. Big video"
     # REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META' -F "bio_sample=@'$BIG_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    # f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    # f_check -r 200 -m $(regex ${META}) -f "- Score format double is expected"
 
     \cp $VERTICAL_SAMPLE_MOV $VERTICAL_SAMPLE_MOV_WFE
     TEST_NAME="detect 200. Vertical video with filename extension"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META' -F "bio_sample=@'$VERTICAL_SAMPLE_MOV_WFE';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m $(regex ${META}) -f "- Score format double is expected"
     rm -f $VERTICAL_SAMPLE_MOV_WFE
 
     \cp $HORIZONTAL_SAMPLE_MOV $HORIZONTAL_SAMPLE_MOV_WFE
     TEST_NAME="detect 200. Horizontal video with filename extension"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META' -F "bio_sample=@'$HORIZONTAL_SAMPLE_MOV_WFE';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m $(regex ${META}) -f "- Score format double is expected"
     rm -f $HORIZONTAL_SAMPLE_MOV_WFE
 
     TEST_NAME="detect 200. Vertical with little second face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META' -F "bio_sample=@'$VERTICAL_SAMPLE_LSF';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m $(regex ${META}) -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Horizontal with little second face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META' -F "bio_sample=@'$HORIZONTAL_SAMPLE_LSF';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m $(regex ${META}) -f "- Score format double is expected"
 
     TEST_NAME="detect 200. With charset=UTF-8"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_CHARSET_1' -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m $(regex ${META_CHARSET_1}) -f "- Score format double is expected"
 
     TEST_NAME="detect 200. With charset=UTF-8"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META_CHARSET_2' -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m $(regex ${META_CHARSET_2}) -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Without filename parameter"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' > tmp/request_body; echo -ne "$META_WF" >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_sample"\r\nContent-Type: video/mov\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m $(regex ${META_WF}) -f "- Score format double is expected"
 
     # TEST_NAME="detect 200. Without filename parameter with big video"
     # echo -ne '--72468\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' > tmp/request_body; echo -ne "$META_WF" >> tmp/request_body
     # echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_sample"\r\nContent-Type: video/mov\r\n\r\n' >> tmp/request_body; cat $BIG_SAMPLE_MOV >> tmp/request_body
     # echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     # REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    # f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    # f_check -r 200 -m $(regex ${META_WF}) -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Without filename parameter with boundary in quotes"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' > tmp/request_body; echo -ne "$META_WF" >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_sample"\r\nContent-Type: video/mov\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=\"72468\"" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m $(regex ${META_WF}) -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Reverse order of headings without filename"
     echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' > tmp/request_body; echo -ne "$META_WF" >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: video/mov\r\nContent-Disposition: form-data; name="bio_sample"\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m $(regex ${META_WF}) -f "- Score format double is expected"
     
     TEST_NAME="detect 200. Reverse order of headings with filename 1"
     echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' > tmp/request_body; echo -ne "$META_WF" >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: video/mov\r\nContent-Disposition: form-data; name="bio_sample"; filename="vertical_active_video"\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m $(regex ${META_WF}) -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Reverse order of headings with filename 2"
     echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="meta.json"\r\n\r\n' > tmp/request_body; echo -ne "$META_WF" >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: video/mov\r\nContent-Disposition: form-data; name="bio_sample"\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m $(regex ${META_WF}) -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Reverse order of headings with filename 3"
     echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="meta.json"\r\n\r\n' > tmp/request_body; echo -ne "$META_WF" >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: video/mov\r\nContent-Disposition: form-data; name="bio_sample"; filename="vertical_active_video"\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m $(regex ${META_WF}) -f "- Score format double is expected"
   
     TEST_NAME="detect 400. LDE-002001 – Неверный Content-Type HTTP-запроса. Wrong content-type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -F '$META' -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL

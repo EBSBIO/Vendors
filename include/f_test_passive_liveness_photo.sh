@@ -10,6 +10,8 @@ source include/f_checks.sh
 
 f_test_passive_liveness_photo() {
     TYPE=$1
+    PHOTO_SCORE_REGEX=$2
+
     BODY="tmp/responce_body"
     
     SAMPLE_JPG="resources/samples/photo_shumskiy.jpg"
@@ -38,88 +40,88 @@ f_test_passive_liveness_photo() {
 
     TEST_NAME="detect 200. JPG sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. PNG sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_PNG';type=image/png" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
 
     \cp $SAMPLE_JPG $SAMPLE_JPG_WFE
     TEST_NAME="detect 200. JPG sample without filename extension"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG_WFE';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
     rm -f $SAMPLE_JPG_WFE
 
     \cp $SAMPLE_PNG $SAMPLE_PNG_WFE
     TEST_NAME="detect 200. PNG sample without filename extension"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_PNG_WFE';type=image/png" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
     rm -f $SAMPLE_PNG_WFE
 
     TEST_NAME="detect 200. Big PNG sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$BIG_SAMPLE_PNG';type=image/png" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Little second face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_LSF';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. With charset=UTF-8"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json;charset=UTF-8" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. With charset=UTF-8"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json; charset=UTF-8" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Without filename parameter"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_sample"\r\nContent-Type: image/jpeg\r\n\r\n' >> tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Without filename parameter with big photo"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_sample"\r\nContent-Type: image/png\r\n\r\n' >> tmp/request_body; cat $BIG_SAMPLE_PNG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Without filename parameter with boundary in quotes"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_sample"\r\nContent-Type: image/jpeg\r\n\r\n' >> tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=\"72468\"" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Reverse order of headings without filename"
     echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="bio_sample"\r\n\r\n' >> tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Reverse order of headings with filename 1"
     echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="bio_sample"; filename="photo_shumskiy.jpg"\r\n\r\n' >> tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Reverse order of headings with filename 2"
     echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="meta.json"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="bio_sample"\r\n\r\n' >> tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Reverse order of headings with filename 3"
     echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="meta.json"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="bio_sample"; filename="photo_shumskiy.jpg"\r\n\r\n' >> tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m "[0-1].[0-9]" -f "- Score format double is expected"
+    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 400. LDE-002001 – Неверный Content-Type HTTP-запроса. Wrong content-type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
