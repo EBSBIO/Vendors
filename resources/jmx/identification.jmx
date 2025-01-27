@@ -347,58 +347,27 @@ try (f = new FileWriter(&quot;resources/csv_configs/template_ids.csv&quot;, true
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression - message" enabled="false">
-              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
-              <stringProp name="RegexExtractor.refname">message</stringProp>
-              <stringProp name="RegexExtractor.regex">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?[0-1].[0-9]+\}</stringProp>
-              <stringProp name="RegexExtractor.template">$0$</stringProp>
-              <stringProp name="RegexExtractor.default">error</stringProp>
-              <stringProp name="RegexExtractor.match_number"></stringProp>
-            </RegexExtractor>
-            <hashTree/>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion - message" enabled="false">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="96784904">error</stringProp>
-              </collectionProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
-              <intProp name="Assertion.test_type">12</intProp>
-              <stringProp name="Assertion.scope">variable</stringProp>
-              <stringProp name="Scope.variable">message</stringProp>
-            </ResponseAssertion>
-            <hashTree/>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion 1 - message" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="-126926479">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?0\}</stringProp>
-                <stringProp name="-126925518">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1\}</stringProp>
-                <stringProp name="2008650094">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1.[1-9]+\}</stringProp>
-                <stringProp name="725520131">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1.0[0-9]+\}</stringProp>
-                <stringProp name="689458353">\{&quot;?[Ss]imilarity&quot;?:\s?0,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
-                <stringProp name="1019224114">\{&quot;?[Ss]imilarity&quot;?:\s?1,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
-                <stringProp name="-234484780">\{&quot;?[Ss]imilarity&quot;?:\s?1.[1-9]+,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
-                <stringProp name="1681844419">\{&quot;?[Ss]imilarity&quot;?:\s?1.0[0-9]+,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
-              </collectionProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
-              <intProp name="Assertion.test_type">6</intProp>
-              <stringProp name="Scope.variable">message</stringProp>
-            </ResponseAssertion>
-            <hashTree/>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion 2 - message" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="1317659918">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?0.[0-9]+\}</stringProp>
-                <stringProp name="-1717779916">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1.0\}</stringProp>
-                <stringProp name="-1569097868">\{&quot;?[Ss]imilarity&quot;?:\s?0.[0-9]+,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
-                <stringProp name="-517836428">\{&quot;?[Ss]imilarity&quot;?:\s?1.0,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
-              </collectionProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
-              <intProp name="Assertion.test_type">34</intProp>
-              <stringProp name="Scope.variable">message</stringProp>
-            </ResponseAssertion>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="JSR223 Assertion" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.util.regex.Pattern;
+
+
+String textResponse = prev.getResponseDataAsString();
+
+String regexPart = &apos;\\{\\s*&quot;template_id&quot;:\\s?&quot;(([0-9]+[a-f]+)+|([a-f]+[0-9]+)+)[0-9a-f]*&quot;,\\s*&quot;similarity&quot;:\\s?((0\\.0)|(0\\.[0-9]*[1-9]+)|(1\\.0))\\s*\\}&apos;;
+String regex = &apos;\\[\\s*&apos; + regexPart + &apos;(,\\s*&apos; + regexPart + &apos;)*\\s*\\]&apos;;
+
+boolean check = Pattern.matches(regex, textResponse);
+
+if (!check) {
+	AssertionResult.setFailure(true);
+	AssertionResult.setFailureMessage(&quot;text response doesn&apos;t match the regex: &quot; + regex)
+}
+</stringProp>
+            </JSR223Assertion>
             <hashTree/>
           </hashTree>
         </hashTree>
@@ -440,58 +409,27 @@ try (f = new FileWriter(&quot;resources/csv_configs/template_ids.csv&quot;, true
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression - message" enabled="false">
-              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
-              <stringProp name="RegexExtractor.refname">message</stringProp>
-              <stringProp name="RegexExtractor.regex">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?[0-1].[0-9]+\}</stringProp>
-              <stringProp name="RegexExtractor.template">$0$</stringProp>
-              <stringProp name="RegexExtractor.default">error</stringProp>
-              <stringProp name="RegexExtractor.match_number"></stringProp>
-            </RegexExtractor>
-            <hashTree/>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion - message" enabled="false">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="96784904">error</stringProp>
-              </collectionProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
-              <intProp name="Assertion.test_type">12</intProp>
-              <stringProp name="Assertion.scope">variable</stringProp>
-              <stringProp name="Scope.variable">message</stringProp>
-            </ResponseAssertion>
-            <hashTree/>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion 1 - message" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="-126926479">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?0\}</stringProp>
-                <stringProp name="-126925518">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1\}</stringProp>
-                <stringProp name="2008650094">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1.[1-9]+\}</stringProp>
-                <stringProp name="725520131">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1.0[0-9]+\}</stringProp>
-                <stringProp name="689458353">\{&quot;?[Ss]imilarity&quot;?:\s?0,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
-                <stringProp name="1019224114">\{&quot;?[Ss]imilarity&quot;?:\s?1,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
-                <stringProp name="-234484780">\{&quot;?[Ss]imilarity&quot;?:\s?1.[1-9]+,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
-                <stringProp name="1681844419">\{&quot;?[Ss]imilarity&quot;?:\s?1.0[0-9]+,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
-              </collectionProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
-              <intProp name="Assertion.test_type">6</intProp>
-              <stringProp name="Scope.variable">message</stringProp>
-            </ResponseAssertion>
-            <hashTree/>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion 2 - message" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="1317659918">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?0.[0-9]+\}</stringProp>
-                <stringProp name="-1717779916">\{&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;,\s?&quot;?[Ss]imilarity&quot;?:\s?1.0\}</stringProp>
-                <stringProp name="-1569097868">\{&quot;?[Ss]imilarity&quot;?:\s?0.[0-9]+,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
-                <stringProp name="-517836428">\{&quot;?[Ss]imilarity&quot;?:\s?1.0,\s?&quot;?[Tt]emplate_id&quot;?:\s?&quot;[0-9]+&quot;\}</stringProp>
-              </collectionProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
-              <intProp name="Assertion.test_type">34</intProp>
-              <stringProp name="Scope.variable">message</stringProp>
-            </ResponseAssertion>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="JSR223 Assertion" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.util.regex.Pattern;
+
+
+String textResponse = prev.getResponseDataAsString();
+
+String regexPart = &apos;\\{\\s*&quot;template_id&quot;:\\s?&quot;(([0-9]+[a-f]+)+|([a-f]+[0-9]+)+)[0-9a-f]*&quot;,\\s*&quot;similarity&quot;:\\s?((0\\.0)|(0\\.[0-9]*[1-9]+)|(1\\.0))\\s*\\}&apos;;
+String regex = &apos;\\[\\s*&apos; + regexPart + &apos;(,\\s*&apos; + regexPart + &apos;)*\\s*\\]&apos;;
+
+boolean check = Pattern.matches(regex, textResponse);
+
+if (!check) {
+	AssertionResult.setFailure(true);
+	AssertionResult.setFailureMessage(&quot;text response doesn&apos;t match the regex: &quot; + regex)
+}
+</stringProp>
+            </JSR223Assertion>
             <hashTree/>
           </hashTree>
         </hashTree>
@@ -573,38 +511,38 @@ try (f = new FileWriter(&quot;resources/csv_configs/template_ids.csv&quot;, true
         <boolProp name="include_checkbox_state">false</boolProp>
         <boolProp name="exclude_checkbox_state">false</boolProp>
         <collectionProp name="metricConnections">
-          <collectionProp name="893103622">
-            <stringProp name="1147929768">10.113.128.185</stringProp>
+          <collectionProp name="820443373">
+            <stringProp name="1147929744">10.113.128.188</stringProp>
             <stringProp name="1600768">4444</stringProp>
             <stringProp name="66952">CPU</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="-1407610699">
-            <stringProp name="1147929768">10.113.128.185</stringProp>
+          <collectionProp name="-1480270948">
+            <stringProp name="1147929744">10.113.128.188</stringProp>
             <stringProp name="1600768">4444</stringProp>
             <stringProp name="-1993889503">Memory</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="894235680">
-            <stringProp name="1147929769">10.113.128.186</stringProp>
+          <collectionProp name="821575431">
+            <stringProp name="1147929745">10.113.128.189</stringProp>
             <stringProp name="1600768">4444</stringProp>
             <stringProp name="66952">CPU</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="-788872281">
-            <stringProp name="1147929769">10.113.128.186</stringProp>
+          <collectionProp name="821575431">
+            <stringProp name="1147929745">10.113.128.189</stringProp>
             <stringProp name="1600768">4444</stringProp>
-            <stringProp name="66952">Memory</stringProp>
+            <stringProp name="66952">CPU</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="481398552">
-            <stringProp name="1147929768">10.113.128.185</stringProp>
+          <collectionProp name="408738303">
+            <stringProp name="1147929744">10.113.128.188</stringProp>
             <stringProp name="1600768">4444</stringProp>
             <stringProp name="2112896831">Disks I/O</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="482530610">
-            <stringProp name="1147929769">10.113.128.186</stringProp>
+          <collectionProp name="409870361">
+            <stringProp name="1147929745">10.113.128.189</stringProp>
             <stringProp name="1600768">4444</stringProp>
             <stringProp name="2112896831">Disks I/O</stringProp>
             <stringProp name="0"></stringProp>

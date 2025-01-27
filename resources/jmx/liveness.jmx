@@ -59,7 +59,7 @@
           <stringProp name="variableNames">path_to_samples</stringProp>
         </CSVDataSet>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Http request - detect photo" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Http request - detect" enabled="true">
           <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
             <collectionProp name="HTTPFileArgs.files">
               <elementProp name="${path_to_meta}" elementType="HTTPFileArg">
@@ -94,12 +94,12 @@
         <hashTree>
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion - message" enabled="true">
             <collectionProp name="Asserion.test_strings">
-              <stringProp name="109264530">score</stringProp>
+              <stringProp name="2018112776">\{\s*&quot;passed&quot;:\s?(false|true),\s*&quot;score&quot;:\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*(,\s*&quot;results&quot;:\s?\[\s*\{\s*&quot;type&quot;:\s?&quot;photo-type&quot;,\s*&quot;passed&quot;:\s?(false|true)\s*\}\s*\]\s*)?\}</stringProp>
             </collectionProp>
             <stringProp name="Assertion.custom_message"></stringProp>
             <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
             <boolProp name="Assertion.assume_success">false</boolProp>
-            <intProp name="Assertion.test_type">16</intProp>
+            <intProp name="Assertion.test_type">1</intProp>
           </ResponseAssertion>
           <hashTree/>
         </hashTree>
@@ -181,26 +181,26 @@
         <boolProp name="include_checkbox_state">false</boolProp>
         <boolProp name="exclude_checkbox_state">false</boolProp>
         <collectionProp name="metricConnections">
-          <collectionProp name="817047199">
-            <stringProp name="1147929741">10.113.128.185</stringProp>
+          <collectionProp name="820443373">
+            <stringProp name="1147929744">10.113.128.188</stringProp>
             <stringProp name="1600768">4444</stringProp>
             <stringProp name="66952">CPU</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="-1483667122">
-            <stringProp name="1147929741">10.113.128.185</stringProp>
+          <collectionProp name="-1480270948">
+            <stringProp name="1147929744">10.113.128.188</stringProp>
             <stringProp name="1600768">4444</stringProp>
             <stringProp name="-1993889503">Memory</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="818179257">
-            <stringProp name="1147929742">10.113.128.186</stringProp>
+          <collectionProp name="821575431">
+            <stringProp name="1147929745">10.113.128.189</stringProp>
             <stringProp name="1600768">4444</stringProp>
             <stringProp name="66952">CPU</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="-1482535064">
-            <stringProp name="1147929742">10.113.128.186</stringProp>
+          <collectionProp name="-1479138890">
+            <stringProp name="1147929745">10.113.128.189</stringProp>
             <stringProp name="1600768">4444</stringProp>
             <stringProp name="-1993889503">Memory</stringProp>
             <stringProp name="0"></stringProp>

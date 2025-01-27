@@ -164,25 +164,15 @@
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression - message" enabled="true">
-              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
-              <stringProp name="RegexExtractor.refname">message</stringProp>
-              <stringProp name="RegexExtractor.regex">\{&quot;?[Ss]core&quot;?:\s?[0-1].[0-9]+\}</stringProp>
-              <stringProp name="RegexExtractor.template">$0$</stringProp>
-              <stringProp name="RegexExtractor.default">error</stringProp>
-              <stringProp name="RegexExtractor.match_number"></stringProp>
-            </RegexExtractor>
-            <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion - message" enabled="true">
               <collectionProp name="Asserion.test_strings">
-                <stringProp name="96784904">error</stringProp>
+                <stringProp name="1087284407">\{\s*&quot;score&quot;:\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*\}</stringProp>
               </collectionProp>
               <stringProp name="Assertion.custom_message"></stringProp>
               <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
               <boolProp name="Assertion.assume_success">false</boolProp>
-              <intProp name="Assertion.test_type">12</intProp>
-              <stringProp name="Assertion.scope">variable</stringProp>
-              <stringProp name="Scope.variable">message</stringProp>
+              <intProp name="Assertion.test_type">2</intProp>
+              <stringProp name="Scope.variable">json</stringProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
@@ -227,12 +217,12 @@
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion - message" enabled="true">
               <collectionProp name="Asserion.test_strings">
-                <stringProp name="109264530">score</stringProp>
+                <stringProp name="1087284407">\{\s*&quot;score&quot;:\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*\}</stringProp>
               </collectionProp>
               <stringProp name="Assertion.custom_message"></stringProp>
               <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
               <boolProp name="Assertion.assume_success">false</boolProp>
-              <intProp name="Assertion.test_type">16</intProp>
+              <intProp name="Assertion.test_type">1</intProp>
               <stringProp name="Scope.variable">json</stringProp>
             </ResponseAssertion>
             <hashTree/>
@@ -316,26 +306,26 @@
         <boolProp name="include_checkbox_state">false</boolProp>
         <boolProp name="exclude_checkbox_state">false</boolProp>
         <collectionProp name="metricConnections">
-          <collectionProp name="65959528">
-            <stringProp name="-1204607085">10.113.128.185</stringProp>
+          <collectionProp name="820443373">
+            <stringProp name="1147929744">10.113.128.188</stringProp>
             <stringProp name="1600768">4444</stringProp>
             <stringProp name="66952">CPU</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="-1483667122">
-            <stringProp name="1147929741">10.113.128.185</stringProp>
+          <collectionProp name="-1480270948">
+            <stringProp name="1147929744">10.113.128.188</stringProp>
             <stringProp name="1600768">4444</stringProp>
             <stringProp name="-1993889503">Memory</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="818179257">
-            <stringProp name="1147929742">10.113.128.186</stringProp>
+          <collectionProp name="821575431">
+            <stringProp name="1147929745">10.113.128.189</stringProp>
             <stringProp name="1600768">4444</stringProp>
             <stringProp name="66952">CPU</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="2060242294">
-            <stringProp name="-1204607085">10.113.128.186</stringProp>
+          <collectionProp name="-1479138890">
+            <stringProp name="1147929745">10.113.128.189</stringProp>
             <stringProp name="1600768">4444</stringProp>
             <stringProp name="-1993889503">Memory</stringProp>
             <stringProp name="0"></stringProp>

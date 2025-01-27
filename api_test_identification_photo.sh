@@ -10,6 +10,11 @@
 # include functions
 source include/f_checks.sh
 
+HEALTH_REGEX='\{\s*"status":\s?0(,\s*"message":.*)?\s*\}'
+MATCH_REGEX_PART='\{\s*"template_id":\s?"[a-f0-9]*",\s*"similarity":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*\}'
+MATCH_REGEX='\[\s*'${MATCH_REGEX_PART}'(,\s*'${MATCH_REGEX_PART}')*\s*\]'
+MATCH_REGEX_1_0='(\[\s*'${MATCH_REGEX_PART}'(,\s*'${MATCH_REGEX_PART}')*\s*\])|(\[\])'
+
 BODY="tmp/responce_body"
 SAMPLE_JPG="resources/samples/photo.jpg"
 SAMPLE_JPG_2="resources/samples/photo_shumskiy.jpg"
@@ -132,7 +137,7 @@ f_test_extract() {
 
     TEST_NAME="extract 400. BPE-002003 – Не удалось прочитать биометрический образец. Sound file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_WAV' --output '$BODY' '$VENDOR_URL
-    f_check -r 400  -m "BPE-002003"
+    f_check -r 400 -m "BPE-002003"
 
     TEST_NAME="extract 400. BPE-003002 – На биометрическом образце отсутствует лицо. No face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_NF' --output '$BODY' '$VENDOR_URL
@@ -578,76 +583,76 @@ f_test_match() {
     ###### tests
     TEST_NAME="match 200"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="match 200. With charset=UTF-8"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_WITH_CHARSET_1' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="match 200. With charset=UTF-8"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_WITH_CHARSET_2' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="match 200. Exponential format of limit"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_NUMBER' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="match 200. With threshold 0.0"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_00' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="match 200. With threshold 1.0"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_10' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_thre "[0-1].[0-9]" -f "- format double or empty array is expected"
+    f_check -r 200 -m ${MATCH_REGEX_1_0} -f "- format double or empty array is expected"
 
     TEST_NAME="match 200. With filename parameter"
     echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="template"; filename="biotemplate"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="match 200. Without filename parameter"
     echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="match 200. Without filename parameter with boundary in quotes"
     echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=\"------------------------516695485518814e\"" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="match 200. Reverse order of headings without filename"
     echo -ne '--------------------------516695485518814e\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="template"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="match 200. Reverse order of headings with filename 1"
     echo -ne '--------------------------516695485518814e\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="template"; filename="biotemplate"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="match 200. Reverse order of headings with filename 2"
     echo -ne '--------------------------516695485518814e\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="template"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="match 200. Reverse order of headings with filename 3"
     echo -ne '--------------------------516695485518814e\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="template"; filename="biotemplate"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="match 400. BPE-002001 – Неверный Content-Type HTTP-запроса. Wrong content-type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:ppplication/form-Fata" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
@@ -739,107 +744,107 @@ f_test_identify() {
     ###### tests
     TEST_NAME="identify 200. JPG sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. PNG sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_PNG';type=image/png" -F '$MMETA' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     \cp $SAMPLE_JPG $SAMPLE_JPG_WFE
     TEST_NAME="identify 200. JPG sample without filename extension"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG_WFE';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
     rm -f $SAMPLE_JPG_WFE
 
     \cp $SAMPLE_PNG $SAMPLE_PNG_WFE
     TEST_NAME="identify 200. PNG sample without filename extension"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_PNG_WFE';type=image/png" -F '$MMETA' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
     rm -f $SAMPLE_PNG_WFE
 
     TEST_NAME="identify 200. Big PNG sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$BIG_SAMPLE_PNG';type=image/png" -F '$MMETA_00' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. Little second face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_LSF';type=image/jpeg" -F '$MMETA_00' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. With charset=UTF-8"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_WITH_CHARSET_1' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. With charset=UTF-8"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_WITH_CHARSET_2' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. Exponential format of limit"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_NUMBER' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. With threshold 0.0"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_00' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. With threshold 1.0"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_10' --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_thre "[0-1].[0-9]" -f "- format double or empty array is expected"
+    f_check -r 200 -m ${MATCH_REGEX_1_0} -f "- format double or empty array is expected"
     
     TEST_NAME="identify 200. With filename parameter"
     echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="photo"; filename="photo.jpg"\r\nContent-Type: image/jpeg\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. Without filename parameter"
     echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="photo"\r\nContent-Type: image/jpeg\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. Without filename parameter with big photo"
     echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="photo"\r\nContent-Type: image/png\r\n\r\n' > tmp/request_body; cat $BIG_SAMPLE_PNG >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID_2\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. Without filename parameter with boundary in quotes"
     echo -ne '--------------------------516695485518814e\r\nContent-Disposition: form-data; name="photo"\r\nContent-Type: image/jpeg\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=\"------------------------516695485518814e\"" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. Reverse order of headings without filename"
     echo -ne '--------------------------516695485518814e\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="photo"\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. Reverse order of headings with filename 1"
     echo -ne '--------------------------516695485518814e\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="photo"; filename="photo.jpg"\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. Reverse order of headings with filename 2"
     echo -ne '--------------------------516695485518814e\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="photo"\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 200. Reverse order of headings with filename 3"
     echo -ne '--------------------------516695485518814e\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="photo"; filename="photo.jpg"\r\n\r\n' > tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--------------------------516695485518814e\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="metadata"\r\n\r\n' >> tmp/request_body; echo -ne "$MMETA_ID\r\n" >> tmp/request_body
     echo -ne '--------------------------516695485518814e--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data; boundary=------------------------516695485518814e" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m_simi "[0-1].[0-9]" -f "- format double is expected"
+    f_check -r 200 -m ${MATCH_REGEX} -f "- format double is expected"
 
     TEST_NAME="identify 400. BPE-002001 – Неверный Content-Type HTTP-запроса. Wrong content-type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:part/fordata" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
@@ -973,7 +978,7 @@ else
         TEST_NAME="health 200"
         REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL
         mkdir -p tmp
-        f_check -r 200 -m "\"?[Ss]tatus\"?:\s?0"
+        f_check -r 200 -m ${HEALTH_REGEX}
 
         if [ "$FAIL" -eq 0 ]; then
             SUCCESS=0

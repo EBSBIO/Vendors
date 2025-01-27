@@ -7,6 +7,9 @@ source include/f_test_passive_liveness_photo.sh
 source include/f_test_passive_liveness_video.sh
 source include/f_test_active_liveness_video.sh
 
+HEALTH_REGEX='\{\s*"status":\s?0(,\s*"message":.*)?\s*\}'
+SOUND_SCORE_REGEX='\{\s*"passed":\s?(false|true),\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))(,\s*"results":\s?\[\s*\{\s*"type":\s?"audio-type",\s*"passed":\s?(false|true)\s*\}\s*\])?\s*\}'
+PHOTO_SCORE_REGEX='\{\s*"passed":\s?(false|true),\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))(,\s*"results":\s?\[\s*\{\s*"type":\s?"photo-type",\s*"passed":\s?(false|true)\s*\}\s*\])?\s*\}'
 
 f_print_usage() {
 echo "Usage: $0 [OPTIONS] URL [TIMEOUT:-1]
@@ -127,7 +130,7 @@ else
         TEST_NAME="health 200"
         REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL
         mkdir -p tmp
-        f_check -r 200 -m "\"?[Ss]tatus\"?:\s?0"
+        f_check -r 200 -m ${HEALTH_REGEX}
 
         if [ "$FAIL" -eq 0 ]; then
             SUCCESS=0
@@ -138,11 +141,11 @@ else
 
             if [ "$TYPE" == "sound" ]; then
                 echo; echo; echo "------------ Begin: f_test_passive_liveness_sound -------------"
-                f_test_passive_liveness_sound $TYPE
+                f_test_passive_liveness_sound $TYPE $SOUND_SCORE_REGEX
             
             elif [ "$TYPE" == "p_video" ]; then
                 echo; echo; echo "------------ Begin: f_test_passive_liveness_video -------------"
-                f_test_passive_liveness_video $TYPE
+                f_test_passive_liveness_video $TYPE $PHOTO_SCORE_REGEX
 
             elif [ "$TYPE" == "a_video" ]; then
                 echo; echo; echo "------------ Begin: f_test_active_liveness_video -------------"
@@ -150,19 +153,19 @@ else
 
             elif [ "$TYPE" == "photo+p_video" ]; then
                 echo; echo; echo "------------ Begin: f_test_passive_liveness_photo -------------"
-                f_test_passive_liveness_photo $TYPE
+                f_test_passive_liveness_photo $TYPE $PHOTO_SCORE_REGEX
                 echo; echo; echo "------------ Begin: f_test_passive_liveness_video -------------"
-                f_test_passive_liveness_video $TYPE
+                f_test_passive_liveness_video $TYPE $PHOTO_SCORE_REGEX
 
             elif [ "$TYPE" == "p_video+a_video" ]; then
                 echo; echo; echo "------------ Begin: f_test_passive_liveness_video -------------"
-                f_test_passive_liveness_video $TYPE
+                f_test_passive_liveness_video $TYPE $PHOTO_SCORE_REGEX
                 echo; echo; echo "------------ Begin: f_test_active_liveness_video -------------"
                 f_test_active_liveness_video $TYPE $MNEMONIC $ACTIONS
                 
             else
                 echo; echo; echo "------------ Begin: f_test_passive_liveness_photo -------------"
-                f_test_passive_liveness_photo $TYPE
+                f_test_passive_liveness_photo $TYPE $PHOTO_SCORE_REGEX
             fi
             
             echo -e "\n\nSCORE: success $SUCCESS, error $ERROR"
