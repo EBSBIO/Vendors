@@ -8,8 +8,15 @@
 # include functions
 source include/f_checks.sh
 
-HEALTH_REGEX='\{\s*"status":\s?0(,\s*"message":.*)?\s*\}'
+HEALTH_REGEX='\{\s*"status":\s?0(,\s*"message":.+)?\s*\}'
 SCORE_REGEX='\{\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*\}'
+
+f_err_regex() {
+    local_code=$1
+    local_message=$2
+
+    echo '\{\s*"code":\s?"'${local_code}'",\s*"message":\s?"'${local_message}'"\s*\}'
+}
 
 BODY="tmp/responce_body"
 SAMPLE_JPG="resources/samples/photo.jpg"
@@ -32,7 +39,7 @@ f_test_health() {
     
     TEST_NAME="health 400. BPE-002006 – Неверный запрос. Bad location"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL/health
-    f_check -r 400 -m "BPE-002006"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002006' 'Неверный запрос')"
 }
 
 
@@ -78,31 +85,31 @@ f_test_extract() {
 
     TEST_NAME="extract 400. BPE-002001 – Неверный Content-Type HTTP-запроса. Wrong content-type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" --data-binary  @'$SAMPLE_JPG' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002001"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002001' 'Неверный Content-Type HTTP-запроса')"
     
     TEST_NAME="extract 400. BPE-002002 – Неверный метод HTTP-запроса. Invalid http method"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary  @'$SAMPLE_JPG' --output '$BODY' -X GET '$VENDOR_URL
-    f_check -r 400 -m "BPE-002002"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002002' 'Неверный метод HTTP-запроса')"
 
     TEST_NAME="extract 400. BPE-002003 – Не удалось прочитать биометрический образец. Empty file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$EMPTY' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002003"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец')"
 
     TEST_NAME="extract 400. BPE-002003 – Не удалось прочитать биометрический образец. Sound file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" --data-binary @'$SAMPLE_WAV' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002003"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец')"
 
     TEST_NAME="extract 400. BPE-002003 – Не удалось прочитать биометрический образец. Video file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" --data-binary @'$VERTICAL_SAMPLE_MOV' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002003"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец')"
 
     TEST_NAME="extract 400. BPE-003002 – На биометрическом образце отсутствует лицо. No face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_NF' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-003002"
+    f_check -r 400 -m "$(f_err_regex 'BPE-003002' 'На биометрическом образце отсутствует лицо')"
 
     TEST_NAME="extract 400. BPE-003003 – На биометрическом образце присутствует более, чем одно лицо. More than one face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" --data-binary @'$SAMPLE_TF' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-003003"
+    f_check -r 400 -m "$(f_err_regex 'BPE-003003' 'На биометрическом образце присутствует более, чем одно лицо')"
 }
 
 
@@ -164,35 +171,35 @@ f_test_compare() {
 
     TEST_NAME="compare 400. BPE-002001 – Неверный Content-Type HTTP-запроса. Wrong content-type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:image/jpeg" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -X POST --output '$BODY' '$VENDOR_URL 
-    f_check -r 400 -m "BPE-002001"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002001' 'Неверный Content-Type HTTP-запроса')"
 
     TEST_NAME="compare 400. BPE-002002 – Неверный метод HTTP-запроса. Invalid http method"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -X GET --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002002"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002002' 'Неверный метод HTTP-запроса')"
 
     TEST_NAME="compare 400. BPE-002004 – Не удалось прочитать биометрический шаблон. Empty biofeature"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_feature=@'$EMPTY';type=application/octet-stream" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -X POST --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002004"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002004' 'Не удалось прочитать биометрический шаблон')"
 
     TEST_NAME="compare 400. BPE-002004 – Не удалось прочитать биометрический шаблон. Empty biotemplate"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$EMPTY';type=application/octet-stream" -X POST --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002004"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002004' 'Не удалось прочитать биометрический шаблон')"
 
     TEST_NAME="compare 400. BPE-002004 – Не удалось прочитать биометрический шаблон. Empty templates"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_feature=@'$EMPTY';type=application/octet-stream" -F "bio_template=@'$EMPTY';type=application/octet-stream" -X POST --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002004"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002004' 'Не удалось прочитать биометрический шаблон')"
 
     TEST_NAME="compare 400. BPE-002004 – Не удалось прочитать биометрический шаблон. Broken biotemplate"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$BIOTEMPLATE_0X00';type=application/octet-stream" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002004"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002004' 'Не удалось прочитать биометрический шаблон')"
 
     TEST_NAME="compare 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid biofeature type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=image/jpeg" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002005"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002005' 'Неверный Content-Type части multiparted HTTP-запроса')"
 
     TEST_NAME="compare 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid biotemplate type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$BIOTEMPLATE';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002005"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002005' 'Неверный Content-Type части multiparted HTTP-запроса')"
 }
 
 
@@ -289,47 +296,47 @@ f_test_verify() {
 
     TEST_NAME="verify 400. BPE-002001 – Неверный Content-Type HTTP-запроса. Wrong content-type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:image/jpeg" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002001"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002001' 'Неверный Content-Type HTTP-запроса')"
 
     TEST_NAME="verify 400. BPE-002002 – Неверный метод HTTP-запроса. Invalid http method"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_JPG';type=image/jpeg" -X GET --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002002"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002002' 'Неверный метод HTTP-запроса')"
 
     TEST_NAME="verify 400. BPE-002003 – Не удалось прочитать биометрический образец. Empty file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$EMPTY';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002003"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец')"
 
     TEST_NAME="verify 400. BPE-002003 – Не удалось прочитать биометрический образец. Sound file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_WAV';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002003"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец')"
 
     TEST_NAME="verify 400. BPE-002003 – Не удалось прочитать биометрический образец. Video file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$VERTICAL_SAMPLE_MOV';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002003"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец')"
 
     TEST_NAME="verify 400. BPE-002004 – Не удалось прочитать биометрический шаблон. Empty biotemplate"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$EMPTY';type=application/octet-stream" -F "sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002004"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002004' 'Не удалось прочитать биометрический шаблон')"
 
     TEST_NAME="verify 400. BPE-002004 – Не удалось прочитать биометрический шаблон | BPE-002003 – Не удалось прочитать биометрический образец. Empty all"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$EMPTY';type=application/octet-stream" -F "sample=@'$EMPTY';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002003|BPE-002004"
+    f_check -r 400 -m "($(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец'))|($(f_err_regex 'BPE-002004' 'Не удалось прочитать биометрический шаблон'))"
 
     TEST_NAME="verify 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid biotemplate type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=ppplication/octet-stream" -F "sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002005"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002005' 'Неверный Content-Type части multiparted HTTP-запроса')"
 
     TEST_NAME="verify 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid sample type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_JPG';type=application/octet-stream" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-002005"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002005' 'Неверный Content-Type части multiparted HTTP-запроса')"
 
     TEST_NAME="verify 400. BPE-003002 – На биометрическом образце отсутствует лицо. No face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_NF';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-003002"
+    f_check -r 400 -m "$(f_err_regex 'BPE-003002' 'На биометрическом образце отсутствует лицо')"
 
     TEST_NAME="verify 400. BPE-003003 – На биометрическом образце присутствует более, чем одно лицо. More than one face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_TF';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "BPE-003003"
+    f_check -r 400 -m "$(f_err_regex 'BPE-003003' 'На биометрическом образце присутствует более, чем одно лицо')"
 }
 
 

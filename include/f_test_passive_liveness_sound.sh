@@ -96,69 +96,65 @@ f_test_passive_liveness_sound() {
 
     TEST_NAME="detect 400. LDE-002001 – Неверный Content-Type HTTP-запроса. Wrong content-type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002001"
+    f_check -r 400 -m "$(f_err_regex 'LDE-002001' 'Неверный Content-Type HTTP-запроса')"
 
     TEST_NAME="detect 400. LDE-002002 – Неверный метод HTTP-запроса. Invalid http method"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" -X GET --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002002"
+    f_check -r 400 -m "$(f_err_regex 'LDE-002002' 'Неверный метод HTTP-запроса')"
 
     TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец. Empty file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$EMPTY';type=audio/wav" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002004"
+    f_check -r 400 -m "$(f_err_regex 'LDE-002004' 'Не удалось прочитать биометрический образец.*')"
 
     TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец. Photo file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=audio/wav" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002004"
+    f_check -r 400 -m "$(f_err_regex 'LDE-002004' 'Не удалось прочитать биометрический образец.*')"
 
     TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец. Video file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=audio/wav" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002004"
+    f_check -r 400 -m "$(f_err_regex 'LDE-002004' 'Не удалось прочитать биометрический образец.*')"
 
     TEST_NAME="detect 400. LDE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid metadata type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=image/jpeg" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002005"
+    f_check -r 400 -m "$(f_err_regex 'LDE-002005' 'Неверный Content-Type части multiparted HTTP-запроса')"
 
     TEST_NAME="detect 400. LDE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid sample type" 
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=application/json" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002005"
+    f_check -r 400 -m "$(f_err_regex 'LDE-002005' 'Неверный Content-Type части multiparted HTTP-запроса')"
     
     TEST_NAME="detect 400. LDE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid sample type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=application/json" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002005"
+    f_check -r 400 -m "$(f_err_regex 'LDE-002005' 'Неверный Content-Type части multiparted HTTP-запроса')"
 
     TEST_NAME="detect 400. LDE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid sample type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002005"
+    f_check -r 400 -m "$(f_err_regex 'LDE-002005' 'Неверный Content-Type части multiparted HTTP-запроса')"
 
     TEST_NAME="detect 400. LDE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid sample type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-002005"
+    f_check -r 400 -m "$(f_err_regex 'LDE-002005' 'Неверный Content-Type части multiparted HTTP-запроса')"
 
     TEST_NAME="detect 400. LDE-003002 – На биометрическом образце отсутствует голос. No voice"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_NV';type=audio/wav" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-003002"
-
-    # TEST_NAME="detect 400. LDE-003003. More than one voice"
-    # REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_DV';type=audio/wav" --output '$BODY' '$VENDOR_URL
-    # f_check -r 400 -m "LDE-003003"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003002' 'На биометрическом образце отсутствует голос')"
 
     TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without mnemonic"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WM';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-003004"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
 
     TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without action"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WA';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-003004"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
 
     TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without action.type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WT';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-003004"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
 
     TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without action.duration"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WD';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-003004"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
 
     TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without action.message"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WMSG';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "LDE-003004"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
 }

@@ -7,9 +7,16 @@ source include/f_test_passive_liveness_photo.sh
 source include/f_test_passive_liveness_video.sh
 source include/f_test_active_liveness_video.sh
 
-HEALTH_REGEX='\{\s*"status":\s?0(,\s*"message":.*)?\s*\}'
+HEALTH_REGEX='\{\s*"status":\s?0(,\s*"message":.+)?\s*\}'
 SOUND_SCORE_REGEX='\{\s*"passed":\s?(false|true),\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))(,\s*"results":\s?\[\s*\{\s*"type":\s?"audio-type",\s*"passed":\s?(false|true)\s*\}\s*\])?\s*\}'
 PHOTO_SCORE_REGEX='\{\s*"passed":\s?(false|true),\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))(,\s*"results":\s?\[\s*\{\s*"type":\s?"photo-type",\s*"passed":\s?(false|true)\s*\}\s*\])?\s*\}'
+
+f_err_regex() {
+    local_code=$1
+    local_message=$2
+
+    echo '\{\s*"code":\s?"'${local_code}'",\s*"message":\s?"'${local_message}'"\s*\}'
+}
 
 f_print_usage() {
 echo "Usage: $0 [OPTIONS] URL [TIMEOUT:-1]
@@ -58,7 +65,7 @@ f_test_health() {
 
     TEST_NAME="health 400. LDE-002006 – Неверный запрос. Bad location"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" --output '$BODY' '$VENDOR_URL/health
-    f_check -r 400 -m "LDE-002006"
+    f_check -r 400 -m "$(f_err_regex 'LDE-002006' 'Неверный запрос')"
 }
 
 
