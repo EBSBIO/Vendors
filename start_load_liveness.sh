@@ -51,8 +51,8 @@ else
         echo "Type – $TYPE"
         
         if [[ "$TYPE" == "sound" ]]; then
-            CTYPE="audio/wav"                                   # content_type
-            META="resources/metadata/meta_lv_s_p_10s.json"      # Metadata, json файл для теста liveness
+            CTYPE="audio/wav"                                                                                                      # content_type
+            echo "resources/metadata/meta_lv_s_p_10s.json" > resources/csv_configs/metadata.csv                                    # Metadata, json файл для теста liveness
             if [ -z $SAMPLE_DIR ]; then
                 echo "$SOUND_SAMPLE" > resources/csv_configs/many_samples.csv                                                      # Внести один сэмпл
             else
@@ -61,8 +61,8 @@ else
                 fi
             fi
         elif [[ "$TYPE" == "photo" ]]; then
-            CTYPE="image/jpeg"                                  # content_type
-            META="resources/metadata/meta.json"                 # Metadata, json файл для теста liveness
+            CTYPE="image/jpeg"                                                                                                     # content_type
+            echo "resources/metadata/meta.json" > resources/csv_configs/metadata.csv                                               # Metadata, json файл для теста liveness
             if [ -z $SAMPLE_DIR ]; then
                 echo "$PHOTO_SAMPLE" > resources/csv_configs/many_samples.csv                                                      # Внести один сэмпл
             else
@@ -71,7 +71,7 @@ else
                 fi
             fi
         elif [[ "$TYPE" == "video" ]]; then
-            CTYPE="video/mov"                                   # content_type
+            CTYPE="video/mov"                                                                                                      # content_type
             if [ -z $SAMPLE_DIR ]; then
                 echo; echo "You need to run the script with the \"-s\" option, specifying the path to the test samples with metadata"
                 exit
