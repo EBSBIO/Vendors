@@ -1,4 +1,10 @@
-### API tests
+### Оглавление
+1. [API тесты](#api-тесты)
+2. [Нагрузочные тесты](#нагрузочные-тесты)
+3. [Настройка окружения с GPU](#настройка-окружения-с-gpu)
+
+---
+### API тесты
 Вызов скрипта без параметров показывает справку.
 
 Для liveness скрипт представляет один исполняемый файл для всех типов лайвнесс:
@@ -7,10 +13,9 @@
 - для active liveness video требуется передать в параметры запуска мнемонику;
 - для active liveness video, если была выбрана мнемоника move, требуется передать в параметры запуска типы действий.
 
-<br>**Если БП liveness поддерживает одновременно работу по нескольким типам**, например, фото + пассивный по видео, то при запуске автотеста следует указывать именно фото+пассивное видео, чтобы корректно подобрался пул запросов.
-  
+**Если БП liveness поддерживает одновременно работу по нескольким типам**, например, фото + пассивный по видео, то при запуске автотеста следует указывать именно фото+пассивное видео, чтобы корректно подобрался пул запросов.
 
-<br>Пример запуска API-автотеста верификации по фото метода extract:
+Пример запуска API-автотеста верификации по фото метода extract:
 ```bash
 ./api_test_verification_photo.sh -vv -t extract 127.0.0.1:{SOME_PORT} 10
 ```
@@ -41,7 +46,7 @@
 ```
 <br>
 
-### Load tests
+### Нагрузочные тесты
 Скрипты являются обертками над jmeter.
 
 Во всех нагрузочных сценариях по умолчанию используется плагин [PerfMon](https://jmeter-plugins.org/wiki/PerfMon/) для сбора метрик загруженности серверов.
@@ -101,3 +106,122 @@
 ```bash
 ./start_load_verification.sh -s /opt/photo/ tevian_gpu extract 3 127.0.0.1 {SOME_PORT}
 ```
+<br>
+
+### Настройка окружения с GPU
+#### RED OS 7.3
+
+На примере драйвера NVIDIA версии 580.76.05 (CUDA Version: 13.0).
+
+1\. Добавление репозитория и обновление ядра
+```bash
+dnf install redos-kernels6-release
+dnf update
+
+dnf install \ 
+    kernel-lt-6.1.148-1.el7.3.x86_64 \
+    kernel-lt-tools-6.1.148-1.el7.3.x86_64 \
+    kernel-lt-tools-libs-6.1.148-1.el7.3.x86_64
+```    
+После установки выполняем `reboot`
+
+2\. Установка драйвера
+```bash    
+dnf install \
+    nvidia-kmod-3:580.76.05-1.el7.x86_64 \
+    nvidia-persistenced-3:580.76.05-1.el7.x86_64 \
+    nvidia-modprobe-3:580.76.05-1.el7.x86_64 \
+    xorg-x11-drv-nvidia-cuda-libs-3:580.76.05-1.el7.x86_64 \
+    xorg-x11-drv-nvidia-cuda-3:580.76.05-1.el7.x86_64
+```
+
+3\. Установка NVIDIA CONTAINER TOOLKIT
+
+Ссылка на офиц. источник: [https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/1.17.8/install-guide html#with-dnf-rhel-centos-fedora-amazon-linux](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/1.17.8/install-guide.html#with-dnf-rhel-centos-fedora-amazon-linux)
+
+```bash
+# добавление офиц. репозитория
+curl -s -L https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo | \
+    tee /etc/yum.repos.d/nvidia-container-toolkit.repo
+
+# установка пакетов
+export NVIDIA_CONTAINER_TOOLKIT_VERSION=1.17.8-1
+dnf install -y \
+    nvidia-container-toolkit-${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
+    nvidia-container-toolkit-base-${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
+    libnvidia-container-tools-${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
+    libnvidia-container1-${NVIDIA_CONTAINER_TOOLKIT_VERSION}
+```
+
+4\. Настройка NVIDIA CONTAINER TOOLKIT и DOCKER SWARM
+
+Выполняем:
+```bash
+nvidia-ctk runtime configure --runtime=docker
+```
+
+Указываем в конфигурации docker `/etc/docker/daemon.json` дефолтную среду выполнения:
+```json
+{
+    "log-driver": "json-file",
+    "runtimes": {
+        "nvidia": {
+            "path": "nvidia-container-runtime",
+            "args": []
+        }
+    },
+    "default-runtime": "nvidia"
+}
+```
+Выполняем перезапуск docker `systemctl restart docker.service`
+
+---
+Далее есть два основных способа контроля GPU для сервисов в swarm:
+- контроль ресурсов через docker swarm
+- контроль ресурсов через окружение сервиса с помощью переменной `NVIDIA_VISIBLE_DEVICES`.
+
+<br>**Контроль ресурсов через docker swarm:**
+- в файле `/etc/nvidia-container-runtime/config.toml` следует добавить или раскомментировать `swarm-resource = "DOCKER_RESOURCE_GPU"`
+- выводим идентификаторы GPU `nvidia-smi -a | grep UUID | awk '{print $NF}'`
+- в конфигурации docker вносим полные идентификаторы GPU:
+```json
+{
+    "log-driver": "json-file",
+    "runtimes": {
+        "nvidia": {
+            "path": "nvidia-container-runtime",
+            "args": []
+        }
+    },
+    "default-runtime": "nvidia"
+    "node-generic-resources": [
+        "gpu={GPU_ID_1}",
+        "gpu={GPU_ID_2}",
+        ...
+    ]    
+}
+```
+- выполняем перезапуск docker `systemctl restart docker.service`
+- в compose-файле следует указать кол-во GPU, которое swarm должен выделить для работы сервиса:
+```yml
+resources:
+  reservations:
+    generic_resources:
+      - discrete_resource_spec:
+          kind: 'gpu'
+          value: 1
+```
+
+В окружение сервиса будет проброшена переменная `DOCKER_RESOURCE_GPU`, значение которой будет соответствовать одному из UUID GPU. Swarm будет самостоятельно вести подсчет зарезервированных GPU. Недостатком такого способа может являться то, что одна GPU будет доступна только для одного процесса.
+
+Кроме того, данный способ подразумевает, что приложение при сканировании доступных GPU будет ориентироваться именно на переменную `DOCKER_RESOURCE_GPU`. В окружении не должно быть переменной `NVIDIA_VISIBLE_DEVICES`, которая имеет приоритет над другими вариантами настройки.
+
+<br>**Контроль ресурсов c помощью переменной NVIDIA_VISIBLE_DEVICES:**
+- обязательным условием является использование в окружении сервиса переменной `NVIDIA_VISIBLE_DEVICES`
+- допустимые значения указаны в документации https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/1.17.8/docker-specialized.html
+
+---
+**Дополнительные настройки**
+
+Может потребоваться настройка SELinux и создание кастомной политики, если драйвер блокируется.
+
