@@ -1,0 +1,4 @@
+resources/body/body_end    text eol=crlf
+resources/body/body_image  text eol=crlf
+resources/body/body_sound  text eol=crlf
+resources/body/body_stream text eol=crlf

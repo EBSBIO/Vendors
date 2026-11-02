@@ -177,7 +177,7 @@ nvidia-ctk runtime configure --runtime=docker
 
 ---
 Далее есть два основных способа контроля GPU для сервисов в swarm:
-- контроль ресурсов через docker swarm,
+- контроль ресурсов через docker swarm
 - контроль ресурсов через окружение сервиса с помощью переменной `NVIDIA_VISIBLE_DEVICES`.
 
 <br>**Контроль ресурсов через docker swarm:**
