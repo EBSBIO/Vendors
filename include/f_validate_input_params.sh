@@ -2,7 +2,7 @@
 
 # ================================================================================
 # DESC:    функция проверки входных параметров запуска скриптов тестирования
-# VERSION: 1.0.1
+# VERSION: 1.0.2
 # ================================================================================
 
 ##### функция проверки на целые положительные числа
@@ -75,6 +75,7 @@ f_validate_input_params() {
     CYAN_COLOR="\033[0;36m"    
     RED_COLOR="\033[0;31m"
     NO_COLOR="\033[0m"
+    TMP_DIR="tmp/"
     CACHE_FILE="tmp/autotest-cache"
     EXIT_ERROR_CODE=1
 
@@ -228,6 +229,9 @@ f_validate_input_params() {
         
         # проверка опции "-s"
         if [[ -n "$TYPE" ]]; then
+            # проверка состояния временного каталога
+            [[ ! -d "$TMP_DIR" ]] && mkdir "$TMP_DIR"
+
             if [[ -n "$SAMPLE_DIR" && -d "$SAMPLE_DIR" ]]; then
                 [[ "$TYPE" == "$SOUND_TEST_TYPE" ]] && FILE_TYPE="$WAV_FILE_TYPE"
                 [[ "$TYPE" == "$PHOTO_TEST_TYPE" ]] && FILE_TYPE="${JPG_FILE_TYPE}|${JPEG_FILE_TYPE}|${PNG_FILE_TYPE}"
