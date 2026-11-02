@@ -357,7 +357,7 @@ try (f = new FileWriter(&quot;resources/csv_configs/template_ids.csv&quot;, true
 
 String textResponse = prev.getResponseDataAsString();
 
-String regexPart = &apos;\\{\\s*&quot;template_id&quot;:\\s?&quot;(([0-9]+[a-f]+)+|([a-f]+[0-9]+)+)[0-9a-f]*&quot;,\\s*&quot;similarity&quot;:\\s?((0\\.0)|(0\\.[0-9]*[1-9]+)|(1\\.0))\\s*\\}&apos;;
+String regexPart = &apos;\\{\\s*&quot;template_id&quot;:\\s?&quot;(([0-9]+[a-f]+)+|([a-f]+[0-9]+)+)[0-9a-f]*&quot;,\\s*&quot;similarity&quot;:\\s?(0\\.0|0\\.[0-9]{0,5}[1-9]|1\\.0)\\s*\\}&apos;;
 String regex = &apos;\\[\\s*&apos; + regexPart + &apos;(,\\s*&apos; + regexPart + &apos;)*\\s*\\]&apos;;
 
 boolean check = Pattern.matches(regex, textResponse);
@@ -419,7 +419,7 @@ if (!check) {
 
 String textResponse = prev.getResponseDataAsString();
 
-String regexPart = &apos;\\{\\s*&quot;template_id&quot;:\\s?&quot;(([0-9]+[a-f]+)+|([a-f]+[0-9]+)+)[0-9a-f]*&quot;,\\s*&quot;similarity&quot;:\\s?((0\\.0)|(0\\.[0-9]*[1-9]+)|(1\\.0))\\s*\\}&apos;;
+String regexPart = &apos;\\{\\s*&quot;template_id&quot;:\\s?&quot;(([0-9]+[a-f]+)+|([a-f]+[0-9]+)+)[0-9a-f]*&quot;,\\s*&quot;similarity&quot;:\\s?(0\\.0|0\\.[0-9]{0,5}[1-9]|1\\.0)\\s*\\}&apos;;
 String regex = &apos;\\[\\s*&apos; + regexPart + &apos;(,\\s*&apos; + regexPart + &apos;)*\\s*\\]&apos;;
 
 boolean check = Pattern.matches(regex, textResponse);

@@ -2,7 +2,7 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API passive liveness video
-# VERSION: 1.1.3
+# VERSION: 1.1.4
 # ================================================================================
 
 ##### настройки среды и глобальные параметры
@@ -11,7 +11,7 @@ source include/common/f_print_test_version.sh
 f_test_passive_liveness_video() {
     CURRENT_FILE_PATH="${BASH_SOURCE[0]}"
     TYPE=$1
-    VIDEO_SCORE_REGEX='^\{\s*"passed":\s*(false|true),\s*"score":\s*(0\.0|0\.[0-9]*[1-9]+|1\.0)(,\s*"results":\s*\[\s*\{\s*"type":\s*"video-type",\s*"passed":\s*(false|true)\s*\}\s*\])?\s*\}$'
+    VIDEO_SCORE_REGEX="${LIVENESS_RESPONSE_CHECK_BASE_PATTERN/$DYNAMIC_PART/$PASSIVE_LIVENESS_VIDEO_ACTION_TYPE}"
 
     BODY="tmp/responce_body"
 

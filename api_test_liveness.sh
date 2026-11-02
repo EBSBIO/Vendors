@@ -2,7 +2,7 @@
 
 # ================================================================================
 # DESC:    мастер-скрипт запуска тестов API liveness
-# VERSION: 2.0.1
+# VERSION: 2.0.2
 # ================================================================================
 
 ##### настройки среды и глобальные параметры
@@ -14,7 +14,7 @@ source include/api/liveness-cases/f_test_passive_liveness_photo.sh
 source include/api/liveness-cases/f_test_passive_liveness_video.sh
 source include/api/liveness-cases/f_test_active_liveness_video.sh
 
-HEALTH_REGEX='^\{\s*"status":\s?0(,\s*"message":\s?".+")?\s*\}$'
+HEALTH_REGEX='^\{\s*"status":\s*0(,\s*"message":\s*".+")?\s*\}$'
 
 f_err_regex() {
     local_code=$1

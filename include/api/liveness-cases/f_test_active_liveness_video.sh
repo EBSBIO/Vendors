@@ -2,7 +2,7 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API active liveness video
-# VERSION: 1.1.1
+# VERSION: 1.1.2
 # ================================================================================
 
 ##### настройки среды и глобальные параметры
@@ -115,14 +115,11 @@ f_test_active_liveness_video() {
     [[ "$MNEMONIC" == "move" ]] && META_WMSG="$MOVE_META_WMSG" || META_WMSG="$TEXT_META_WMSG"
 
     ACTION_TYPE_LIST='(TURN_((RIGHT)|(LEFT)|(UP)|(DOWN)))|(SMILE)|(BLINK)|(DISTORTION)|(RAISE_EYEBROW)|(numbers-digits)'
-    DETECT_REGEX_START_PART='\{\s*"passed":\s?(false|true),\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))(,\s*"results":\s?\[\s*\{\s*"type":\s?"'
-    DETECT_REGEX_END_PART='",\s*"passed":\s?(false|true)\s*\}\s*\])?\s*\}'
-
     f_regex() {
         LOCAL_META=$1
         ACTION_TYPE=$(echo $LOCAL_META | grep -E "${ACTION_TYPE_LIST}" -o)
 
-        echo ^${DETECT_REGEX_START_PART}${ACTION_TYPE}${DETECT_REGEX_END_PART}$
+        echo "${LIVENESS_RESPONSE_CHECK_BASE_PATTERN/$DYNAMIC_PART/$ACTION_TYPE}"
     }
 
     VENDOR_URL="$BASE_URL/detect"

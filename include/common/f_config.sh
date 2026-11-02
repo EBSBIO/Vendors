@@ -2,7 +2,7 @@
 
 # ================================================================================
 # DESC:    глобальные параметры и настройки
-# VERSION: 1.0.0
+# VERSION: 1.0.1
 # ================================================================================
 
 ##### общие параметры
@@ -111,4 +111,4 @@ DETECT_CSV_DATASET_HEADER="${DETECT_CSV_DATASET_BIO_SAMPLE_COLUMN}${SEP_CHAR}${D
 
 ##### паттерны для проверок ответов
 DYNAMIC_PART="__DYNAMIC_PART__"
-LIVENESS_RESPONSE_CHECK_BASE_PATTERN='^\{\s*"passed":\s*(false|true),\s*"score":\s*(0\.0|0\.[0-9]*[1-9]+|1\.0)(,\s*"results":\s*\[\s*\{\s*"type":\s*"'${DYNAMIC_PART}'",\s*"passed":\s*(false|true)\s*\}\s*\])?\s*\}$'
+LIVENESS_RESPONSE_CHECK_BASE_PATTERN='^\{\s*"passed":\s*(false|true),\s*"score":\s*(0\.0|0\.[0-9]{0,5}[1-9]|1\.0)(,\s*"results":\s*\[\s*\{\s*"type":\s*"'${DYNAMIC_PART}'",\s*"passed":\s*(false|true)\s*\}\s*\])?\s*\}$'
