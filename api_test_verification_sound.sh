@@ -2,13 +2,15 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API верификации по голосу
-# VERSION: 2.0.0
+# VERSION: 2.1.0
 # ================================================================================
 
 # include functions
 source include/f_validate_input_params.sh
+source include/f_print_test_version.sh
 source include/f_checks.sh
 
+CURRENT_FILE="${BASH_SOURCE[0]}"
 HEALTH_REGEX='^\{\s*"status":\s?0(,\s*"message":\s?".+")?\s*\}$'
 COMPARE_SCORE_REGEX='^\{\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*\}$'
 VERIFY_SCORE_REGEX='\{\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*\}'
@@ -324,6 +326,7 @@ else
         TIMEOUT=$2
         
         f_validate_input_params
+        f_print_test_version
 
         if [ -n "$PREFIX" ]; then
             BASE_URL="http://${ENDPOINT}/${API_VERSION}/${PREFIX}/pattern"

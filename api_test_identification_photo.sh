@@ -2,13 +2,15 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API идентификации по фотоизображению лица
-# VERSION: 2.0.0
+# VERSION: 2.1.0
 # ================================================================================
 
 # include functions
 source include/f_validate_input_params.sh
+source include/f_print_test_version.sh
 source include/f_checks.sh
 
+CURRENT_FILE="${BASH_SOURCE[0]}"
 HEALTH_REGEX='^\{\s*"status":\s?0(,\s*"message":\s?".+")?\s*\}$'
 MATCH_REGEX_PART='\{\s*"template_id":\s?"[a-f0-9]*",\s*"similarity":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*\}'
 MATCH_REGEX='^\[\s*'${MATCH_REGEX_PART}'(,\s*'${MATCH_REGEX_PART}')*\s*\]$'
@@ -972,6 +974,7 @@ else
         TIMEOUT=$2
         
         f_validate_input_params
+        f_print_test_version
 
         if [ -n "$PREFIX" ]; then
             BASE_URL="http://${ENDPOINT}/${API_VERSION}/${PREFIX}"

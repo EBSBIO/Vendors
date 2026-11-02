@@ -2,83 +2,8 @@
 
 # ================================================================================
 # DESC:    функция проверки входных параметров запуска скриптов тестирования
-# VERSION: 1.0.0
+# VERSION: 1.0.1
 # ================================================================================
-
-##### общие параметры
-GREEN_COLOR="\033[32m"
-RED_COLOR="\033[0;31m"
-NO_COLOR="\033[0m"
-CACHE_FILE="tmp/autotest-cache"
-EXIT_ERROR_CODE=1
-
-##### параметры TCP
-PORT_FORMAT="^[0-9]+$"
-MIN_PORT=1
-MAX_PORT=65535
-TCP_TIMEOUT=3
-
-##### атрибуты тестовых сценариев
-API_TEST_ATTRIBUTE="api"
-LIVENESS_API_TEST_ATTRIBUTE="api_test_liveness"
-VERIFICATION_API_TEST_ATTRIBUTE="api_test_verification"
-IDENTIFICATION_API_TEST_ATTRIBUTE="api_test_identification"
-LOAD_TEST_ATTRIBUTE="load"
-LIVENESS_LOAD_TEST_ATTRIBUTE="load_liveness"
-VERIFICATION_LOAD_TEST_ATTRIBUTE="load_verification"
-IDENTIFICATION_LOAD_TEST_ATTRIBUTE="load_identification"
-
-##### названия опций и параметров тестовых сценариев
-TIMEOUT_PARAMETER_NAME="TIMEOUT"
-METHOD_OPTION_NAME="-m"
-METHOD_PARAMETER_NAME="METHOD"
-THREADS_PARAMETER_NAME="THREADS"
-DURATION_PARAMETER_NAME="DURATION"
-
-##### типы тест-кейсов в зависимости от БО
-DEFAULT_TEST_TYPE="photo"
-SOUND_TEST_TYPE="sound"
-PHOTO_TEST_TYPE="photo"
-VIDEO_TEST_TYPE="video"
-
-##### параметры тест-кейсов liveness
-PASSIVE_VIDEO_TEST_TYPE="p_video"
-ACTIVE_VIDEO_TEST_TYPE="a_video"
-MOVE_MNEMONIC="move-instructions"
-MOVE_MNEMONIC_ATTRIBUTE="move"
-TEXT_MNEMONIC_ATTRIBUTE="text"
-ALL_MOVE_INSTRUCTIONS="all"
-INSTRUCTIONS_BASE_FORMAT="^[1-8](,[1-8])*$"
-TEXT_INSTRUCTION="numbers-digits"
-
-##### типы тестовых БО, БШ, json
-WAV_FILE_TYPE="wav"
-JPG_FILE_TYPE="jpg"
-JPEG_FILE_TYPE="jpeg"
-PNG_FILE_TYPE="png"
-WEBM_FILE_TYPE="webm"
-MP4_FILE_TYPE="mp4"
-MOV_FILE_TYPE="mov"
-VECTOR_TYPE="octet-stream"
-JSON_TYPE="json"
-
-##### числовые константы
-DEFAULT_NUM_VALUE=0
-POSITIVE_INTEGER_PATTERN="^[1-9][0-9]*$"
-
-##### параметры API БП
-DEFAULT_API_VERSION="v1"
-API_VERSION_PATTERN="^v[1-9][0-9]*$"
-DEFAULT_METHOD="all"
-HEALTH_METHOD="health"
-EXTRACT_METHOD="extract"
-COMPARE_METHOD="compare"
-VERIFY_METHOD="verify"
-ADD_METHOD="add"
-UPDATE_METHOD="update"
-DELETE_METHOD="delete"
-MATCH_METHOD="match"
-IDENTIFY_METHOD="identify"
 
 ##### функция проверки на целые положительные числа
 # аргументы:
@@ -109,7 +34,7 @@ f_validate_test_type() {
 
     if [[ -z "$current_type" ]]; then
         TYPE="$default_type"
-        echo -e "Тип тест-кейсов: '${GREEN_COLOR}${TYPE}${NO_COLOR}'."
+        echo -e "Тип тест-кейсов: '${CYAN_COLOR}${TYPE}${NO_COLOR}'."
     elif [[ ! "$current_type" =~ ^($allowed_type_list)$ ]]; then
         echo -e "Ошибка: передан некорректный аргумент для опции '-t' → '${RED_COLOR}${current_type}${NO_COLOR}'. Допустимые значения: '${allowed_type_list}'." >&2
         
@@ -133,7 +58,7 @@ f_validate_method() {
 
     if [[ -z "$current_method" && -n "$default_method" ]]; then
         METHOD="$default_method"
-        echo -e "Метод API: '${GREEN_COLOR}${METHOD}${NO_COLOR}'."
+        echo -e "Метод API: '${CYAN_COLOR}${METHOD}${NO_COLOR}'."
     elif [[ -z "$current_method" && -z "$default_method" ]]; then
         echo "Ошибка: отсутствует значение для обязательного параметра 'METHOD'." >&2
         HAS_ERRORS=true
@@ -145,11 +70,86 @@ f_validate_method() {
 
 ##### универсальная функция валидации входных параметров
 f_validate_input_params() {
+    ### общие параметры
+    BLUE_COLOR="\033[0;34m"
+    CYAN_COLOR="\033[0;36m"    
+    RED_COLOR="\033[0;31m"
+    NO_COLOR="\033[0m"
+    CACHE_FILE="tmp/autotest-cache"
+    EXIT_ERROR_CODE=1
+
+    ### параметры TCP
+    PORT_FORMAT="^[0-9]+$"
+    MIN_PORT=1
+    MAX_PORT=65535
+    TCP_TIMEOUT=3
+
+    ### атрибуты тестовых сценариев
+    API_TEST_ATTRIBUTE="api"
+    LIVENESS_API_TEST_ATTRIBUTE="api_test_liveness"
+    VERIFICATION_API_TEST_ATTRIBUTE="api_test_verification"
+    IDENTIFICATION_API_TEST_ATTRIBUTE="api_test_identification"
+    LOAD_TEST_ATTRIBUTE="load"
+    LIVENESS_LOAD_TEST_ATTRIBUTE="load_liveness"
+    VERIFICATION_LOAD_TEST_ATTRIBUTE="load_verification"
+    IDENTIFICATION_LOAD_TEST_ATTRIBUTE="load_identification"
+
+    ### названия опций и параметров тестовых сценариев
+    TIMEOUT_PARAMETER_NAME="TIMEOUT"
+    METHOD_OPTION_NAME="-m"
+    METHOD_PARAMETER_NAME="METHOD"
+    THREADS_PARAMETER_NAME="THREADS"
+    DURATION_PARAMETER_NAME="DURATION"
+
+    ### типы тест-кейсов в зависимости от БО
+    DEFAULT_TEST_TYPE="photo"
+    SOUND_TEST_TYPE="sound"
+    PHOTO_TEST_TYPE="photo"
+    VIDEO_TEST_TYPE="video"
+
+    ### параметры тест-кейсов liveness
+    PASSIVE_VIDEO_TEST_TYPE="p_video"
+    ACTIVE_VIDEO_TEST_TYPE="a_video"
+    MOVE_MNEMONIC="move-instructions"
+    MOVE_MNEMONIC_ATTRIBUTE="move"
+    TEXT_MNEMONIC_ATTRIBUTE="text"
+    ALL_MOVE_INSTRUCTIONS="all"
+    INSTRUCTIONS_BASE_FORMAT="^[1-8](,[1-8])*$"
+    TEXT_INSTRUCTION="numbers-digits"
+
+    ### типы тестовых БО, БШ, json
+    WAV_FILE_TYPE="wav"
+    JPG_FILE_TYPE="jpg"
+    JPEG_FILE_TYPE="jpeg"
+    PNG_FILE_TYPE="png"
+    WEBM_FILE_TYPE="webm"
+    MP4_FILE_TYPE="mp4"
+    MOV_FILE_TYPE="mov"
+    VECTOR_TYPE="octet-stream"
+    JSON_TYPE="json"
+
+    ### числовые константы
+    DEFAULT_NUM_VALUE=0
+    POSITIVE_INTEGER_PATTERN="^[1-9][0-9]*$"
+
+    ### параметры API БП
+    DEFAULT_API_VERSION="v1"
+    API_VERSION_PATTERN="^v[1-9][0-9]*$"
+    DEFAULT_METHOD="all"
+    HEALTH_METHOD="health"
+    EXTRACT_METHOD="extract"
+    COMPARE_METHOD="compare"
+    VERIFY_METHOD="verify"
+    ADD_METHOD="add"
+    UPDATE_METHOD="update"
+    DELETE_METHOD="delete"
+    MATCH_METHOD="match"
+    IDENTIFY_METHOD="identify"
+
     # исходное состояние
     HAS_ERRORS=false
 
-    echo "-----"
-
+    echo -e "${BLUE_COLOR}----------${NO_COLOR}"
     ### валидация входных данных тестов API
     if [[ "$0" =~ $API_TEST_ATTRIBUTE ]]; then
         # проверка параметра "TIMEOUT"
@@ -167,7 +167,7 @@ f_validate_input_params() {
                 echo -e "Ошибка: для API active liveness отсутствует или введено некорректное значение мнемоники (опция '-m'): '${RED_COLOR}${MNEMONIC}${NO_COLOR}'. Допустимые значения: '${MOVE_MNEMONIC_ATTRIBUTE}|${TEXT_MNEMONIC_ATTRIBUTE}'." >&2
                 HAS_ERRORS=true
             else
-                echo -e "Выбрана следующая мнемоника API active liveness: '${GREEN_COLOR}${MNEMONIC}${NO_COLOR}'."
+                echo -e "Выбрана следующая мнемоника API active liveness: '${CYAN_COLOR}${MNEMONIC}${NO_COLOR}'."
                 if [[ "$MNEMONIC" == "$MOVE_MNEMONIC_ATTRIBUTE" ]]; then
                     # базовая проверка опции "-i"
                     if [[ -z "$INSTRUCTIONS" ]]; then
@@ -179,7 +179,7 @@ f_validate_input_params() {
                     # расширенная проверка опции "-i"
                     else
                         if [[ "$INSTRUCTIONS" == "$ALL_MOVE_INSTRUCTIONS" ]]; then
-                            echo -e "Выбраны все move-инструкции: '${GREEN_COLOR}${INSTRUCTIONS}${NO_COLOR}'."
+                            echo -e "Выбраны все move-инструкции: '${CYAN_COLOR}${INSTRUCTIONS}${NO_COLOR}'."
                         else
                             # создаем эталонную строку с аргументами → меняем запятые на переносы строк, сортируем численно (-n) и уникально (-u), удаляем запятую в конце (если есть)
                             ETALON_INSTRUCTIONS=$(echo "$INSTRUCTIONS" | tr ',' '\n' | sort -nu | tr '\n' ',' | sed 's/,$//')
@@ -187,12 +187,12 @@ f_validate_input_params() {
                                 echo -e "Ошибка: передан некорректный аргумент для опции '-i' (нарушен порядок цифр или есть повторения): '${RED_COLOR}${INSTRUCTIONS}${NO_COLOR}'." >&2
                                 HAS_ERRORS=true
                             else
-                                echo -e "Выбраны следующие move-инструкции: '${GREEN_COLOR}${INSTRUCTIONS}${NO_COLOR}'."
+                                echo -e "Выбраны следующие move-инструкции: '${CYAN_COLOR}${INSTRUCTIONS}${NO_COLOR}'."
                             fi
                         fi
                     fi
                 elif [[ ("$MNEMONIC" == "$TEXT_MNEMONIC_ATTRIBUTE") ]]; then
-                    echo -e "Выбрана следующая text-инструкция: '${GREEN_COLOR}${TEXT_INSTRUCTION}${NO_COLOR}'."
+                    echo -e "Выбрана следующая text-инструкция: '${CYAN_COLOR}${TEXT_INSTRUCTION}${NO_COLOR}'."
                     if [[ -n "$INSTRUCTIONS" ]]; then
                         echo "Для мнемоники '$TEXT_MNEMONIC_ATTRIBUTE' выбор инструкций не требуется. Опция '-i' будет проигнорирована."
                     fi
@@ -316,7 +316,7 @@ f_validate_input_params() {
     # проверка опции "-a"
     if [[ -z "$API_VERSION" ]]; then
         API_VERSION="$DEFAULT_API_VERSION"
-        echo -e "Версия API: '${GREEN_COLOR}${API_VERSION}${NO_COLOR}'."
+        echo -e "Версия API: '${CYAN_COLOR}${API_VERSION}${NO_COLOR}'."
     elif [[ ! "$API_VERSION" =~ $API_VERSION_PATTERN ]]; then
         echo -e "Ошибка: передан некорректный аргумент для опции '-a': '${RED_COLOR}${API_VERSION}${NO_COLOR}'. Формат: префикс «v» и целое положительное число." >&2
         HAS_ERRORS=true
@@ -344,7 +344,7 @@ f_validate_input_params() {
         fi
     fi
 
-    echo "-----"
+    echo -e "${BLUE_COLOR}----------${NO_COLOR}"
 
     if [[ "$HAS_ERRORS" == true ]]; then
         exit $EXIT_ERROR_CODE

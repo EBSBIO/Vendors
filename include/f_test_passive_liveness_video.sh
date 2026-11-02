@@ -2,13 +2,15 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API passive liveness video
-# VERSION: 1.0.0
+# VERSION: 1.1.0
 # ================================================================================
 
 # include functions
+source include/f_print_test_version.sh
 source include/f_checks.sh
 
 f_test_passive_liveness_video() {
+    CURRENT_FILE="${BASH_SOURCE[0]}"
     TYPE=$1
     VIDEO_SCORE_REGEX='^\{\s*"passed":\s?(false|true),\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))(,\s*"results":\s?\[\s*\{\s*"type":\s?"video-type",\s*"passed":\s?(false|true)\s*\}\s*\])?\s*\}$'
 
@@ -40,6 +42,7 @@ f_test_passive_liveness_video() {
     
     VENDOR_URL="$BASE_URL/detect"
 
+    f_print_test_version
 
     TEST_NAME="detect 200. Vertical video"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL

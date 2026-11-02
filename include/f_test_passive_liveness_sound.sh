@@ -2,13 +2,15 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API passive liveness sound
-# VERSION: 1.0.0
+# VERSION: 1.1.0
 # ================================================================================
 
 # include functions
+source include/f_print_test_version.sh
 source include/f_checks.sh
 
 f_test_passive_liveness_sound() {
+    CURRENT_FILE="${BASH_SOURCE[0]}"
     TYPE=$1
     SOUND_SCORE_REGEX='^\{\s*"passed":\s?(false|true),\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))(,\s*"results":\s?\[\s*\{\s*"type":\s?"audio-type",\s*"passed":\s?(false|true)\s*\}\s*\])?\s*\}$'
 
@@ -32,6 +34,7 @@ f_test_passive_liveness_sound() {
     
     VENDOR_URL="$BASE_URL/detect"
 
+    f_print_test_version
 
     TEST_NAME="detect 200. WAV sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=audio/wav" --output '$BODY' '$VENDOR_URL

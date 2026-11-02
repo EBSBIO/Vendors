@@ -2,11 +2,14 @@
 
 # ================================================================================
 # DESC:    скрипт запуска нагрузочных тестов API identification посредством jmeter
-# VERSION: 1.0.0
+# VERSION: 1.1.0
 # ================================================================================
 
 # include functions
 source include/f_validate_input_params.sh
+source include/f_print_test_version.sh
+
+CURRENT_FILE="${BASH_SOURCE[0]}"
 
 f_print_usage() {
 echo Использование: "$0 [OPTIONS] TASK_NAME METHOD THREADS ENDPOINT DURATION
@@ -83,6 +86,7 @@ else
         DURATION=$5
 
         f_validate_input_params
+        f_print_test_version
 
         SERVER="$TMP_SERVER"
         PORT="$TMP_PORT"
