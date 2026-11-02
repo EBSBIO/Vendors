@@ -2,14 +2,15 @@
 
 # ================================================================================
 # DESC:    функция проверки ответов API
-# VERSION: 1.0.0
+# VERSION: 1.1.0
 # ================================================================================
 
 f_check() {
     start=`date +%s.%N`
     RESPONCE_CODE=$(eval $REQUEST)
     end=`date +%s.%N`
-   
+    
+    PASSIVE_LIVENESS_API_TEST_ATTRIBUTE="passive_liveness"
     FAIL=0
     HTTP_CHECK=0
     BODY_CHECK=0
@@ -55,7 +56,14 @@ f_check() {
                     #cat $BODY
                     MESSAGE=$(grep --binary-files=text -E '(\{.*\})|(\[.*\])' -zo $BODY | tr -d '\0')
                     if [[ $MESSAGE =~ $2 ]]; then
-                        MESSAGE_RESULT="OK"
+                        POSSIBLE_LIVENESS_RESPONSE_BOOLEAN_PART="${BASH_REMATCH[1]}"
+                        POSSIBLE_LIVENESS_OPTIONAL_RESPONSE_PART="${BASH_REMATCH[3]}"
+                        POSSIBLE_LIVENESS_OPTIONAL_RESPONSE_BOOLEAN_PART="${BASH_REMATCH[4]}"
+                        if [[ "$CURRENT_FILE" =~ $PASSIVE_LIVENESS_API_TEST_ATTRIBUTE && -n "$POSSIBLE_LIVENESS_OPTIONAL_RESPONSE_PART" ]]; then
+                            [[ "$POSSIBLE_LIVENESS_RESPONSE_BOOLEAN_PART" == "$POSSIBLE_LIVENESS_OPTIONAL_RESPONSE_BOOLEAN_PART" ]] && MESSAGE_RESULT="OK" || MESSAGE_RESULT="FAIL (результат атомарной проверки противоречит значению 'passed')"
+                        else
+                            MESSAGE_RESULT="OK"
+                        fi
                     else
                         MESSAGE_RESULT="FAIL ($2 is expected)"
                     fi

@@ -2,7 +2,7 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API passive liveness sound
-# VERSION: 1.1.0
+# VERSION: 1.1.1
 # ================================================================================
 
 # include functions
@@ -12,7 +12,7 @@ source include/f_checks.sh
 f_test_passive_liveness_sound() {
     CURRENT_FILE="${BASH_SOURCE[0]}"
     TYPE=$1
-    SOUND_SCORE_REGEX='^\{\s*"passed":\s?(false|true),\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))(,\s*"results":\s?\[\s*\{\s*"type":\s?"audio-type",\s*"passed":\s?(false|true)\s*\}\s*\])?\s*\}$'
+    SOUND_SCORE_REGEX='^\{\s*"passed":\s*(false|true),\s*"score":\s*(0\.0|0\.[0-9]*[1-9]+|1\.0)(,\s*"results":\s*\[\s*\{\s*"type":\s*"audio-type",\s*"passed":\s*(false|true)\s*\}\s*\])?\s*\}$'
 
     BODY="tmp/responce_body"
 
