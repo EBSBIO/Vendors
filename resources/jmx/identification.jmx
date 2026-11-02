@@ -28,7 +28,7 @@
       </ThreadGroup>
       <hashTree>
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config - samples" enabled="true">
-          <stringProp name="filename">resources/csv_configs/many_samples.csv</stringProp>
+          <stringProp name="filename">resources/csv/many_samples.csv</stringProp>
           <stringProp name="fileEncoding"></stringProp>
           <stringProp name="variableNames">path_to_samples</stringProp>
           <boolProp name="ignoreFirstLine">false</boolProp>
@@ -42,7 +42,7 @@
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config - biotemplates" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">resources/csv_configs/many_biotemplates.csv</stringProp>
+          <stringProp name="filename">resources/csv/many_biotemplates.csv</stringProp>
           <boolProp name="ignoreFirstLine">false</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -52,7 +52,7 @@
         </CSVDataSet>
         <hashTree/>
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config - template_ids" enabled="true">
-          <stringProp name="filename">resources/csv_configs/template_ids.csv</stringProp>
+          <stringProp name="filename">resources/csv/template_ids.csv</stringProp>
           <stringProp name="fileEncoding"></stringProp>
           <stringProp name="variableNames">path_to_ids</stringProp>
           <boolProp name="ignoreFirstLine">false</boolProp>
@@ -357,7 +357,7 @@ try (f = new FileWriter(&quot;resources/csv_configs/template_ids.csv&quot;, true
 
 String textResponse = prev.getResponseDataAsString();
 
-String regexPart = &apos;\\{\\s*&quot;template_id&quot;:\\s?&quot;(([0-9]+[a-f]+)+|([a-f]+[0-9]+)+)[0-9a-f]*&quot;,\\s*&quot;similarity&quot;:\\s?((0\\.0)|(0\\.[0-9]*[1-9]+)|(1\\.0))\\s*\\}&apos;;
+String regexPart = &apos;\\{\\s*&quot;template_id&quot;:\\s?&quot;(([0-9]+[a-f]+)+|([a-f]+[0-9]+)+)[0-9a-f]*&quot;,\\s*&quot;similarity&quot;:\\s?(0\\.0|0\\.[0-9]{0,5}[1-9]|1\\.0)\\s*\\}&apos;;
 String regex = &apos;\\[\\s*&apos; + regexPart + &apos;(,\\s*&apos; + regexPart + &apos;)*\\s*\\]&apos;;
 
 boolean check = Pattern.matches(regex, textResponse);
@@ -419,7 +419,7 @@ if (!check) {
 
 String textResponse = prev.getResponseDataAsString();
 
-String regexPart = &apos;\\{\\s*&quot;template_id&quot;:\\s?&quot;(([0-9]+[a-f]+)+|([a-f]+[0-9]+)+)[0-9a-f]*&quot;,\\s*&quot;similarity&quot;:\\s?((0\\.0)|(0\\.[0-9]*[1-9]+)|(1\\.0))\\s*\\}&apos;;
+String regexPart = &apos;\\{\\s*&quot;template_id&quot;:\\s?&quot;(([0-9]+[a-f]+)+|([a-f]+[0-9]+)+)[0-9a-f]*&quot;,\\s*&quot;similarity&quot;:\\s?(0\\.0|0\\.[0-9]{0,5}[1-9]|1\\.0)\\s*\\}&apos;;
 String regex = &apos;\\[\\s*&apos; + regexPart + &apos;(,\\s*&apos; + regexPart + &apos;)*\\s*\\]&apos;;
 
 boolean check = Pattern.matches(regex, textResponse);

@@ -1,21 +1,24 @@
 #!/bin/bash
-##########################
-#                        #
-# Author: kflirik        #
-#                        #
-##########################
 
-# include functions
-source include/f_checks.sh
+# ================================================================================
+# DESC:    скрипт запуска тестов API passive liveness video
+# VERSION: 1.2.0
+# ================================================================================
+
+##### настройки среды и глобальные параметры
+source include/common/f_print_test_version.sh
 
 f_test_passive_liveness_video() {
+    CURRENT_FILE_PATH="${BASH_SOURCE[0]}"
     TYPE=$1
-    PHOTO_SCORE_REGEX=$2
+    VIDEO_SCORE_REGEX="${LIVENESS_RESPONSE_CHECK_BASE_PATTERN/$DYNAMIC_PART/$PASSIVE_LIVENESS_VIDEO_ACTION_TYPE}"
 
     BODY="tmp/responce_body"
 
     VERTICAL_SAMPLE_MOV="resources/samples/vert_passive_video"
+    VERTICAL_SAMPLE_MP4="resources/samples/vert_video_mp4"
     HORIZONTAL_SAMPLE_MOV="resources/samples/horizon_passive_video"
+    HORIZONTAL_SAMPLE_WEBM="resources/samples/horizon_video_webm"
     VERTICAL_SAMPLE_MOV_WV="resources/samples/vert_numbers_digits_video"
     HORIZONTAL_SAMPLE_MOV_WV="resources/samples/horizon_numbers_digits_video"
     VERTICAL_SAMPLE_MOV_WFE="resources/samples/vert_passive_video.mov"
@@ -31,112 +34,121 @@ f_test_passive_liveness_video() {
     SAMPLE_NF_MOV="resources/samples/no_face_video"
     SAMPLE_TF_MOV="resources/samples/two_face_video"
 
-    META="resources/metadata/meta_lv_v_p.json"
+    META="resources/metadata/p_lv_v_meta.json"
     META_WM="resources/metadata/meta_without_mnemonic_lv_v_p.json"
     META_WA="resources/metadata/meta_without_action.json"
     META_WT="resources/metadata/meta_without_type_lv_v_p.json"
-    META_WD="resources/metadata/meta_without_duration.json"
+    META_WD="resources/metadata/meta_without_duration_lv_v_p.json"
     META_WMSG="resources/metadata/meta_without_message_lv_v_p.json"
     
     VENDOR_URL="$BASE_URL/detect"
 
+    f_print_test_version
 
-    TEST_NAME="detect 200. Vertical video"
+    TEST_NAME="detect 200. Vertical MOV video"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
-    TEST_NAME="detect 200. Horizontal video"
+    TEST_NAME="detect 200. Vertical MP4 video"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MP4';type=video/mp4" --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
+
+    TEST_NAME="detect 200. Horizontal MOV video"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$HORIZONTAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
+
+    TEST_NAME="detect 200. Horizontal WEBM video"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$HORIZONTAL_SAMPLE_WEBM';type=video/webm" --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Vertical video with voice"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV_WV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Horizontal video with voice"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$HORIZONTAL_SAMPLE_MOV_WV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     \cp $VERTICAL_SAMPLE_MOV $VERTICAL_SAMPLE_MOV_WFE
     TEST_NAME="detect 200. Vertical video with filename extension"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV_WFE';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
     rm -f $VERTICAL_SAMPLE_MOV_WFE
 
     \cp $HORIZONTAL_SAMPLE_MOV $HORIZONTAL_SAMPLE_MOV_WFE
     TEST_NAME="detect 200. Horizontal video with filename extension"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$HORIZONTAL_SAMPLE_MOV_WFE';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
     rm -f $HORIZONTAL_SAMPLE_MOV_WFE
 
     # TEST_NAME="detect 200. Big video"
     # REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$BIG_SAMPLE';type=video/mov" --output '$BODY' '$VENDOR_URL
-    # f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    # f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Vertical with little second face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_LSF';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Horizontal with little second face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$HORIZONTAL_SAMPLE_LSF';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. With charset=UTF-8"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json;charset=UTF-8" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. With charset=UTF-8"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json; charset=UTF-8" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Without filename parameter"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_sample"\r\nContent-Type: video/mov\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     # TEST_NAME="detect 200. Without filename parameter with big video"
     # echo -ne '--72468\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     # echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_sample"\r\nContent-Type: video/mov\r\n\r\n' >> tmp/request_body; cat $BIG_SAMPLE >> tmp/request_body
     # echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     # REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    # f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    # f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Without filename parameter with boundary in quotes"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_sample"\r\nContent-Type: video/mov\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=\"72468\"" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Reverse order of headings without filename"
     echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: video/mov\r\nContent-Disposition: form-data; name="bio_sample"\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Reverse order of headings with filename 1"
     echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: video/mov\r\nContent-Disposition: form-data; name="bio_sample"; filename="vert_passive_video"\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Reverse order of headings with filename 2"
-    echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="meta_lv_v_p.json"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
+    echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="p_lv_v_meta.json"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: video/mov\r\nContent-Disposition: form-data; name="bio_sample"\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
         
     TEST_NAME="detect 200. Reverse order of headings with filename 3"
-    echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="meta_lv_v_p.json"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
+    echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="p_lv_v_meta.json"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: video/mov\r\nContent-Disposition: form-data; name="bio_sample"; filename="vert_passive_video"\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${PHOTO_SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 400. LDE-002001 – Неверный Content-Type HTTP-запроса. Wrong content-type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
@@ -146,15 +158,15 @@ f_test_passive_liveness_video() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" -X GET --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'LDE-002002' 'Неверный метод HTTP-запроса')"
 
-    TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец. Empty file"
+    TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец [подробное описание причины при наличии]. Empty file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$EMPTY';type=video/mov" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'LDE-002004' 'Не удалось прочитать биометрический образец.*')"
 
-    TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец. Sound file"
+    TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец [подробное описание причины при наличии]. Sound file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=video/mov" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'LDE-002004' 'Не удалось прочитать биометрический образец.*')"
 
-    TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец. Photo file"
+    TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец [подробное описание причины при наличии]. Photo file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=video/mov" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'LDE-002004' 'Не удалось прочитать биометрический образец.*')"
 
@@ -193,23 +205,23 @@ f_test_passive_liveness_video() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_TF_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'LDE-003003' 'На биометрическом образце присутствует более, чем одно лицо')"
 
-    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without mnemonic"
+    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata [подробное описание причины при наличии]. Meta without mnemonic"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WM';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without action"
+    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata [подробное описание причины при наличии]. Meta without action"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WA';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without action.type"
+    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata [подробное описание причины при наличии]. Meta without action.type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WT';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without action.duration"
+    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata [подробное описание причины при наличии]. Meta without action.duration"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WD';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without action.message"
+    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata [подробное описание причины при наличии]. Meta without action.message"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WMSG';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata.*')"
 }

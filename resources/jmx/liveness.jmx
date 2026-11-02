@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.5">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="liveness" enabled="true">
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan: liveness" enabled="true">
       <stringProp name="TestPlan.comments"></stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
@@ -12,21 +12,21 @@
       <stringProp name="TestPlan.user_define_classpath"></stringProp>
     </TestPlan>
     <hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group Method" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">${__P(loop, -1)}</stringProp>
+          <stringProp name="LoopController.loops">${__P(loopCount)}</stringProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">${__P(threads, 1)}</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">${__P(ramp, 0)}</stringProp>
+        <stringProp name="ThreadGroup.num_threads">${__P(threads)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__P(rampUpPeriod)}</stringProp>
         <boolProp name="ThreadGroup.scheduler">false</boolProp>
         <stringProp name="ThreadGroup.duration"></stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
       </ThreadGroup>
       <hashTree>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header - UID" enabled="true">
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">X-Request-ID</stringProp>
@@ -35,42 +35,30 @@
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config - meta" enabled="true">
-          <stringProp name="delimiter">,</stringProp>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
+          <stringProp name="delimiter">${__P(delimeter)}</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">resources/csv_configs/metadata.csv</stringProp>
+          <stringProp name="filename">${__P(csvDataset)}</stringProp>
           <boolProp name="ignoreFirstLine">false</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
           <stringProp name="shareMode">shareMode.all</stringProp>
           <boolProp name="stopThread">false</boolProp>
-          <stringProp name="variableNames">path_to_meta</stringProp>
+          <stringProp name="variableNames"></stringProp>
         </CSVDataSet>
         <hashTree/>
-        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config - samples" enabled="true">
-          <stringProp name="delimiter">,</stringProp>
-          <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">resources/csv_configs/many_samples.csv</stringProp>
-          <boolProp name="ignoreFirstLine">false</boolProp>
-          <boolProp name="quotedData">false</boolProp>
-          <boolProp name="recycle">true</boolProp>
-          <stringProp name="shareMode">shareMode.all</stringProp>
-          <boolProp name="stopThread">false</boolProp>
-          <stringProp name="variableNames">path_to_samples</stringProp>
-        </CSVDataSet>
-        <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Http request - detect" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request: detect method" enabled="true">
           <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
             <collectionProp name="HTTPFileArgs.files">
-              <elementProp name="${path_to_meta}" elementType="HTTPFileArg">
-                <stringProp name="File.path">${path_to_meta}</stringProp>
-                <stringProp name="File.paramname">metadata</stringProp>
-                <stringProp name="File.mimetype">application/json</stringProp>
+              <elementProp name="${__V(${__P(metadataPathColumn)})}" elementType="HTTPFileArg">
+                <stringProp name="File.path">${__V(${__P(metadataPathColumn)})}</stringProp>
+                <stringProp name="File.paramname">${__P(metadataParameterName)}</stringProp>
+                <stringProp name="File.mimetype">${__P(metadataMimeType)}</stringProp>
               </elementProp>
-              <elementProp name="${path_to_samples}" elementType="HTTPFileArg">
-                <stringProp name="File.path">${path_to_samples}</stringProp>
-                <stringProp name="File.paramname">bio_sample</stringProp>
-                <stringProp name="File.mimetype">${__P(content_type)}</stringProp>
+              <elementProp name="${__V(${__P(bioSampleColumn)})}" elementType="HTTPFileArg">
+                <stringProp name="File.path">${__V(${__P(bioSampleColumn)})}</stringProp>
+                <stringProp name="File.paramname">${__P(bioSampleParameterName)}</stringProp>
+                <stringProp name="File.mimetype">${__V(${__P(bioSampleMimeTypeColumn)})}</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
@@ -81,20 +69,20 @@
           <stringProp name="HTTPSampler.port">${__P(port)}</stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">${__P(path)}</stringProp>
+          <stringProp name="HTTPSampler.path">${__P(apiLocation)}</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">true</boolProp>
           <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion - message" enabled="true">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
             <collectionProp name="Asserion.test_strings">
-              <stringProp name="2018112776">\{\s*&quot;passed&quot;:\s?(false|true),\s*&quot;score&quot;:\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*(,\s*&quot;results&quot;:\s?\[\s*\{\s*&quot;type&quot;:\s?&quot;photo-type&quot;,\s*&quot;passed&quot;:\s?(false|true)\s*\}\s*\]\s*)?\}</stringProp>
+              <stringProp name="-1607185502">${__V(${__P(livenessResponseCheckPatternColumn)})}</stringProp>
             </collectionProp>
             <stringProp name="Assertion.custom_message"></stringProp>
             <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
@@ -134,10 +122,10 @@
             <threadCounts>true</threadCounts>
           </value>
         </objProp>
-        <stringProp name="filename">tmp/http_errors.xml</stringProp>
+        <stringProp name="filename">${__P(failedRequestsLog)}</stringProp>
       </ResultCollector>
       <hashTree/>
-      <kg.apc.jmeter.perfmon.PerfMonCollector guiclass="kg.apc.jmeter.vizualizers.PerfMonGui" testclass="kg.apc.jmeter.perfmon.PerfMonCollector" testname="jp@gc - PerfMon Metrics Collector" enabled="true">
+      <kg.apc.jmeter.perfmon.PerfMonCollector guiclass="kg.apc.jmeter.vizualizers.PerfMonGui" testclass="kg.apc.jmeter.perfmon.PerfMonCollector" testname="PerfMon Metrics Collector" enabled="true">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
           <name>saveConfig</name>

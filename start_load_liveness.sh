@@ -1,124 +1,154 @@
 #!/bin/bash
-##########################
-#                        #
-# Author: kflirik        #
-#                        #
-# Version 1.24.0         #
-#                        #
-##########################
 
-f_usage(){
-echo Usage: "$0 [OPTIONS] TASK_NAME THREADS URL PORT
-    
-    OPTIONS:
-    -b              Start in background (screen)
-    
-    -s              Absolute path to the directory where samples for testing
-                    For video type it's a must-have option
+# ================================================================================
+# DESC:    обертка для запуска нагрузочных тестов API liveness
+# VERSION: 1.2.0
+# ================================================================================
 
-    -r num          Ramp-up period (sec, default 0)
-    -p string       Prefix
-    -t              Type (sound|photo|video, default photo)
+##### настройки среды и глобальные параметры
+source include/common/f_config.sh
+source include/common/f_validate_input_params.sh
+source include/common/f_print_test_version.sh
+source include/load/dataset-generation/f_gen_dataset.sh
 
-    TASK_NAME       Vendor name
-    THREADS         Sum threads(users)
-    URL             IP
-    PORT            TCP порт БП"
+# путь до текущего скрипта, вне зависимости от того, откуда он будет вызван
+CURRENT_FILE_PATH="${BASH_SOURCE[0]}"
+
+##### функция вывода справки
+f_print_usage() {
+  echo "Использование: $0 [OPTIONS] VENDOR THREADS ENDPOINT
+
+OPTIONS:
+  -b          запуск в фоновом режиме (screen)
+  -t  string  тип тест-кейсов (укажите одно из значений):
+                * sound
+                * photo (по умолчанию)
+                * p_video (passive liveness video)
+                * a_video (active liveness video)
+  -m  string  мнемоника (только для active liveness video):
+                * move (move-instructions)
+                * text (text-instructions)
+  -i  string  move-инструкции (только для move-instructions), например 1,2,3,4,6 или all:
+                * 1 (TURN_RIGHT)
+                * 2 (TURN_LEFT)
+                * 3 (TURN_UP)
+                * 4 (TURN_DOWN)
+                * 5 (SMILE)
+                * 6 (BLINK)
+                * 7 (DISTORTION)
+                * 8 (RAISE_EYEBROW)
+                * all
+  -s  string  абсолютный путь к директории, в которой находятся образцы для тестирования (для типа \"a_video\" опция обязательна)
+  -a  string  версия API (по умолчанию \"v1\")
+  -p  string  префикс (необязательная составная часть пути)
+  -r  int     период ramp-up, сек (по умолчанию 0)
+  
+VENDOR    string  наименование вендора
+THREADS   string  количество потоков нагрузки
+ENDPOINT  string  <IP/DNS>:<ПОРТ>"
 }
 
-if [ -z $1 ]; then
-    f_usage
-else
-    while [ -n "$1" ]; do
-        case "$1" in
-            -b) BG=1; shift;;
-            -s) SAMPLE_DIR=$2; shift; shift;;
-            -r) RAMP=$2; shift; shift;;
-            -p) PREFIX=$2; shift; shift;;
-            -t) TYPE=$2; shift; shift;;
-            *) break ;;
-        esac
+##### основная функция → точка входа
+main() {
+  if [[ -z "$1" ]]; then
+    f_print_usage
+  else
+    while [[ -n "$1" ]]; do
+      case "$1" in
+        -b) local background_mode=true; shift;;
+        -t) TYPE="$2"; shift; shift;;
+        -m) MNEMONIC="$2"; shift; shift;;
+        -i) INSTRUCTIONS="$2"; shift; shift;;
+        -s) SAMPLE_DIR="$2"; shift; shift;;
+        -a) API_VERSION="$2"; shift; shift;;
+        -p) local prefix="$2"; shift; shift;;
+        -r) RAMP_UP_PERIOD="$2"; shift; shift;;
+        *) break;;
+      esac
     done
-    if [ "$#" -ne "4" ]; then
-        f_usage
+
+    local required_positional_arguments_count=3
+    if [[ "$#" != "$required_positional_arguments_count" ]]; then
+      f_print_usage
     else
-        JMX_FILE=resources/jmx/liveness.jmx                   # Template jmeter
-        SUMINTERVAL=10                                        # Интервал (в сек) обновления summariser (таблицы результатов в логе)  
-        SOUND_SAMPLE="resources/samples/sound_10s.wav"        # Используемый файл (sound) для теста в режиме одного сэмпла. Файл необходимо расположить в папке resources
-        PHOTO_SAMPLE="resources/samples/photo_shumskiy.jpg"   # Используемый файл (photo) для теста в режиме одного сэмпла. Файл необходимо расположить в папке resources
-        
-        [ -z $TYPE ] && TYPE="photo"
-        echo "Type – $TYPE"
-        
-        if [[ "$TYPE" == "sound" ]]; then
-            CTYPE="audio/wav"                                                                                                      # content_type
-            echo "resources/metadata/meta_lv_s_p_10s.json" > resources/csv_configs/metadata.csv                                    # Metadata, json файл для теста liveness
-            if [ -z $SAMPLE_DIR ]; then
-                echo "$SOUND_SAMPLE" > resources/csv_configs/many_samples.csv                                                      # Внести один сэмпл
-            else
-                if [ $(find $SAMPLE_DIR -type f -iname "*.wav" | wc -l) -ne $(cat resources/csv_configs/many_samples.csv | wc -l) ]; then
-                    find $SAMPLE_DIR -type f -iname "*.wav" > resources/csv_configs/many_samples.csv                               # Обновить список сэмплов
-                fi
-            fi
-        elif [[ "$TYPE" == "photo" ]]; then
-            CTYPE="image/jpeg"                                                                                                     # content_type
-            echo "resources/metadata/meta.json" > resources/csv_configs/metadata.csv                                               # Metadata, json файл для теста liveness
-            if [ -z $SAMPLE_DIR ]; then
-                echo "$PHOTO_SAMPLE" > resources/csv_configs/many_samples.csv                                                      # Внести один сэмпл
-            else
-                if [ $(find $SAMPLE_DIR -type f -iname "*.jpg" | wc -l) -ne $(cat resources/csv_configs/many_samples.csv | wc -l) ]; then
-                    find $SAMPLE_DIR -type f -iname "*.jpg" > resources/csv_configs/many_samples.csv                               # Обновить список сэмплов
-                fi
-            fi
-        elif [[ "$TYPE" == "video" ]]; then
-            CTYPE="video/mov"                                                                                                      # content_type
-            if [ -z $SAMPLE_DIR ]; then
-                echo; echo "You need to run the script with the \"-s\" option, specifying the path to the test samples with metadata"
-                exit
-            else
-                if [ $(find $SAMPLE_DIR -type f -iname "*json*" | wc -l) -ne $(cat resources/csv_configs/metadata.csv | wc -l) ]; then
-                    find $SAMPLE_DIR -type f -iname "*json*" | sort > resources/csv_configs/metadata.csv                           # Обновить список сэмплов
-                fi
+      ### обязательные параметры
+      local vendor="$1"
+      THREADS="$2"
+      ENDPOINT="$3"
+      METHOD="$DETECT_API_METHOD"
 
-                if [ $(find $SAMPLE_DIR -type f -iname "*mov*" | wc -l) -ne $(cat resources/csv_configs/many_samples.csv | wc -l) ]; then
-                    find $SAMPLE_DIR -type f -iname "*mov*" | sort > resources/csv_configs/many_samples.csv                        # Обновить список сэмплов
-                fi
-            fi
-        else
-            f_usage; exit
-        fi
+      ### параметры тестового сценария
+      local jmx_file="resources/jmx/liveness.jmx"
+      local sum_interval=10
+      local loop_count="-1"
 
-        THREADS=$2                              # Количество потоков (пользователей)
-        LOOP="-1"                               # Количество повторов (-1 беcконечно)
-        [ -z $RAMP ] && RAMP=0                  # Длительность (в сек) для «наращивания» до полного числа выбранных потоков
+      # параметры запуска в режиме "single file"
+      SINGLE_SOUND_FILE_MODE_SAMPLE="resources/samples/sound_10s.wav"
+      SINGLE_SOUND_FILE_MODE_METADATA="resources/metadata/p_lv_s_meta_10s.json"
+      SINGLE_PHOTO_FILE_MODE_SAMPLE="resources/samples/photo_shumskiy.jpg"
+      SINGLE_PHOTO_FILE_MODE_METADATA="resources/metadata/p_lv_p_meta.json"
+      SINGLE_VIDEO_FILE_MODE_SAMPLE="resources/samples/video.mov"
+      SINGLE_VIDEO_FILE_MODE_METADATA="resources/metadata/p_lv_v_meta.json"
 
-        REPORT=reports/${1}/liveness_${2}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv    # Отчет по запросам
-        PERFLOG=reports/${1}/liveness_${2}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
-        LOG=tmp/jmeter.log                      # Лог jmeter
+      ### валидация входных данных и генерация датасета
+      f_validate_input_params
+      f_print_test_version
+      f_gen_dataset
 
-        SERVER=$3                               # DNS/IP имя сервера с развернутым БП
-        PORT=$4                                 # Порт БП
+      ### подготовка остальных параметров для запуска теста
+      local current_date
+      current_date="$(date "+%Y-%m-%dT%H-%M-%S")"
+      local jmeter_log="reports/${vendor}/${DETECT_API_METHOD}-${THREADS}thr-${RAMP_UP_PERIOD}r--${current_date}-jmeter.log"
+      local report="reports/${vendor}/${DETECT_API_METHOD}-${THREADS}thr-${RAMP_UP_PERIOD}r--${current_date}-report.csv"
+      local perflog="reports/${vendor}/${DETECT_API_METHOD}-${THREADS}thr-${RAMP_UP_PERIOD}r--${current_date}-perflog.csv"
+      local failed_requests_log="reports/${vendor}/${DETECT_API_METHOD}-${THREADS}thr-${RAMP_UP_PERIOD}r--${current_date}-failed-requests.xml"
+      local server="${ENDPOINT%%:*}"
+      local port="${ENDPOINT##*:}"
+      local api_location
 
-        if [ -n $PREFIX ]; then
-            LOCATION="/v1/$PREFIX/liveness/detect"
-        else
-            LOCATION="/v1/liveness/detect"
-        fi
-        
-        [[ -s "tmp/http_errors.xml" ]] && cat /dev/null > tmp/http_errors.xml                                       # Очистить лог http-запросов к БП, которые завершились с ошибкой, перед очередным запуском теста
+      if [[ -n "$prefix" ]]; then
+        api_location="/${API_VERSION}/${prefix}/${LIVENESS_DETECT_PATH}"
+      else
+        api_location="/${API_VERSION}/${LIVENESS_DETECT_PATH}"
+      fi
 
-        CMD='jmeter -n -t '$JMX_FILE' -Jthreads='$THREADS' -Jloop='$LOOP' -Jramp='$RAMP' -Jpath='$LOCATION' -Jcontent_type='$CTYPE' -Jmeta='$META' -Jsummariser.interval='$SUMINTERVAL' -Jserver='$SERVER' -Jport='$PORT' -Jperflog='$PERFLOG' -j '$LOG' -l '$REPORT
-        
-        if [ "$BG" == 1 ]; then
-            CMD='screen -dmS start.jmeter sh -c "'$CMD'"'
-        fi
-        echo -e "\nCMD: $CMD\n"
+      echo "Датасет: $DETECT_CSV_DATASET"
 
-        if [ $(cat resources/csv_configs/many_samples.csv | wc -l) -eq 0 ]; then
-            echo; echo "ERROR: no $CTYPE samples to test, check your sample directory or test type"
-            exit
-        fi
+      local jmeter_cmd=(
+        jmeter
+        -n
+        -j "$jmeter_log"
+        -t "$jmx_file"
+        -l "$report"
+        -Jsummariser.interval="$sum_interval"
+        -Jthreads="$THREADS"
+        -JrampUpPeriod="$RAMP_UP_PERIOD"
+        -JloopCount="$loop_count"
+        -JcsvDataset="$DETECT_CSV_DATASET"
+        -Jdelimeter="$SEP_CHAR"
+        -Jserver="$server"
+        -Jport="$port"
+        -JapiLocation="$api_location"
+        -JmetadataPathColumn="$DETECT_CSV_DATASET_METADATA_PATH_COLUMN"
+        -JmetadataParameterName="$METADATA_PARAMETER_NAME"
+        -JmetadataMimeType="$JSON_MIME_TYPE"
+        -JbioSampleColumn="$DETECT_CSV_DATASET_BIO_SAMPLE_COLUMN"
+        -JbioSampleParameterName="$BIO_SAMPLE_PARAMETER_NAME"
+        -JbioSampleMimeTypeColumn="$DETECT_CSV_DATASET_BIO_SAMPLE_MIME_TYPE_COLUMN"
+        -JlivenessResponseCheckPatternColumn="$DETECT_CSV_DATASET_LIVENESS_RESPONSE_CHECK_PATTERN_COLUMN"
+        -Jperflog="$perflog"
+        -JfailedRequestsLog="$failed_requests_log"
+      )
 
-        eval $CMD
+      if [[ "$background_mode" == true ]]; then
+        jmeter_cmd='screen -dmS start.jmeter sh -c "'$jmeter_cmd'"'
+      fi
+
+      echo -e "\nЗапуск jmeter: ${jmeter_cmd[*]}\n"
+      "${jmeter_cmd[@]}"
     fi
-fi
+  fi
+}
+
+##### запуск теста
+main "$@"

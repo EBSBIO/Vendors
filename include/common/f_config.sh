@@ -1,0 +1,114 @@
+#!/bin/bash
+
+# ================================================================================
+# DESC:    глобальные параметры и настройки
+# VERSION: 1.0.1
+# ================================================================================
+
+##### общие параметры
+DIVIDING_LINE="--------------------"
+TMP_DIR="tmp/"
+SEP_CHAR=";"
+EXIT_ERROR_CODE=1
+
+# ANSI
+CYAN_COLOR="\033[0;36m"
+YELLOW_COLOR="\033[0;33m"
+RED_COLOR="\033[0;31m"
+NO_COLOR="\033[0m"
+
+##### атрибуты тестовых сценариев
+API_TEST_ATTRIBUTE="api_test"
+LIVENESS_API_TEST_ATTRIBUTE="api_test_liveness"
+VERIFICATION_API_TEST_ATTRIBUTE="api_test_verification"
+IDENTIFICATION_API_TEST_ATTRIBUTE="api_test_identification"
+LOAD_TEST_ATTRIBUTE="load"
+LIVENESS_LOAD_TEST_ATTRIBUTE="load_liveness"
+VERIFICATION_LOAD_TEST_ATTRIBUTE="load_verification"
+IDENTIFICATION_LOAD_TEST_ATTRIBUTE="load_identification"
+
+##### типы тест-кейсов, БО, БШ, json-полей
+DEFAULT_TEST_TYPE="photo"
+SOUND_TEST_TYPE="sound"
+PHOTO_TEST_TYPE="photo"
+PASSIVE_LIVENESS_VIDEO_TEST_TYPE="p_video"
+ACTIVE_LIVENESS_VIDEO_TEST_TYPE="a_video"
+ACTIVE_LIVENESS_VIDEO_ALL_MOVE_INSTRUCTIONS_ARGUMENT="all"
+WAV_FILE_TYPE="wav"
+JPG_FILE_TYPE="jpg"
+JPEG_FILE_TYPE="jpeg"
+PNG_FILE_TYPE="png"
+MOV_FILE_TYPE="mov"
+MP4_FILE_TYPE="mp4"
+WEBM_FILE_TYPE="webm"
+VECTOR_TYPE="octet-stream"
+JSON_TYPE="json"
+
+##### MIME-типы
+AUDIO_WAV_MIME_TYPE="audio/wav"
+IMAGE_JPEG_MIME_TYPE="image/jpeg"
+IMAGE_PNG_MIME_TYPE="image/png"
+VIDEO_MOV_MIME_TYPE="video/mov"
+VIDEO_MP4_MIME_TYPE="video/mp4"
+VIDEO_WEBM_MIME_TYPE="video/webm"
+VECTOR_MIME_TYPE="application/octet-stream"
+JSON_MIME_TYPE="application/json"
+
+##### параметры API
+# общие
+HEALTH_API_METHOD="health"
+DETECT_API_METHOD="detect"
+EXTRACT_API_METHOD="extract"
+COMPARE_API_METHOD="compare"
+VERIFY_API_METHOD="verify"
+ADD_API_METHOD="add"
+UPDATE_API_METHOD="update"
+DELETE_API_METHOD="delete"
+MATCH_API_METHOD="match"
+IDENTIFY_API_METHOD="identify"
+METADATA_PARAMETER_NAME="metadata"
+
+# liveness
+LIVENESS_DETECT_PATH="liveness/detect"
+ACTIVE_LIVENESS_VIDEO_MOVE_MNEMONIC="move-instructions"
+ACTIVE_LIVENESS_VIDEO_MOVE_MNEMONIC_ATTRIBUTE="move"
+ACTIVE_LIVENESS_VIDEO_TEXT_MNEMONIC="text-instructions"
+ACTIVE_LIVENESS_VIDEO_TEXT_MNEMONIC_ATTRIBUTE="text"
+ACTIVE_LIVENESS_VIDEO_TURN_RIGHT_MOVE_TYPE="TURN_RIGHT"
+ACTIVE_LIVENESS_VIDEO_TURN_LEFT_MOVE_TYPE="TURN_LEFT"
+ACTIVE_LIVENESS_VIDEO_TURN_UP_MOVE_TYPE="TURN_UP"
+ACTIVE_LIVENESS_VIDEO_TURN_DOWN_MOVE_TYPE="TURN_DOWN"
+ACTIVE_LIVENESS_VIDEO_SMILE_MOVE_TYPE="SMILE"
+ACTIVE_LIVENESS_VIDEO_BLINK_MOVE_TYPE="BLINK"
+ACTIVE_LIVENESS_VIDEO_DISTORTION_MOVE_TYPE="DISTORTION"
+ACTIVE_LIVENESS_VIDEO_RAISE_EYEBROW_MOVE_TYPE="RAISE_EYEBROW"
+ACTIVE_LIVENESS_VIDEO_MOVE_TYPE_LIST_PATTERN='(TURN_(RIGHT|LEFT|UP|DOWN)|SMILE|BLINK|DISTORTION|RAISE_EYEBROW)'
+ACTIVE_LIVENESS_VIDEO_TEXT_TYPE="numbers-digits"
+PASSIVE_LIVENESS_SOUND_ACTION_TYPE="audio-type"
+PASSIVE_LIVENESS_PHOTO_ACTION_TYPE="photo-type"
+PASSIVE_LIVENESS_VIDEO_ACTION_TYPE="video-type"
+BIO_SAMPLE_PARAMETER_NAME="bio_sample"
+
+##### параметры нагрузочных сценариев
+DETECT_DATASET_STATE_CACHE="tmp/detect-dataset-state-cache"
+EXTRACT_IDENTIFY_DATASET_STATE_CACHE="tmp/extract-identify-dataset-state-cache"
+COMPARE_ADD_MATCH_DATASET_STATE_CACHE="tmp/compare-add-match-dataset-state-cache"
+VERIFY_DATASET_STATE_CACHE="tmp/verify-dataset-state-cache"
+UPDATE_DELETE_DATASET_STATE_CACHE="tmp/update-delete-dataset-state-cache"
+DETECT_CSV_DATASET="resources/csv/detect-dataset.csv"
+EXTRACT_IDENTIFY_CSV_DATASET="resources/csv/extract-identify-dataset.csv"
+COMPARE_ADD_MATCH_CSV_DATASET="resources/csv/compare-add-match-dataset.csv"
+VERIFY_CSV_DATASET="resources/csv/verify-dataset.csv"
+UPDATE_DELETE_CSV_DATASET="resources/csv/update-delete-dataset.csv"
+CSV_DATASET_TARGET_LINE=2
+
+# настройки liveness-датасета
+DETECT_CSV_DATASET_BIO_SAMPLE_COLUMN="bioSample"
+DETECT_CSV_DATASET_BIO_SAMPLE_MIME_TYPE_COLUMN="bioSampleMimeType"
+DETECT_CSV_DATASET_METADATA_PATH_COLUMN="metadataPath"
+DETECT_CSV_DATASET_LIVENESS_RESPONSE_CHECK_PATTERN_COLUMN="livenessResponseCheckPattern"
+DETECT_CSV_DATASET_HEADER="${DETECT_CSV_DATASET_BIO_SAMPLE_COLUMN}${SEP_CHAR}${DETECT_CSV_DATASET_BIO_SAMPLE_MIME_TYPE_COLUMN}${SEP_CHAR}${DETECT_CSV_DATASET_METADATA_PATH_COLUMN}${SEP_CHAR}${DETECT_CSV_DATASET_LIVENESS_RESPONSE_CHECK_PATTERN_COLUMN}"
+
+##### паттерны для проверок ответов
+DYNAMIC_PART="__DYNAMIC_PART__"
+LIVENESS_RESPONSE_CHECK_BASE_PATTERN='^\{\s*"passed":\s*(false|true),\s*"score":\s*(0\.0|0\.[0-9]{0,5}[1-9]|1\.0)(,\s*"results":\s*\[\s*\{\s*"type":\s*"'${DYNAMIC_PART}'",\s*"passed":\s*(false|true)\s*\}\s*\])?\s*\}$'

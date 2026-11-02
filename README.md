@@ -118,7 +118,7 @@
 dnf install redos-kernels6-release
 dnf update
 
-dnf install \ 
+dnf install \
     kernel-lt-6.1.148-1.el7.3.x86_64 \
     kernel-lt-tools-6.1.148-1.el7.3.x86_64 \
     kernel-lt-tools-libs-6.1.148-1.el7.3.x86_64
@@ -177,7 +177,7 @@ nvidia-ctk runtime configure --runtime=docker
 
 ---
 Далее есть два основных способа контроля GPU для сервисов в swarm:
-- контроль ресурсов через docker swarm,
+- контроль ресурсов через docker swarm
 - контроль ресурсов через окружение сервиса с помощью переменной `NVIDIA_VISIBLE_DEVICES`.
 
 <br>**Контроль ресурсов через docker swarm:**
@@ -193,11 +193,11 @@ nvidia-ctk runtime configure --runtime=docker
             "args": []
         }
     },
-    "default-runtime": "nvidia"
+    "default-runtime": "nvidia",
     "node-generic-resources": [
         "gpu={GPU_ID_1}",
         "gpu={GPU_ID_2}",
-        ...
+        "..."
     ]    
 }
 ```
@@ -224,4 +224,3 @@ resources:
 **Дополнительные настройки**
 
 Может потребоваться настройка SELinux и создание кастомной политики, если драйвер блокируется.
-
