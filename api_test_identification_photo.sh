@@ -2,7 +2,7 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API идентификации по фотоизображению лица
-# VERSION: 2.1.2
+# VERSION: 2.1.3
 # ================================================================================
 
 ##### настройки среды и глобальные параметры
@@ -21,7 +21,7 @@ f_err_regex() {
     local_code=$1
     local_message=$2
 
-    echo '^\{\s*"code":\s?"'${local_code}'",\s*"message":\s?"'${local_message}'"\s*\}$'
+    echo '^\{\s*"code":\s*"'${local_code}'",\s*"message":\s*"'${local_message}'"\s*\}$'
 }
 
 BODY="tmp/responce_body"
@@ -140,13 +140,13 @@ f_test_extract() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary  @'$SAMPLE_JPG' --output '$BODY' -X GET '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-002002' 'Неверный метод HTTP-запроса')"
 
-    TEST_NAME="extract 400. BPE-002003 – Не удалось прочитать биометрический образец. Empty file"
+    TEST_NAME="extract 400. BPE-002003 – Не удалось прочитать биометрический образец [подробное описание причины при наличии]. Empty file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$EMPTY' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец.*')"
 
-    TEST_NAME="extract 400. BPE-002003 – Не удалось прочитать биометрический образец. Sound file"
+    TEST_NAME="extract 400. BPE-002003 – Не удалось прочитать биометрический образец [подробное описание причины при наличии]. Sound file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_WAV' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец.*')"
 
     TEST_NAME="extract 400. BPE-003002 – На биометрическом образце отсутствует лицо. No face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_NF' --output '$BODY' '$VENDOR_URL
@@ -280,9 +280,9 @@ f_test_add() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' -X GET --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-002002' 'Неверный метод HTTP-запроса')"
 
-    TEST_NAME="add 400. BPE-002004 – Не удалось прочитать биометрический шаблон. Empty file"
+    TEST_NAME="add 400. BPE-002004 – Не удалось прочитать биометрический шаблон [подробное описание причины при наличии]. Empty file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$EMPTY';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-002004' 'Не удалось прочитать биометрический шаблон')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002004' 'Не удалось прочитать биометрический шаблон.*')"
 
     TEST_NAME="add 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid template type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=image/jpeg" -F '$META' --output '$BODY' '$VENDOR_URL
@@ -292,15 +292,15 @@ f_test_add() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BADTYPE' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-002005' 'Неверный Content-Type части multiparted HTTP-запроса')"
 
-    TEST_NAME="add 400. BPE-00005 – Не удалось прочитать метаданные. No parameters"
+    TEST_NAME="add 400. BPE-00005 – Не удалось прочитать metadata [подробное описание причины при наличии]. No parameters"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BROKEN' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать метаданные')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="add 400. BPE-00005 – Не удалось прочитать метаданные. Extra comma in metadata"
+    TEST_NAME="add 400. BPE-00005 – Не удалось прочитать metadata [подробное описание причины при наличии]. Extra comma in metadata"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BAD' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать метаданные')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="add 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. Bad parameter \"template_id\""
+    TEST_NAME="add 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. Bad parameter \"template_id\""
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_NOID' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
@@ -308,19 +308,19 @@ f_test_add() {
     # REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$EMPTY';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL 
     # f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="add 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No template part"
+    TEST_NAME="add 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No template part"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="add 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No metadata body"
+    TEST_NAME="add 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No metadata body"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_EMPTY' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="add 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No metadata part"
+    TEST_NAME="add 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No metadata part"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
     
-    TEST_NAME="add 400. BPE-00506 – Недопустимое значение параметра {название параметра}. Invalid template_id parameter value"
+    TEST_NAME="add 400. BPE-00506 – Недопустимое значение параметра [название параметра]. Invalid template_id parameter value"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_IPV' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00506' 'Недопустимое значение параметра.+')"
 
@@ -439,9 +439,9 @@ f_test_update() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' --output '$BODY' -X GET '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-002002' 'Неверный метод HTTP-запроса')"
 
-    TEST_NAME="update 400. BPE-002004 – Не удалось прочитать биометрический шаблон. Broken biotemplate"
+    TEST_NAME="update 400. BPE-002004 – Не удалось прочитать биометрический шаблон [подробное описание причины при наличии]. Broken biotemplate"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE_BR';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-002004' 'Не удалось прочитать биометрический шаблон')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002004' 'Не удалось прочитать биометрический шаблон.*')"
 
     TEST_NAME="update 400. BPE-002404 – Не найден биометрический шаблон с заданным идентификатором"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BIGID' --output '$BODY' '$VENDOR_URL
@@ -455,15 +455,15 @@ f_test_update() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BADTYPE' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-002005' 'Неверный Content-Type части multiparted HTTP-запроса')"
 
-    TEST_NAME="update 400. BPE-00005 – Не удалось прочитать метаданные. No parameters"
+    TEST_NAME="update 400. BPE-00005 – Не удалось прочитать metadata [подробное описание причины при наличии]. No parameters"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BROKEN' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать метаданные')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="update 400. BPE-00005 – Не удалось прочитать метаданные. Extra comma in metadata"
+    TEST_NAME="update 400. BPE-00005 – Не удалось прочитать metadata [подробное описание причины при наличии]. Extra comma in metadata"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BAD' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать метаданные')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="update 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. Bad parameter \"template_id\""
+    TEST_NAME="update 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. Bad parameter \"template_id\""
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_NOID' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
@@ -471,19 +471,19 @@ f_test_update() {
     # REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$EMPTY';type=application/octet-stream" -F '$META' --output '$BODY' '$VENDOR_URL
     # f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="update 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No template part"
+    TEST_NAME="update 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No template part"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F '$META' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="update 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No metadata body"
+    TEST_NAME="update 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No metadata body"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_EMPTY' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="update 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No metadata part"
+    TEST_NAME="update 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No metadata part"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="update 400. BPE-00506 – Недопустимое значение параметра {название параметра}. Invalid template_id parameter value"
+    TEST_NAME="update 400. BPE-00506 – Недопустимое значение параметра [название параметра]. Invalid template_id parameter value"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_IPV' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00506' 'Недопустимое значение параметра.+')"
 
@@ -551,19 +551,19 @@ f_test_delete() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
     f_check -r 200
 
-    TEST_NAME="delete 400. BPE-00005 – Не удалось прочитать метаданные. Extra comma in metadata"
+    TEST_NAME="delete 400. BPE-00005 – Не удалось прочитать metadata [подробное описание причины при наличии]. Extra comma in metadata"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_BAD' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать метаданные')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="delete 400. BPE-00005 – Не удалось прочитать метаданные. No parameter"
+    TEST_NAME="delete 400. BPE-00005 – Не удалось прочитать metadata [подробное описание причины при наличии]. No parameter"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_BROKEN' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать метаданные')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="delete 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. Bad parameter \"template_id\""
+    TEST_NAME="delete 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. Bad parameter \"template_id\""
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_NOID' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="delete 400. BPE-00506 – Недопустимое значение параметра {название параметра}. Invalid template_id parameter value"
+    TEST_NAME="delete 400. BPE-00506 – Недопустимое значение параметра [название параметра]. Invalid template_id parameter value"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:application/json" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA_IPV' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00506' 'Недопустимое значение параметра.+')"
 }
@@ -671,9 +671,9 @@ f_test_match() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA' --output '$BODY' -X GET '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-002002' 'Неверный метод HTTP-запроса')"
 
-    TEST_NAME="match 400. BPE-002004 – Не удалось прочитать биометрический шаблон. Broken biotemplate"
+    TEST_NAME="match 400. BPE-002004 – Не удалось прочитать биометрический шаблон [подробное описание причины при наличии]. Broken biotemplate"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE_BR';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-002004' 'Не удалось прочитать биометрический шаблон')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002004' 'Не удалось прочитать биометрический шаблон.*')"
 
     TEST_NAME="match 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid template type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
@@ -683,35 +683,35 @@ f_test_match() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_BADTYPE' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-002005' 'Неверный Content-Type части multiparted HTTP-запроса')"
 
-    TEST_NAME="match 400. BPE-00005 – Не удалось прочитать метаданные. No parameters"
+    TEST_NAME="match 400. BPE-00005 – Не удалось прочитать metadata [подробное описание причины при наличии]. No parameters"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META_BROKEN' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать метаданные')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="match 400. BPE-00005 – Не удалось прочитать метаданные. Extra comma in metadata"
+    TEST_NAME="match 400. BPE-00005 – Не удалось прочитать metadata [подробное описание причины при наличии]. Extra comma in metadata"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_BAD' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать метаданные')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать metadata.*')"
 
     # TEST_NAME="match 400. BPE-00005. No template"
     # REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$EMPTY';type=application/octet-stream" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     # f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать метаданные')"
 
-    TEST_NAME="match 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No limit parameter"
+    TEST_NAME="match 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No limit parameter"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_NOLIM' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="match 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No threshold parameter"
+    TEST_NAME="match 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No threshold parameter"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_NOTH' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="match 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No template part"
+    TEST_NAME="match 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No template part"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="match 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No metadata body"
+    TEST_NAME="match 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No metadata body"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F "metadata={};type=application/json" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="match 400. BPE-00506 – Недопустимое значение параметра {название параметра}. Invalid limit parameter value"
+    TEST_NAME="match 400. BPE-00506 – Недопустимое значение параметра [название параметра]. Invalid limit parameter value"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$MMETA_IPV' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00506' 'Недопустимое значение параметра.+')"
 
@@ -863,17 +863,17 @@ f_test_identify() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA' --output '$BODY' -X GET '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-002002' 'Неверный метод HTTP-запроса')"
 
-    TEST_NAME="identify 400. BPE-002003 – Не удалось прочитать биометрический образец. Broken sample"
+    TEST_NAME="identify 400. BPE-002003 – Не удалось прочитать биометрический образец [подробное описание причины при наличии]. Broken sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_BR';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец.*')"
 
-    TEST_NAME="identify 400. BPE-002003 – Не удалось прочитать биометрический образец. Empty file"
+    TEST_NAME="identify 400. BPE-002003 – Не удалось прочитать биометрический образец [подробное описание причины при наличии]. Empty file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$EMPTY';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец.*')"
 
-    TEST_NAME="identify 400. BPE-002003 – Не удалось прочитать биометрический образец. Sound file"
+    TEST_NAME="identify 400. BPE-002003 – Не удалось прочитать биометрический образец [подробное описание причины при наличии]. Sound file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_WAV';type=image/jpeg" -F '$MMETA' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-002003' 'Не удалось прочитать биометрический образец.*')"
 
     TEST_NAME="identify 400. BPE-002005 – Неверный Content-Type части multiparted HTTP-запроса. Invalid sample type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=audio/pcm" -F '$MMETA' --output '$BODY' '$VENDOR_URL
@@ -887,35 +887,35 @@ f_test_identify() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=audio/wav" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-002005' 'Неверный Content-Type части multiparted HTTP-запроса')"
 
-    TEST_NAME="identify 400. BPE-00005 – Не удалось прочитать метаданные. No parameters"
+    TEST_NAME="identify 400. BPE-00005 – Не удалось прочитать metadata [подробное описание причины при наличии]. No parameters"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$META_BROKEN' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать метаданные')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="identify 400. BPE-00005 – Не удалось прочитать метаданные. Extra comma in metadata"
+    TEST_NAME="identify 400. BPE-00005 – Не удалось прочитать metadata [подробное описание причины при наличии]. Extra comma in metadata"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_BAD' --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать метаданные')"
+    f_check -r 400 -m "$(f_err_regex 'BPE-00005' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="identify 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No threshold parameter"
+    TEST_NAME="identify 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No threshold parameter"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_NOTH' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="identify 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No limit parameter"
+    TEST_NAME="identify 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No limit parameter"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_NOLIM' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="identify 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No photo part"
+    TEST_NAME="identify 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No photo part"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F '$MMETA' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="identify 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No metadata body"
+    TEST_NAME="identify 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No metadata body"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$META_EMPTY' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="identify 400. BPE-00502 – Запрос не содержит обязательных данных {название данных/параметров}. No metadata part"
+    TEST_NAME="identify 400. BPE-00502 – Запрос не содержит обязательных данных [название данных/параметров]. No metadata part"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00502' 'Запрос не содержит обязательных данных.+')"
 
-    TEST_NAME="identify 400. BPE-00506 – Недопустимое значение параметра {название параметра}. Invalid limit parameter value"
+    TEST_NAME="identify 400. BPE-00506 – Недопустимое значение параметра [название параметра]. Invalid limit parameter value"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "photo=@'$SAMPLE_JPG';type=image/jpeg" -F '$MMETA_IPV' --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'BPE-00506' 'Недопустимое значение параметра.+')"
 

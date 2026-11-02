@@ -2,7 +2,7 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API passive liveness photo
-# VERSION: 1.1.3
+# VERSION: 1.1.4
 # ================================================================================
 
 ##### настройки среды и глобальные параметры
@@ -133,15 +133,15 @@ f_test_passive_liveness_photo() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" -X GET --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'LDE-002002' 'Неверный метод HTTP-запроса')"
 
-    TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец. Empty file"
+    TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец [подробное описание причины при наличии]. Empty file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$EMPTY';type=image/jpeg" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'LDE-002004' 'Не удалось прочитать биометрический образец.*')"
 
-    TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец. Sound file"
+    TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец [подробное описание причины при наличии]. Sound file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_WAV';type=image/jpeg" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'LDE-002004' 'Не удалось прочитать биометрический образец.*')"
 
-    TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец. Video file"
+    TEST_NAME="detect 400. LDE-002004 – Не удалось прочитать биометрический образец [подробное описание причины при наличии]. Video file"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=image/jpeg" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'LDE-002004' 'Не удалось прочитать биометрический образец.*')"
 
@@ -180,23 +180,23 @@ f_test_passive_liveness_photo() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$SAMPLE_TF';type=image/jpeg" --output '$BODY' '$VENDOR_URL
     f_check -r 400 -m "$(f_err_regex 'LDE-003003' 'На биометрическом образце присутствует более, чем одно лицо')"
 
-    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without mnemonic"
+    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata [подробное описание причины при наличии]. Meta without mnemonic"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WM';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without action"
+    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata [подробное описание причины при наличии]. Meta without action"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WA';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without action.type"
+    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata [подробное описание причины при наличии]. Meta without action.type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WT';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without action.duration"
+    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata [подробное описание причины при наличии]. Meta without action.duration"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WD';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata.*')"
 
-    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata. Meta without action.message"
+    TEST_NAME="detect 400. LDE-003004 – Не удалось прочитать metadata [подробное описание причины при наличии]. Meta without action.message"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-Type:multipart/form-data" -F "metadata=@'$META_WMSG';type=application/json" -F "bio_sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata')"
+    f_check -r 400 -m "$(f_err_regex 'LDE-003004' 'Не удалось прочитать metadata.*')"
 }
