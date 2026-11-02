@@ -2,7 +2,7 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API верификации по голосу
-# VERSION: 2.1.0
+# VERSION: 2.1.1
 # ================================================================================
 
 # include functions
@@ -329,9 +329,9 @@ else
         f_print_test_version
 
         if [ -n "$PREFIX" ]; then
-            BASE_URL="http://${ENDPOINT}/${API_VERSION}/${PREFIX}/pattern"
+            BASE_URL="http://${ENDPOINT}/${API_VERSION}/${PREFIX}"
         else
-            BASE_URL="http://${ENDPOINT}/${API_VERSION}/pattern"
+            BASE_URL="http://${ENDPOINT}/${API_VERSION}"
         fi
         
         VENDOR_URL="$BASE_URL/health"

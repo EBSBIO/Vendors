@@ -2,7 +2,7 @@
 
 # ================================================================================
 # DESC:    скрипт запуска нагрузочных тестов API verification посредством jmeter
-# VERSION: 1.1.0
+# VERSION: 1.1.1
 # ================================================================================
 
 # include functions
@@ -144,9 +144,9 @@ else
         fi
 
         if [ -n "$PREFIX" ]; then
-            LOCATION="/$API_VERSION/$PREFIX/pattern/$METHOD"
+            LOCATION="/$API_VERSION/$PREFIX/$METHOD"
         else
-            LOCATION="/$API_VERSION/pattern/$METHOD"
+            LOCATION="/$API_VERSION/$METHOD"
         fi
 
         [[ -s "tmp/http_errors.xml" ]] && cat /dev/null > tmp/http_errors.xml                                       # Очистить лог http-запросов к БП, которые завершились с ошибкой, перед очередным запуском теста
