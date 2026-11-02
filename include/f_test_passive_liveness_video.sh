@@ -2,7 +2,7 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API passive liveness video
-# VERSION: 1.1.0
+# VERSION: 1.1.1
 # ================================================================================
 
 # include functions
@@ -37,7 +37,7 @@ f_test_passive_liveness_video() {
     META_WM="resources/metadata/meta_without_mnemonic_lv_v_p.json"
     META_WA="resources/metadata/meta_without_action.json"
     META_WT="resources/metadata/meta_without_type_lv_v_p.json"
-    META_WD="resources/metadata/meta_without_duration.json"
+    META_WD="resources/metadata/meta_without_duration_lv_v_p.json"
     META_WMSG="resources/metadata/meta_without_message_lv_v_p.json"
     
     VENDOR_URL="$BASE_URL/detect"
