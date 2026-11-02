@@ -1,25 +1,23 @@
 #!/bin/bash
-##########################
-#                        #
-# Author: kflirik        #
-#                        #
-# Ver: 1.24.2            #
-#                        #
-##########################
+
+# ================================================================================
+# DESC:    скрипт запуска тестов API идентификации
+# VERSION: 1.0.0
+# ================================================================================
 
 # include functions
 source include/f_checks.sh
 
-HEALTH_REGEX='\{\s*"status":\s?0(,\s*"message":.+)?\s*\}'
+HEALTH_REGEX='^\{\s*"status":\s?0(,\s*"message":\s?".+")?\s*\}$'
 MATCH_REGEX_PART='\{\s*"template_id":\s?"[a-f0-9]*",\s*"similarity":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*\}'
-MATCH_REGEX='\[\s*'${MATCH_REGEX_PART}'(,\s*'${MATCH_REGEX_PART}')*\s*\]'
-MATCH_REGEX_1_0='(\[\s*'${MATCH_REGEX_PART}'(,\s*'${MATCH_REGEX_PART}')*\s*\])|(\[\])'
+MATCH_REGEX='^\[\s*'${MATCH_REGEX_PART}'(,\s*'${MATCH_REGEX_PART}')*\s*\]$'
+MATCH_REGEX_1_0='(^\[\s*'${MATCH_REGEX_PART}'(,\s*'${MATCH_REGEX_PART}')*\s*\]$)|(^\[\]$)'
 
 f_err_regex() {
     local_code=$1
     local_message=$2
 
-    echo '\{\s*"code":\s?"'${local_code}'",\s*"message":\s?"'${local_message}'"\s*\}'
+    echo '^\{\s*"code":\s?"'${local_code}'",\s*"message":\s?"'${local_message}'"\s*\}$'
 }
 
 BODY="tmp/responce_body"

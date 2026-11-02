@@ -1,21 +1,22 @@
 #!/bin/bash
-##########################
-#                        #
-# Author: kflirik        #
-#                        #
-##########################
+
+# ================================================================================
+# DESC:    скрипт запуска тестов API верификации по фото лица
+# VERSION: 1.0.0
+# ================================================================================
 
 # include functions
 source include/f_checks.sh
 
-HEALTH_REGEX='\{\s*"status":\s?0(,\s*"message":.+)?\s*\}'
-SCORE_REGEX='\{\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*\}'
+HEALTH_REGEX='^\{\s*"status":\s?0(,\s*"message":\s?".+")?\s*\}$'
+COMPARE_SCORE_REGEX='^\{\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*\}$'
+VERIFY_SCORE_REGEX='\{\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*\}'
 
 f_err_regex() {
     local_code=$1
     local_message=$2
 
-    echo '\{\s*"code":\s?"'${local_code}'",\s*"message":\s?"'${local_message}'"\s*\}'
+    echo '^\{\s*"code":\s?"'${local_code}'",\s*"message":\s?"'${local_message}'"\s*\}$'
 }
 
 BODY="tmp/responce_body"
@@ -125,49 +126,49 @@ f_test_compare() {
     # Tests
     TEST_NAME="compare 200"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -X POST --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${COMPARE_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="compare 200. Without filename parameter"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_feature"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_template"\r\nContent-Type: application/octet-stream\r\n\r\n' >> tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${COMPARE_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="compare 200. Without filename parameter with boundary in quotes"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_feature"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="bio_template"\r\nContent-Type: application/octet-stream\r\n\r\n' >> tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=\"72468\"" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${COMPARE_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="compare 200. Reverse order of headings without filename"
     echo -ne '--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_feature"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_template"\r\n\r\n' >> tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${COMPARE_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="compare 200. Reverse order of headings with filename 1"
     echo -ne '--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_feature"; filename="biotemplate"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_template"\r\n\r\n' >> tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${COMPARE_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="compare 200. Reverse order of headings with filename 2"
     echo -ne '--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_feature"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_template"; filename="biotemplate"\r\n\r\n' >> tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${COMPARE_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="compare 200. Reverse order of headings with filename 3"
     echo -ne '--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_feature"; filename="biotemplate"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_template"; filename="biotemplate"\r\n\r\n' >> tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${COMPARE_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="compare 400. BPE-002001 – Неверный Content-Type HTTP-запроса. Wrong content-type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:image/jpeg" -F "bio_feature=@'$BIOTEMPLATE';type=application/octet-stream" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -X POST --output '$BODY' '$VENDOR_URL 
@@ -214,85 +215,85 @@ f_test_verify() {
     
     TEST_NAME="verify 200. JPG sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="verify 200. PNG sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_PNG';type=image/png" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
 
     \cp $SAMPLE_JPG $SAMPLE_JPG_WFE
     TEST_NAME="verify 200. JPG sample without filename extension"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_JPG_WFE';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
     rm -f $SAMPLE_JPG_WFE
 
     \cp $SAMPLE_PNG $SAMPLE_PNG_WFE
     TEST_NAME="verify 200. PNG sample without filename extension"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_PNG_WFE';type=image/png" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
     rm -f $SAMPLE_PNG_WFE
 
     TEST_NAME="verify 200. Big PNG sample"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$BIG_SAMPLE_PNG';type=image/png" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="verify 200. Little second face"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:multipart/form-data" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_LSF';type=image/jpeg" --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="verify 200. Boundary no hyphens"
     cat resources/body/body_stream $BIOTEMPLATE resources/body/body_image $SAMPLE_JPG resources/body/body_end > tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="verify 200. Without filename parameter"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="sample"\r\nContent-Type: image/jpeg\r\n\r\n' >> tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="verify 200. Without filename parameter with big photo"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="sample"\r\nContent-Type: image/png\r\n\r\n' >> tmp/request_body; cat $BIG_SAMPLE_PNG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="verify 200. Without filename parameter with boundary in quotes"
     echo -ne '--72468\r\nContent-Disposition: form-data; name="bio_template"\r\nContent-Type: application/octet-stream\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Disposition: form-data; name="sample"\r\nContent-Type: image/jpeg\r\n\r\n' >> tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=\"72468\"" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="verify 200. Reverse order of headings without filename"
     echo -ne '--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_template"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="sample"\r\n\r\n' >> tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="verify 200. Reverse order of headings with filename 1"
     echo -ne '--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_template"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="sample"; filename="photo.jpg"\r\n\r\n' >> tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="verify 200. Reverse order of headings with filename 2"
     echo -ne '--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_template"; filename="biotemplate"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="sample"\r\n\r\n' >> tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="verify 200. Reverse order of headings with filename 3"
     echo -ne '--72468\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; name="bio_template"; filename="biotemplate"\r\n\r\n' > tmp/request_body; cat $BIOTEMPLATE >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: image/jpeg\r\nContent-Disposition: form-data; name="sample"; filename="photo.jpg"\r\n\r\n' >> tmp/request_body; cat $SAMPLE_JPG >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
-    f_check -r 200 -m ${SCORE_REGEX} -f "- Score format double is expected"
+    f_check -r 200 -m ${VERIFY_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="verify 400. BPE-002001 – Неверный Content-Type HTTP-запроса. Wrong content-type"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-type:image/jpeg" -F "bio_template=@'$BIOTEMPLATE';type=application/octet-stream" -F "sample=@'$SAMPLE_JPG';type=image/jpeg" --output '$BODY' '$VENDOR_URL

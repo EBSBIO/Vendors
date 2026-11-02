@@ -1,17 +1,16 @@
 #!/bin/bash
-##########################
-#                        #
-# Author: kflirik        #
-#                        #
-# version: 1.24.2        #
-##########################
+
+# ================================================================================
+# DESC:    скрипт запуска тестов API passive liveness sound
+# VERSION: 1.0.0
+# ================================================================================
 
 # include functions
 source include/f_checks.sh
 
 f_test_passive_liveness_sound() {
     TYPE=$1
-    SOUND_SCORE_REGEX=$2
+    SOUND_SCORE_REGEX='^\{\s*"passed":\s?(false|true),\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))(,\s*"results":\s?\[\s*\{\s*"type":\s?"audio-type",\s*"passed":\s?(false|true)\s*\}\s*\])?\s*\}$'
 
     BODY="tmp/responce_body"
 

@@ -94,7 +94,7 @@
         <hashTree>
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion - message" enabled="true">
             <collectionProp name="Asserion.test_strings">
-              <stringProp name="2018112776">\{\s*&quot;passed&quot;:\s?(false|true),\s*&quot;score&quot;:\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*(,\s*&quot;results&quot;:\s?\[\s*\{\s*&quot;type&quot;:\s?&quot;photo-type&quot;,\s*&quot;passed&quot;:\s?(false|true)\s*\}\s*\]\s*)?\}</stringProp>
+              <stringProp name="416986359">\{\s*&quot;passed&quot;:\s?(false|true),\s*&quot;score&quot;:\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))(,\s*&quot;results&quot;:\s?\[\s*\{\s*&quot;type&quot;:\s?&quot;photo-type&quot;,\s*&quot;passed&quot;:\s?(false|true)\s*\}\s*\])?\s*\}</stringProp>
             </collectionProp>
             <stringProp name="Assertion.custom_message"></stringProp>
             <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>

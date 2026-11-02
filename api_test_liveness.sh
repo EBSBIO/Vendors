@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# ================================================================================
+# DESC:    мастер-скрипт запуска тестов API liveness
+# VERSION: 1.0.0
+# ================================================================================
+
 # include functions
 source include/f_checks.sh
 source include/f_test_passive_liveness_sound.sh
@@ -7,15 +12,13 @@ source include/f_test_passive_liveness_photo.sh
 source include/f_test_passive_liveness_video.sh
 source include/f_test_active_liveness_video.sh
 
-HEALTH_REGEX='\{\s*"status":\s?0(,\s*"message":.+)?\s*\}'
-SOUND_SCORE_REGEX='\{\s*"passed":\s?(false|true),\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))(,\s*"results":\s?\[\s*\{\s*"type":\s?"audio-type",\s*"passed":\s?(false|true)\s*\}\s*\])?\s*\}'
-PHOTO_SCORE_REGEX='\{\s*"passed":\s?(false|true),\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))(,\s*"results":\s?\[\s*\{\s*"type":\s?"photo-type",\s*"passed":\s?(false|true)\s*\}\s*\])?\s*\}'
+HEALTH_REGEX='^\{\s*"status":\s?0(,\s*"message":\s?".+")?\s*\}$'
 
 f_err_regex() {
     local_code=$1
     local_message=$2
 
-    echo '\{\s*"code":\s?"'${local_code}'",\s*"message":\s?"'${local_message}'"\s*\}'
+    echo '^\{\s*"code":\s?"'${local_code}'",\s*"message":\s?"'${local_message}'"\s*\}$'
 }
 
 f_print_usage() {
@@ -148,11 +151,11 @@ else
 
             if [ "$TYPE" == "sound" ]; then
                 echo; echo; echo "------------ Begin: f_test_passive_liveness_sound -------------"
-                f_test_passive_liveness_sound $TYPE $SOUND_SCORE_REGEX
+                f_test_passive_liveness_sound $TYPE
             
             elif [ "$TYPE" == "p_video" ]; then
                 echo; echo; echo "------------ Begin: f_test_passive_liveness_video -------------"
-                f_test_passive_liveness_video $TYPE $PHOTO_SCORE_REGEX
+                f_test_passive_liveness_video $TYPE
 
             elif [ "$TYPE" == "a_video" ]; then
                 echo; echo; echo "------------ Begin: f_test_active_liveness_video -------------"
@@ -160,19 +163,19 @@ else
 
             elif [ "$TYPE" == "photo+p_video" ]; then
                 echo; echo; echo "------------ Begin: f_test_passive_liveness_photo -------------"
-                f_test_passive_liveness_photo $TYPE $PHOTO_SCORE_REGEX
+                f_test_passive_liveness_photo $TYPE
                 echo; echo; echo "------------ Begin: f_test_passive_liveness_video -------------"
-                f_test_passive_liveness_video $TYPE $PHOTO_SCORE_REGEX
+                f_test_passive_liveness_video $TYPE
 
             elif [ "$TYPE" == "p_video+a_video" ]; then
                 echo; echo; echo "------------ Begin: f_test_passive_liveness_video -------------"
-                f_test_passive_liveness_video $TYPE $PHOTO_SCORE_REGEX
+                f_test_passive_liveness_video $TYPE
                 echo; echo; echo "------------ Begin: f_test_active_liveness_video -------------"
                 f_test_active_liveness_video $TYPE $MNEMONIC $ACTIONS
                 
             else
                 echo; echo; echo "------------ Begin: f_test_passive_liveness_photo -------------"
-                f_test_passive_liveness_photo $TYPE $PHOTO_SCORE_REGEX
+                f_test_passive_liveness_photo $TYPE
             fi
             
             echo -e "\n\nSCORE: success $SUCCESS, error $ERROR"

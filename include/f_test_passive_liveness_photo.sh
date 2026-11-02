@@ -1,16 +1,16 @@
 #!/bin/bash
-##########################
-#                        #
-# Author: kflirik        #
-#                        #
-##########################
+
+# ================================================================================
+# DESC:    скрипт запуска тестов API passive liveness photo
+# VERSION: 1.0.0
+# ================================================================================
 
 # include functions
 source include/f_checks.sh
 
 f_test_passive_liveness_photo() {
     TYPE=$1
-    PHOTO_SCORE_REGEX=$2
+    PHOTO_SCORE_REGEX='^\{\s*"passed":\s?(false|true),\s*"score":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))(,\s*"results":\s?\[\s*\{\s*"type":\s?"photo-type",\s*"passed":\s?(false|true)\s*\}\s*\])?\s*\}$'
 
     BODY="tmp/responce_body"
     
