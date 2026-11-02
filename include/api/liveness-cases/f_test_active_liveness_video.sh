@@ -2,7 +2,7 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API active liveness video
-# VERSION: 1.1.3
+# VERSION: 1.2.0
 # ================================================================================
 
 ##### настройки среды и глобальные параметры
@@ -37,6 +37,8 @@ f_test_active_liveness_video() {
     NUMBERS_DIGITS_HORIZONTAL_SAMPLE_MOV="resources/samples/horizon_numbers_digits_video"
     
     # BIG_SAMPLE_MOV="resources/samples/___________________"
+    VERTICAL_SAMPLE_MP4="resources/samples/vert_video_mp4"
+    HORIZONTAL_SAMPLE_WEBM="resources/samples/horizon_video_webm"
     VERTICAL_SAMPLE_MOV_WFE="resources/samples/vert_blink_video.mov"
     HORIZONTAL_SAMPLE_MOV_WFE="resources/samples/horizon_blink_video.mov"
     VERTICAL_SAMPLE_LSF="resources/samples/vert_little_second_face_video"
@@ -220,6 +222,14 @@ f_test_active_liveness_video() {
     # TEST_NAME="detect 200. Big video"
     # REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META' -F "bio_sample=@'$BIG_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
     # f_check -r 200 -m $(f_regex ${META}) -f "- Score format double is expected"
+
+    TEST_NAME="detect 200. Vertical MP4 video"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META' -F "bio_sample=@'$VERTICAL_SAMPLE_MP4';type=video/mp4" --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m $(f_regex ${META}) -f "- Score format double is expected"
+
+    TEST_NAME="detect 200. Horizontal WEBM video"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F '$META' -F "bio_sample=@'$HORIZONTAL_SAMPLE_WEBM';type=video/webm" --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m $(f_regex ${META}) -f "- Score format double is expected"
 
     \cp $VERTICAL_SAMPLE_MOV $VERTICAL_SAMPLE_MOV_WFE
     TEST_NAME="detect 200. Vertical video with filename extension"

@@ -2,7 +2,7 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API passive liveness video
-# VERSION: 1.1.5
+# VERSION: 1.2.0
 # ================================================================================
 
 ##### настройки среды и глобальные параметры
@@ -16,7 +16,9 @@ f_test_passive_liveness_video() {
     BODY="tmp/responce_body"
 
     VERTICAL_SAMPLE_MOV="resources/samples/vert_passive_video"
+    VERTICAL_SAMPLE_MP4="resources/samples/vert_video_mp4"
     HORIZONTAL_SAMPLE_MOV="resources/samples/horizon_passive_video"
+    HORIZONTAL_SAMPLE_WEBM="resources/samples/horizon_video_webm"
     VERTICAL_SAMPLE_MOV_WV="resources/samples/vert_numbers_digits_video"
     HORIZONTAL_SAMPLE_MOV_WV="resources/samples/horizon_numbers_digits_video"
     VERTICAL_SAMPLE_MOV_WFE="resources/samples/vert_passive_video.mov"
@@ -43,12 +45,20 @@ f_test_passive_liveness_video() {
 
     f_print_test_version
 
-    TEST_NAME="detect 200. Vertical video"
+    TEST_NAME="detect 200. Vertical MOV video"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
-    TEST_NAME="detect 200. Horizontal video"
+    TEST_NAME="detect 200. Vertical MP4 video"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$VERTICAL_SAMPLE_MP4';type=video/mp4" --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
+
+    TEST_NAME="detect 200. Horizontal MOV video"
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$HORIZONTAL_SAMPLE_MOV';type=video/mov" --output '$BODY' '$VENDOR_URL
+    f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
+
+    TEST_NAME="detect 200. Horizontal WEBM video"
+    REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:multipart/form-data" -F "metadata=@'$META';type=application/json" -F "bio_sample=@'$HORIZONTAL_SAMPLE_WEBM';type=video/webm" --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Vertical video with voice"
