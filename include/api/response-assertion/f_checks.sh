@@ -59,7 +59,7 @@ f_check() {
                         POSSIBLE_LIVENESS_RESPONSE_BOOLEAN_PART="${BASH_REMATCH[1]}"
                         POSSIBLE_LIVENESS_OPTIONAL_RESPONSE_PART="${BASH_REMATCH[3]}"
                         POSSIBLE_LIVENESS_OPTIONAL_RESPONSE_BOOLEAN_PART="${BASH_REMATCH[4]}"
-                        if [[ "$CURRENT_FILE" =~ $PASSIVE_LIVENESS_API_TEST_ATTRIBUTE && -n "$POSSIBLE_LIVENESS_OPTIONAL_RESPONSE_PART" ]]; then
+                        if [[ "$CURRENT_FILE_PATH" =~ $PASSIVE_LIVENESS_API_TEST_ATTRIBUTE && -n "$POSSIBLE_LIVENESS_OPTIONAL_RESPONSE_PART" ]]; then
                             [[ "$POSSIBLE_LIVENESS_RESPONSE_BOOLEAN_PART" == "$POSSIBLE_LIVENESS_OPTIONAL_RESPONSE_BOOLEAN_PART" ]] && MESSAGE_RESULT="OK" || MESSAGE_RESULT="FAIL (результат атомарной проверки противоречит значению 'passed')"
                         else
                             MESSAGE_RESULT="OK"

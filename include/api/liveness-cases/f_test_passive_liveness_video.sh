@@ -2,15 +2,14 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API passive liveness video
-# VERSION: 1.1.2
+# VERSION: 1.1.3
 # ================================================================================
 
-# include functions
-source include/f_print_test_version.sh
-source include/f_checks.sh
+##### настройки среды и глобальные параметры
+source include/common/f_print_test_version.sh
 
 f_test_passive_liveness_video() {
-    CURRENT_FILE="${BASH_SOURCE[0]}"
+    CURRENT_FILE_PATH="${BASH_SOURCE[0]}"
     TYPE=$1
     VIDEO_SCORE_REGEX='^\{\s*"passed":\s*(false|true),\s*"score":\s*(0\.0|0\.[0-9]*[1-9]+|1\.0)(,\s*"results":\s*\[\s*\{\s*"type":\s*"video-type",\s*"passed":\s*(false|true)\s*\}\s*\])?\s*\}$'
 
@@ -33,7 +32,7 @@ f_test_passive_liveness_video() {
     SAMPLE_NF_MOV="resources/samples/no_face_video"
     SAMPLE_TF_MOV="resources/samples/two_face_video"
 
-    META="resources/metadata/meta_lv_v_p.json"
+    META="resources/metadata/p_lv_v_meta.json"
     META_WM="resources/metadata/meta_without_mnemonic_lv_v_p.json"
     META_WA="resources/metadata/meta_without_action.json"
     META_WT="resources/metadata/meta_without_type_lv_v_p.json"
@@ -128,14 +127,14 @@ f_test_passive_liveness_video() {
     f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
 
     TEST_NAME="detect 200. Reverse order of headings with filename 2"
-    echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="meta_lv_v_p.json"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
+    echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="p_lv_v_meta.json"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: video/mov\r\nContent-Disposition: form-data; name="bio_sample"\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL
     f_check -r 200 -m ${VIDEO_SCORE_REGEX} -f "- Score format double is expected"
         
     TEST_NAME="detect 200. Reverse order of headings with filename 3"
-    echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="meta_lv_v_p.json"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
+    echo -ne '--72468\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name="metadata"; filename="p_lv_v_meta.json"\r\n\r\n' > tmp/request_body; cat $META >> tmp/request_body
     echo -ne '\r\n--72468\r\nContent-Type: video/mov\r\nContent-Disposition: form-data; name="bio_sample"; filename="vert_passive_video"\r\n\r\n' >> tmp/request_body; cat $VERTICAL_SAMPLE_MOV >> tmp/request_body
     echo -ne '\r\n--72468--\r\n' >> tmp/request_body
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Expect:" -H "Content-type:multipart/form-data; boundary=72468" --data-binary @tmp/request_body --output '$BODY' '$VENDOR_URL

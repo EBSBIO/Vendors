@@ -2,15 +2,16 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API идентификации по фотоизображению лица
-# VERSION: 2.1.0
+# VERSION: 2.1.1
 # ================================================================================
 
-# include functions
-source include/f_validate_input_params.sh
-source include/f_print_test_version.sh
-source include/f_checks.sh
+##### настройки среды и глобальные параметры
+source include/common/f_config.sh
+source include/common/f_validate_input_params.sh
+source include/common/f_print_test_version.sh
+source include/api/response-assertion/f_checks.sh
 
-CURRENT_FILE="${BASH_SOURCE[0]}"
+CURRENT_FILE_PATH="${BASH_SOURCE[0]}"
 HEALTH_REGEX='^\{\s*"status":\s?0(,\s*"message":\s?".+")?\s*\}$'
 MATCH_REGEX_PART='\{\s*"template_id":\s?"[a-f0-9]*",\s*"similarity":\s?((0\.0)|(0\.[0-9]*[1-9]+)|(1\.0))\s*\}'
 MATCH_REGEX='^\[\s*'${MATCH_REGEX_PART}'(,\s*'${MATCH_REGEX_PART}')*\s*\]$'
@@ -948,8 +949,7 @@ OPTIONS:
   -vv         вывод результатов всех тестов
 
 ENDPOINT  string  <IP/DNS>:<ПОРТ>
-TIMEOUT   int     максимальное время (сек) на выполнение каждого тест-кейса
-"
+TIMEOUT   int     максимальное время (сек) на выполнение каждого тест-кейса"
 }
 
 if [ -z "$1" ]; then

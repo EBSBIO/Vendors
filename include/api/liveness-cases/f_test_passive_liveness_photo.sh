@@ -2,15 +2,14 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API passive liveness photo
-# VERSION: 1.1.1
+# VERSION: 1.1.2
 # ================================================================================
 
-# include functions
-source include/f_print_test_version.sh
-source include/f_checks.sh
+##### настройки среды и глобальные параметры
+source include/common/f_print_test_version.sh
 
 f_test_passive_liveness_photo() {
-    CURRENT_FILE="${BASH_SOURCE[0]}"
+    CURRENT_FILE_PATH="${BASH_SOURCE[0]}"
     TYPE=$1
     PHOTO_SCORE_REGEX='^\{\s*"passed":\s*(false|true),\s*"score":\s*(0\.0|0\.[0-9]*[1-9]+|1\.0)(,\s*"results":\s*\[\s*\{\s*"type":\s*"photo-type",\s*"passed":\s*(false|true)\s*\}\s*\])?\s*\}$'
 
@@ -30,7 +29,7 @@ f_test_passive_liveness_photo() {
     SAMPLE_NF="resources/samples/no_face.jpg"
     SAMPLE_TF="resources/samples/two_face.jpg"
 
-    META="resources/metadata/meta.json"
+    META="resources/metadata/p_lv_p_meta.json"
     META_WM="resources/metadata/meta_without_mnemonic.json"
     META_WA="resources/metadata/meta_without_action.json"
     META_WT="resources/metadata/meta_without_type.json"

@@ -2,15 +2,14 @@
 
 # ================================================================================
 # DESC:    скрипт запуска тестов API active liveness video
-# VERSION: 1.1.0
+# VERSION: 1.1.1
 # ================================================================================
 
-# include functions
-source include/f_print_test_version.sh
-source include/f_checks.sh
+##### настройки среды и глобальные параметры
+source include/common/f_print_test_version.sh
 
 f_test_active_liveness_video() {
-    CURRENT_FILE="${BASH_SOURCE[0]}"
+    CURRENT_FILE_PATH="${BASH_SOURCE[0]}"
     TYPE=$1
     MNEMONIC=$2
     ACTIONS=$3

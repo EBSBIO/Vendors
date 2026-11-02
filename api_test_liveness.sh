@@ -2,16 +2,17 @@
 
 # ================================================================================
 # DESC:    мастер-скрипт запуска тестов API liveness
-# VERSION: 2.0.0
+# VERSION: 2.0.1
 # ================================================================================
 
-# include functions
-source include/f_validate_input_params.sh
-source include/f_checks.sh
-source include/f_test_passive_liveness_sound.sh
-source include/f_test_passive_liveness_photo.sh
-source include/f_test_passive_liveness_video.sh
-source include/f_test_active_liveness_video.sh
+##### настройки среды и глобальные параметры
+source include/common/f_config.sh
+source include/common/f_validate_input_params.sh
+source include/api/response-assertion/f_checks.sh
+source include/api/liveness-cases/f_test_passive_liveness_sound.sh
+source include/api/liveness-cases/f_test_passive_liveness_photo.sh
+source include/api/liveness-cases/f_test_passive_liveness_video.sh
+source include/api/liveness-cases/f_test_active_liveness_video.sh
 
 HEALTH_REGEX='^\{\s*"status":\s?0(,\s*"message":\s?".+")?\s*\}$'
 
@@ -22,37 +23,31 @@ f_err_regex() {
     echo '^\{\s*"code":\s?"'${local_code}'",\s*"message":\s?"'${local_message}'"\s*\}$'
 }
 
+##### функция вывода справки
 f_print_usage() {
-echo "Использование: $0 [OPTIONS] ENDPOINT TIMEOUT
+  echo "Использование: $0 [OPTIONS] ENDPOINT TIMEOUT
 
 OPTIONS:
-  -t  string  тип тест-кейсов (выберите одно из значений):
-                sound
-                photo (по умолчанию)
-                p_video (passive video)
-                a_video (active video)
-                photo+p_video
-                p_video+a_video
-    
-  -m  string  мнемоника (только для active liveness):
-                move (move-instructions)
-                text (text-instructions)
-  
-  -i  string  инструкции к действию (только для мнемоники move-instructions):
-                1 (TURN_RIGHT)
-                2 (TURN_LEFT)
-                3 (TURN_UP)
-                4 (TURN_DOWN)
-                5 (SMILE)
-                6 (BLINK)
-                7 (DISTORTION)
-                8 (RAISE_EYEBROW)
-                all
-                    
-              примеры:
-                -i 1,2,3,4,6
-                -i all
-    
+  -t  string  тип тест-кейсов (укажите одно из значений):
+                * sound
+                * photo (по умолчанию)
+                * p_video (passive liveness video)
+                * a_video (active liveness video)
+                * photo+p_video
+                * p_video+a_video
+  -m  string  мнемоника (только для active liveness video):
+                * move (move-instructions)
+                * text (text-instructions)
+  -i  string  move-инструкции (только для move-instructions), например 1,2,3,4,6 или all:
+                * 1 (TURN_RIGHT)
+                * 2 (TURN_LEFT)
+                * 3 (TURN_UP)
+                * 4 (TURN_DOWN)
+                * 5 (SMILE)
+                * 6 (BLINK)
+                * 7 (DISTORTION)
+                * 8 (RAISE_EYEBROW)
+                * all
   -a  string  версия API (по умолчанию \"v1\")
   -p  string  префикс (необязательная составная часть пути)
   -v          вывод результатов тестов с признаком \"FAIL\"
@@ -92,8 +87,8 @@ else
     if [ -z "$1" ]; then
         f_print_usage
     else
-        ENDPOINT=$1
-        TIMEOUT=$2
+        ENDPOINT="$1"
+        TIMEOUT="$2"
         
         f_validate_input_params
 
