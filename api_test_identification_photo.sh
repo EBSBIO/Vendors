@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # ================================================================================
-# DESC:    скрипт запуска тестов API идентификации
-# VERSION: 1.0.0
+# DESC:    скрипт запуска тестов API идентификации по фотоизображению лица
+# VERSION: 2.0.0
 # ================================================================================
 
 # include functions
+source include/f_validate_input_params.sh
 source include/f_checks.sh
 
 HEALTH_REGEX='^\{\s*"status":\s?0(,\s*"message":\s?".+")?\s*\}$'
@@ -329,7 +330,7 @@ f_test_add() {
     f_check -r 400 -m "$(f_err_regex 'BPE-00507' 'Шаблон не добавлен. Запись с данным идентификатором уже существует в базе')"
 
     ###### cleaning
-    if [[ "$TASK" == "add" ]]; then
+    if [[ "$METHOD" == "add" ]]; then
         TEST_NAME="CLEANING - delete template_id: 722852fdf2ca4900be3707d80243fd70"
         REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
         f_check -r 200
@@ -351,7 +352,7 @@ f_test_update() {
 
     head --bytes=64 $BIOTEMPLATE > $BIOTEMPLATE_BR
 
-    if [[ "$TASK" == "update" ]]; then
+    if [[ "$METHOD" == "update" ]]; then
         TEST_NAME="PREPARE - add biotemplate"
         REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
         f_check -r 200
@@ -484,7 +485,7 @@ f_test_update() {
     f_check -r 400 -m "$(f_err_regex 'BPE-00506' 'Недопустимое значение параметра.+')"
 
     ###### cleaning
-    if [[ "$TASK" == "update" ]]; then
+    if [[ "$METHOD" == "update" ]]; then
         TEST_NAME="CLEANING - delete template_id: 722852fdf2ca4900be3707d80243fd70"
         REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
         f_check -r 200
@@ -504,7 +505,7 @@ f_test_delete() {
     REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type:image/jpeg" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" --data-binary @'$SAMPLE_JPG' --output '$BIOTEMPLATE' '$BASE_URL'/extract'
     f_check -r 200
 
-    if [[ "$TASK" == "delete" ]]; then
+    if [[ "$METHOD" == "delete" ]]; then
         TEST_NAME="PREPARE - add biotemplate"
         REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
         f_check -r 200
@@ -712,7 +713,7 @@ f_test_match() {
     f_check -r 400 -m "$(f_err_regex 'BPE-00506' 'Недопустимое значение параметра.+')"
 
     ###### cleaning
-    if [[ "$TASK" == "match" ]]; then
+    if [[ "$METHOD" == "match" ]]; then
         TEST_NAME="CLEANING - delete template_id: 722852fdf2ca4900be3707d80243fd70"
         REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: application/json" -H "X-Request-ID: '$(uuidgen)'" --data '$RDATA' --output '$BODY' -X POST '$BASE_URL'/delete'
         f_check -r 200
@@ -734,7 +735,7 @@ f_test_identify() {
 
     dd if=/dev/urandom of=$SAMPLE_BR bs=1024 count=4 status=none
 
-    if [[ "$TASK" == "identify" ]]; then
+    if [[ "$METHOD" == "identify" ]]; then
         TEST_NAME="PREPARE - add biotemplate"
         REQUEST='curl -m '$TIMEOUT' -s -w "%{http_code}" -H "Content-Type: multipart/form-data" -H "Expect:" -H "X-Request-ID: '$(uuidgen)'" -F "template=@'$BIOTEMPLATE';type=application/octet-stream" -F '$META' '$BASE_URL'/add'
         f_check -r 200
@@ -935,30 +936,29 @@ f_test_identify() {
 
 
 f_print_usage() {
-echo "Usage: $0 [OPTIONS] URL TIMEOUT
+echo "Использование: $0 [OPTIONS] ENDPOINT TIMEOUT
 
 OPTIONS:
-    -t  string      Set test method: all (default), health, extract, add, update, delete, match, identify
-    -p  string      Prefix
-    -v              Verbose FAIL checks
-    -vv             Verbose All checks
+  -a  string  версия API (по умолчанию \"v1\")
+  -p  string  префикс (необязательная составная часть пути)
+  -m  string  выбор метода: all (по умолчанию), health, extract, add, update, delete, match, identify
+  -v          вывод результатов тестов с признаком \"FAIL\"
+  -vv         вывод результатов всех тестов
 
-URL                 <ip>:<port>
-TIMEOUT             <seconds> – maximum time in seconds that you allow the whole operation to take
+ENDPOINT  string  <IP/DNS>:<ПОРТ>
+TIMEOUT   int     максимальное время (сек) на выполнение каждого тест-кейса
 "
 }
-
 
 if [ -z "$1" ]; then
     f_print_usage
 else
-    TASK="all"
     V=0
     while [ -n "$1" ]; do
         case "$1" in
-            -t) TASK="$2"; shift; shift;;
-            -r) R="$2"; shift; shift;;
-            -p) P=$2; shift; shift;;
+            -a) API_VERSION="$2"; shift; shift;;
+            -p) PREFIX="$2"; shift; shift;;
+            -m) METHOD="$2"; shift; shift;;
             -v) V=1; shift;;
             -vv) V=2; shift;;
             -*) shift;;
@@ -968,14 +968,15 @@ else
     if [ -z "$1" ]; then
         f_print_usage
     else
-        URL=$1
+        ENDPOINT=$1
         TIMEOUT=$2
-        [ -z $R ] && R="v1" # version
         
-        if [ -n "$P" ]; then
-            BASE_URL="http://$URL/$R/$P"
+        f_validate_input_params
+
+        if [ -n "$PREFIX" ]; then
+            BASE_URL="http://${ENDPOINT}/${API_VERSION}/${PREFIX}"
         else
-            BASE_URL="http://$URL/$R"
+            BASE_URL="http://${ENDPOINT}/${API_VERSION}"
         fi
 
         VENDOR_URL="$BASE_URL/health"
@@ -989,7 +990,7 @@ else
             SUCCESS=0
             ERROR=0
 
-            case "$TASK" in
+            case "$METHOD" in
             all )
                 echo; echo; echo "------------ Begin: f_test_health -------------"
                 f_test_health

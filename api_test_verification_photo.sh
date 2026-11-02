@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # ================================================================================
-# DESC:    скрипт запуска тестов API верификации по фото лица
-# VERSION: 1.0.0
+# DESC:    скрипт запуска тестов API верификации по фотоизображению лица
+# VERSION: 2.0.0
 # ================================================================================
 
 # include functions
+source include/f_validate_input_params.sh
 source include/f_checks.sh
 
 HEALTH_REGEX='^\{\s*"status":\s?0(,\s*"message":\s?".+")?\s*\}$'
@@ -342,31 +343,29 @@ f_test_verify() {
 
 
 f_print_usage() {
-echo "Usage: $0 [OPTIONS] URL TIMEOUT
+echo "Использование: $0 [OPTIONS] ENDPOINT TIMEOUT
 
 OPTIONS:
-    -t  string      Set test method: all (default), health, extract, compare, verify
-    -r  string      Version api
-    -p  string      Prefix
-    -v              Verbose FAIL checks
-    -vv             Verbose All checks
+  -a  string  версия API (по умолчанию \"v1\")
+  -p  string  префикс (необязательная составная часть пути)
+  -m  string  выбор метода: all (по умолчанию), health, extract, compare, verify
+  -v          вывод результатов тестов с признаком \"FAIL\"
+  -vv         вывод результатов всех тестов
 
-URL                 <ip>:<port>
-TIMEOUT             <seconds> – maximum time in seconds that you allow the whole operation to take
+ENDPOINT  string  <IP/DNS>:<ПОРТ>
+TIMEOUT   int     максимальное время (сек) на выполнение каждого тест-кейса
 "
 }
-
 
 if [ -z "$1" ]; then
     f_print_usage
 else
-    TASK="all"
     V=0
     while [ -n "$1" ]; do
         case "$1" in
-            -t) TASK="$2"; shift; shift;;
-            -r) R="$2"; shift; shift;;
-            -p) P=$2; shift; shift;;
+            -a) API_VERSION="$2"; shift; shift;;
+            -p) PREFIX="$2"; shift; shift;;
+            -m) METHOD="$2"; shift; shift;;
             -v) V=1; shift;;
             -vv) V=2; shift;;
             -*) shift;;
@@ -376,14 +375,15 @@ else
     if [ -z "$1" ]; then
         f_print_usage
     else
-        URL=$1
+        ENDPOINT=$1
         TIMEOUT=$2
-        [ -z $R ] && R="v1" # version
         
-        if [ -n "$P" ]; then
-            BASE_URL="http://$URL/$R/$P/pattern"
+        f_validate_input_params
+
+        if [ -n "$PREFIX" ]; then
+            BASE_URL="http://${ENDPOINT}/${API_VERSION}/${PREFIX}/pattern"
         else
-            BASE_URL="http://$URL/$R/pattern"
+            BASE_URL="http://${ENDPOINT}/${API_VERSION}/pattern"
         fi
 
         VENDOR_URL="$BASE_URL/health"
@@ -397,7 +397,7 @@ else
             SUCCESS=0
             ERROR=0
 
-            case "$TASK" in
+            case "$METHOD" in
             all )
                 echo; echo; echo "------------ Begin: f_test_health -------------"
                 f_test_health

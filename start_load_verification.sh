@@ -1,28 +1,30 @@
 #!/bin/bash
 
-##########################
-#                        #
-# Author: kflirik        #
-#                        #
-##########################
+# ================================================================================
+# DESC:    скрипт запуска нагрузочных тестов API verification посредством jmeter
+# VERSION: 1.0.0
+# ================================================================================
 
-f_usage() {
-echo Usage: "$0 [OPTIONS] TASK_NAME METHOD THREADS URL PORT
+# include functions
+source include/f_validate_input_params.sh
+
+f_print_usage() {
+echo Использование: "$0 [OPTIONS] TASK_NAME METHOD THREADS ENDPOINT
     
-    OPTIONS:
-    -d              Delete previously extracted templates
-    -b              Start in background (screen)
-    -s              Absolute path to the directory where samples for testing
-    -r num          Ramp-up period (sec, default 0)
-    -p string       Prefix
-    -v string       Version
-    -t string       Type (sound|photo)
-    
-    TASK_NAME       Vendor name
-    METHOD          extract, verify, compare
-    THREADS         Sum threads(users)
-    URL             IP
-    PORT            TCP порт БП"
+OPTIONS:
+  -d          режим очистки ненужных данных
+  -b          запуск в фоновом режиме (screen)
+  -t  string  тип тест-кейсов (выберите одно из значений): sound, photo (по умолчанию)
+  -s  string  абсолютный путь к директории, в которой образцы для тестирования
+  -a  string  версия API (по умолчанию \"v1\")
+  -p  string  префикс (необязательная составная часть пути)
+  -r  int     период ramp-up, сек (по умолчанию 0)
+  
+TASK_NAME  string  наименование вендора
+METHOD     string  выбор метода (выберите одно из значений): extract, compare, verify
+THREADS    int     количество потоков нагрузки
+ENDPOINT   string  <IP/DNS>:<ПОРТ>
+"
 }
 
 rm_templates() {
@@ -42,22 +44,22 @@ biotemplates() {
 }
 
 if [ -z $1 ]; then
-    f_usage
+    f_print_usage
 else
     while [ -n "$1" ]; do
         case "$1" in
             -d) DEL=1; shift;;
             -b) BG=1; shift;;
-            -s) SAMPLE_DIR=$2; shift; shift;;
-            -r) RAMP=$2; shift; shift;;
-            -v) VERSION=$2; shift; shift;;
-            -p) PREFIX=$2; shift; shift;;
-            -t) TYPE=$2; shift; shift;;
+            -t) TYPE="$2"; shift; shift;;
+            -s) SAMPLE_DIR="$2"; shift; shift;;
+            -a) API_VERSION="$2"; shift; shift;;
+            -p) PREFIX="$2"; shift; shift;;
+            -r) RAMP="$2"; shift; shift;;
             *) break;;
         esac
     done
-    if [ "$#" -ne "5" ]; then
-        f_usage
+    if [ "$#" -ne "4" ]; then
+        f_print_usage
     else        
         JMX_FILE=resources/jmx/verification.jmx                  # Template jmeter
         SUMINTERVAL=10                                           # Интервал (в сек) обновления summariser (таблицы результатов в логе)
@@ -69,16 +71,18 @@ else
         METHOD=$2
         THREADS=$3                                               # Количество потоков (пользователей)
         LOOP="-1"                                                # количество повторов (-1 беcконечно)
-        [ -z $RAMP ] && RAMP=0                                   # Длительность (в сек) для «наращивания» до полного числа выбранных потоков
-        [ -z $VERSION ] && VERSION="v1"
         
         REPORT=reports/${TASK_NAME}/${METHOD}_${THREADS}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv        # Отчет по запросам
         PERFLOG=reports/${TASK_NAME}/${METHOD}_${THREADS}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv      # Отчет PerfMon
         LOG=tmp/jmeter.log                                       # Лог jmeter
         
-        SERVER=$4
-        PORT=$5                                                  # URL
+        ENDPOINT=$4
         
+        f_validate_input_params
+
+        SERVER="$TMP_SERVER"
+        PORT="$TMP_PORT"
+
         if [ "$DEL" == 1 ]; then                                                                                    # Удаление ранее извлеченных шаблонов *.octet-stream
             echo
             echo "The previous templates will be deleted"
@@ -136,9 +140,9 @@ else
         fi
 
         if [ -n "$PREFIX" ]; then
-            LOCATION="/$VERSION/$PREFIX/pattern/$METHOD"
+            LOCATION="/$API_VERSION/$PREFIX/pattern/$METHOD"
         else
-            LOCATION="/$VERSION/pattern/$METHOD"
+            LOCATION="/$API_VERSION/pattern/$METHOD"
         fi
 
         [[ -s "tmp/http_errors.xml" ]] && cat /dev/null > tmp/http_errors.xml                                       # Очистить лог http-запросов к БП, которые завершились с ошибкой, перед очередным запуском теста

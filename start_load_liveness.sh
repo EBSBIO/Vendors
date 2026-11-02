@@ -1,54 +1,66 @@
 #!/bin/bash
-##########################
-#                        #
-# Author: kflirik        #
-#                        #
-# Version 1.24.0         #
-#                        #
-##########################
 
-f_usage(){
-echo Usage: "$0 [OPTIONS] TASK_NAME THREADS URL PORT
-    
-    OPTIONS:
-    -b              Start in background (screen)
-    
-    -s              Absolute path to the directory where samples for testing
-                    For video type it's a must-have option
+# ================================================================================
+# DESC:    скрипт запуска нагрузочных тестов API liveness посредством jmeter
+# VERSION: 1.0.0
+# ================================================================================
 
-    -r num          Ramp-up period (sec, default 0)
-    -p string       Prefix
-    -t              Type (sound|photo|video, default photo)
+# include functions
+source include/f_validate_input_params.sh
 
-    TASK_NAME       Vendor name
-    THREADS         Sum threads(users)
-    URL             IP
-    PORT            TCP порт БП"
+f_print_usage() {
+echo Использование: "$0 [OPTIONS] TASK_NAME THREADS ENDPOINT
+
+OPTIONS:
+  -b          запуск в фоновом режиме (screen)
+  -t  string  тип тест-кейсов (выберите одно из значений): sound, photo (по умолчанию), video
+  -s  string  абсолютный путь к директории, в которой образцы для тестирования (для типа video опция обязательна)
+  -a  string  версия API (по умолчанию \"v1\")
+  -p  string  префикс (необязательная составная часть пути)
+  -r  int     период ramp-up, сек (по умолчанию 0)
+  
+TASK_NAME  string  наименование вендора
+THREADS    string  количество потоков нагрузки
+ENDPOINT   string  <IP/DNS>:<ПОРТ>
+"
 }
 
 if [ -z $1 ]; then
-    f_usage
+    f_print_usage
 else
     while [ -n "$1" ]; do
         case "$1" in
             -b) BG=1; shift;;
-            -s) SAMPLE_DIR=$2; shift; shift;;
-            -r) RAMP=$2; shift; shift;;
-            -p) PREFIX=$2; shift; shift;;
-            -t) TYPE=$2; shift; shift;;
+            -t) TYPE="$2"; shift; shift;;
+            -s) SAMPLE_DIR="$2"; shift; shift;;
+            -a) API_VERSION="$2"; shift; shift;;
+            -p) PREFIX="$2"; shift; shift;;
+            -r) RAMP="$2"; shift; shift;;
             *) break ;;
         esac
     done
-    if [ "$#" -ne "4" ]; then
-        f_usage
+    if [ "$#" -ne "3" ]; then
+        f_print_usage
     else
         JMX_FILE=resources/jmx/liveness.jmx                   # Template jmeter
         SUMINTERVAL=10                                        # Интервал (в сек) обновления summariser (таблицы результатов в логе)  
         SOUND_SAMPLE="resources/samples/sound_10s.wav"        # Используемый файл (sound) для теста в режиме одного сэмпла. Файл необходимо расположить в папке resources
         PHOTO_SAMPLE="resources/samples/photo_shumskiy.jpg"   # Используемый файл (photo) для теста в режиме одного сэмпла. Файл необходимо расположить в папке resources
         
-        [ -z $TYPE ] && TYPE="photo"
-        echo "Type – $TYPE"
+        TASK_NAME=$1
+        THREADS=$2                              # Количество потоков (пользователей)
+        LOOP="-1"                               # Количество повторов (-1 беcконечно)
+
+        REPORT=reports/${TASK_NAME}/liveness_${THREADS}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv    # Отчет по запросам
+        PERFLOG=reports/${TASK_NAME}/liveness_${THREADS}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
+        LOG=tmp/jmeter.log                      # Лог jmeter
+
+        ENDPOINT=$3                             # DNS/IP имя сервера с развернутым БП
+        
+        f_validate_input_params
+
+        SERVER="$TMP_SERVER"
+        PORT="$TMP_PORT"
         
         if [[ "$TYPE" == "sound" ]]; then
             CTYPE="audio/wav"                                                                                                      # content_type
@@ -85,24 +97,13 @@ else
                 fi
             fi
         else
-            f_usage; exit
+            f_print_usage; exit
         fi
 
-        THREADS=$2                              # Количество потоков (пользователей)
-        LOOP="-1"                               # Количество повторов (-1 беcконечно)
-        [ -z $RAMP ] && RAMP=0                  # Длительность (в сек) для «наращивания» до полного числа выбранных потоков
-
-        REPORT=reports/${1}/liveness_${2}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_report.csv    # Отчет по запросам
-        PERFLOG=reports/${1}/liveness_${2}thr_${RAMP}r_$(date "+%Y-%m-%d-%H:%M:%S")_perflog.csv  # Отчет PerfMon
-        LOG=tmp/jmeter.log                      # Лог jmeter
-
-        SERVER=$3                               # DNS/IP имя сервера с развернутым БП
-        PORT=$4                                 # Порт БП
-
-        if [ -n $PREFIX ]; then
-            LOCATION="/v1/$PREFIX/liveness/detect"
+        if [ -n "$PREFIX" ]; then
+            LOCATION="/$API_VERSION/$PREFIX/liveness/detect"
         else
-            LOCATION="/v1/liveness/detect"
+            LOCATION="/$API_VERSION/liveness/detect"
         fi
         
         [[ -s "tmp/http_errors.xml" ]] && cat /dev/null > tmp/http_errors.xml                                       # Очистить лог http-запросов к БП, которые завершились с ошибкой, перед очередным запуском теста
